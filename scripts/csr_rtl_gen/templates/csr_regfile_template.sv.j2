@@ -1,0 +1,125 @@
+`timescale 1ns / 1ps
+//==============================================================//
+//  Module:       csr_reg_file
+//  File:         csr_reg_file.sv
+//  Description:  Auto-generated CSR register file.
+//
+//                 This module defines all supported CSRs along with
+//                 their reset values, access permissions, and address
+//                 decoding logic. The structure and content of this file
+//                 are generated automatically from the CSR specification
+//                 (YAML/Excel source).
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   N/A
+//
+//  Notes:        - This file is partially auto-generated.
+//                - Do not edit auto-generated sections directly; they may
+//                  be overwritten by regeneration scripts.
+//==============================================================//
+`include "instr_macros.sv"
+`include "csr_macros.sv"
+
+module csr_reg_file (
+    // -- Clk and Reset --
+    input logic         clk_i,
+    input logic         reset_i,
+
+    // -- Write Signals --
+    input logic         csr_we_i,
+    input logic [11:0]  csr_waddr_i,
+    input logic [31:0]  csr_wdata_i,
+
+    // -- Read Signals --
+    input  logic [11:0] csr_raddr_i,
+    output logic [31:0] csr_rdata_o,
+
+    // -- Other --
+    input logic         retire_w_i
+);
+    
+    // csr signal definitions
+    {% for csr_name, csr_info in csr_data.items() %}
+    // {{ csr_info.DESCRIPTION }}
+    logic [31:0] {{ csr_name.lower() }}_q;
+    {%- if "W" in csr_info.ACCESS or "special" in csr_info.BEHAV %}
+    logic [31:0] {{ csr_name.lower() }}_next;
+    {%- endif %}
+    {% endfor %}
+
+    // Write logic (only implementing specific registers as of now)
+    always_ff @(posedge clk_i) begin : csr_write_ff
+        if (reset_i) begin
+            {%- for csr_name, csr_info in csr_data.items() %}
+            {{ (csr_name.lower() + "_q").ljust(max_name_len + 2) }} <= {{ csr_info.RESET_VAL }};
+            {%- endfor %}
+        end else begin
+            unique case (csr_addr_i)
+                {%- for csr_name, csr_info in csr_data.items() %}
+                {%- if "W" in csr_info.ACCESS or "special" in csr_info.BEHAV %}
+                {{ csr_info.ADDR_MACRO.ljust(max_macro_len) }}: {{ (csr_name.lower() + "_q").ljust(max_name_len + 2) }} <= {{ csr_name.lower() }}_next;
+                {%- endif %}
+                {%- endfor %}
+            endcase
+        end
+    end
+
+    // Read logic
+    always_comb begin : csr_read_comb
+        unique case (csr_addr_i)
+            {%- for csr_name, csr_info in csr_data.items() %}
+            {%- if "R" in csr_info.ACCESS and "W" in csr_info.ACCESS %}
+            {{ csr_info.ADDR_MACRO.ljust(max_macro_len) }}: csr_rdata_o = (csr_waddr_i == csr_rdata_i) ? csr_wdata_i : {{ csr_name.lower() }}_q;
+            {%- elif "R" in csr_info.ACCESS %}
+            {{ csr_info.ADDR_MACRO.ljust(max_macro_len) }}: csr_rdata_o = {{ csr_name.lower() }};
+            {%- endif %}
+            {%- endfor %}
+            default: csr_rdata_o = 32'h0;
+        endcase
+    end
+
+    always_comb begin : csr_next_comb
+        // Standard writable registers
+        {%- for csr_name, csr_info in csr_data.items() %}
+        {%- if "W" in csr_info.ACCESS and "standard" in csr_info.BEHAV %}
+        {{ (csr_name.lower() + "_next").ljust(max_name_len) }} = csr_we_i && ({{ csr_info.ADDR_MACRO }} == csr_waddr_i) ? csr_wdata_i : {{ csr_name.lower() }}_q;
+        {%- endif %}
+        {%- endfor %}
+        
+        // Following registers next cycle behaviour manually generated:
+        // 
+        {%- for csr_name, csr_info in csr_data.items() -%}
+        {%- if "special" in csr_info.BEHAV -%}
+        {{ (csr_name.lower() + " ") }}
+        {%- endif -%}
+        {%- endfor %}
+        
+        // mcycle handelling
+        mcycle_next = (csr_we_i && csr_waddr_i == `MCYCLE_ADDR) ? csr_wdata_i : mcycle_q + 1;
+
+        //mcycleh handelling
+        if (~csr_we_i || csr_waddr_i != `MCYCLEH_ADDR) begin
+            mcycleh_next = mcycleh_q + (mcycle_q == 32'hFFFF_FFFF);
+        end else begin
+            mcycle_h_next = csr_wdata_i;
+        end
+
+        // minstret handelling
+        if (~csr_we_i || csr_waddr_i != `MINSTRET_ADDR) begin
+            minstret_next = (retire_w_i) ? minstret_q + 1 : minstret_q;
+        end else begin
+            minstret_next = csr_wdata_i;
+        end
+
+        // minstreth handelling
+        if (~csr_we_i || csr_waddr_i != `MINSTRETH_ADDR) begin
+            minstreth_next = (retire_w_i) ? minstreth_q + (minstret_q == 32'hFFFF_FFFF) : minstret_q;
+        end else begin
+            minstreth_next = csr_wdata_i;
+        end
+    end
+
+endmodule

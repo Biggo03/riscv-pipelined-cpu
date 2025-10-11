@@ -1,0 +1,32 @@
+MCYCLE:
+  ADDRESS: B00
+  PRIVILEGE: M
+  ACCESS: R/W
+  RESET_VAL: 0
+  BEHAV: special
+  DESCRIPTION: Bottom 32-bits storing number of cycles
+  ADDR_MACRO: MCYCLE_ADDR
+MCYCLEH:
+  ADDRESS: B80
+  PRIVILEGE: M
+  ACCESS: R/W
+  RESET_VAL: 0
+  BEHAV: special
+  DESCRIPTION: Top 32-bits storing number of cycles
+  ADDR_MACRO: MCYCLEH_ADDR
+MINSTRET:
+  ADDRESS: B02
+  PRIVILEGE: M
+  ACCESS: R/W
+  RESET_VAL: 0
+  BEHAV: special
+  DESCRIPTION: Bottom 32-bits storing number of instructions retired
+  ADDR_MACRO: MINSTRET_ADDR
+MINSTRETH:
+  ADDRESS: B82
+  PRIVILEGE: M
+  ACCESS: R/W
+  RESET_VAL: 0
+  BEHAV: special
+  DESCRIPTION: Top 32-bits storing number of instructions retired
+  ADDR_MACRO: MINSTRETH_ADDR
