@@ -1,5 +1,5 @@
 ////////////////////////////////////////
-//         CSR REGISTER MACROS        //
+// AUTO-GENERATED CSR REGISTER MACROS //
 ////////////////////////////////////////
 `define MCYCLE_ADDR         12'hB00 // Bottom 32-bits storing number of cycles
 `define MCYCLEH_ADDR        12'hB80 // Top 32-bits storing number of cycles

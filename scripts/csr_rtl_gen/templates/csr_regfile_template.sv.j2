@@ -23,7 +23,7 @@
 `include "instr_macros.sv"
 `include "csr_macros.sv"
 
-module csr_reg_file (
+module csr_regfile (
     // -- Clk and Reset --
     input logic         clk_i,
     input logic         reset_i,
@@ -57,24 +57,22 @@ module csr_reg_file (
             {{ (csr_name.lower() + "_q").ljust(max_name_len + 2) }} <= {{ csr_info.RESET_VAL }};
             {%- endfor %}
         end else begin
-            unique case (csr_addr_i)
-                {%- for csr_name, csr_info in csr_data.items() %}
-                {%- if "W" in csr_info.ACCESS or "special" in csr_info.BEHAV %}
-                {{ csr_info.ADDR_MACRO.ljust(max_macro_len) }}: {{ (csr_name.lower() + "_q").ljust(max_name_len + 2) }} <= {{ csr_name.lower() }}_next;
-                {%- endif %}
-                {%- endfor %}
-            endcase
+            {%- for csr_name, csr_info in csr_data.items() %}
+            {%- if "W" in csr_info.ACCESS or "special" in csr_info.BEHAV %}
+            {{ (csr_name.lower() + "_q").ljust(max_name_len + 2) }} <= {{ csr_name.lower() }}_next;
+            {%- endif %}
+            {%- endfor %}
         end
     end
 
     // Read logic
     always_comb begin : csr_read_comb
-        unique case (csr_addr_i)
+        unique case (csr_raddr_i)
             {%- for csr_name, csr_info in csr_data.items() %}
             {%- if "R" in csr_info.ACCESS and "W" in csr_info.ACCESS %}
-            {{ csr_info.ADDR_MACRO.ljust(max_macro_len) }}: csr_rdata_o = (csr_waddr_i == csr_rdata_i) ? csr_wdata_i : {{ csr_name.lower() }}_q;
+            {{ csr_info.ADDR_MACRO.ljust(max_macro_len) }}: csr_rdata_o = (csr_we_i && csr_waddr_i == csr_raddr_i) ? csr_wdata_i : {{ csr_name.lower() }}_q;
             {%- elif "R" in csr_info.ACCESS %}
-            {{ csr_info.ADDR_MACRO.ljust(max_macro_len) }}: csr_rdata_o = {{ csr_name.lower() }};
+            {{ csr_info.ADDR_MACRO.ljust(max_macro_len) }}: csr_rdata_o = {{ csr_name.lower() }}_q;
             {%- endif %}
             {%- endfor %}
             default: csr_rdata_o = 32'h0;
@@ -104,7 +102,7 @@ module csr_reg_file (
         if (~csr_we_i || csr_waddr_i != `MCYCLEH_ADDR) begin
             mcycleh_next = mcycleh_q + (mcycle_q == 32'hFFFF_FFFF);
         end else begin
-            mcycle_h_next = csr_wdata_i;
+            mcycleh_next = csr_wdata_i;
         end
 
         // minstret handelling

@@ -188,3 +188,8 @@ TESTS:
       tb: reg_file_tb.sv
       defines: []
       tags: [unit, sequential, fast]
+
+    csr_regfile:
+      tb: csr_regfile_tb.sv
+      defines: []
+      tags: [unit, sequential, fast]
