@@ -24,15 +24,18 @@ module data_path (
     input  logic [31:0] pred_pc_target_f_i,
 
     // Control inputs
-    input  logic [3:0]  alu_control_d_i,
-    input  logic [2:0]  width_src_d_i,
-    input  logic [2:0]  result_src_d_i,
     input  logic [2:0]  imm_src_d_i,
+    input  logic [2:0]  result_src_d_i,
     input  logic [1:0]  branch_op_d_i,
-    input  logic        mem_write_d_i,
-    input  logic        reg_write_d_i,
     input  logic        alu_src_d_i,
     input  logic        pc_base_src_d_i,
+    input  logic        reg_write_d_i,
+    input  logic        mem_write_d_i,
+    input  logic        csr_we_d_i,
+    input  logic [3:0]  alu_control_d_i,
+    input  logic [2:0]  width_src_d_i,
+    input  logic [1:0]  csr_control_d_i,
+    input  logic        csr_src_d_i,
     input  logic [1:0]  pc_src_i,
     input  logic        pc_src_pred_f_i,
 
@@ -81,7 +84,9 @@ module data_path (
     output logic [4:0]  rd_m_o,
     output logic [4:0]  rd_w_o,
     output logic        reg_write_m_o,
-    output logic        reg_write_w_o
+    output logic        reg_write_w_o,
+    output logic        csr_we_m_o,
+    output logic        csr_we_w_o
 );
 
     // ----- Fetch stage -----
@@ -104,8 +109,11 @@ module data_path (
     logic [31:0] pc_plus4_e;
     logic [31:0] imm_ext_e;
     logic [2:0]  width_src_e;
+    logic [1:0]  csr_control_e;
+    logic        csr_src_e;
     logic        mem_write_e;
     logic        reg_write_e;
+    logic        csr_we_e;
     logic        valid_e;
 
     // ----- Memory stage -----
@@ -204,14 +212,17 @@ module data_path (
         .rd_d_i                         (rd_d),
         .rs1_d_i                        (rs1_d_o),
         .rs2_d_i                        (rs2_d_o),
-        .alu_control_d_i                (alu_control_d_i),
-        .width_src_d_i                  (width_src_d_i),
         .result_src_d_i                 (result_src_d_i),
         .branch_op_d_i                  (branch_op_d_i),
+        .alu_src_d_i                    (alu_src_d_i),
+        .pc_base_src_d_i                (pc_base_src_d_i),
         .reg_write_d_i                  (reg_write_d_i),
         .mem_write_d_i                  (mem_write_d_i),
-        .pc_base_src_d_i                (pc_base_src_d_i),
-        .alu_src_d_i                    (alu_src_d_i),
+        .csr_we_d_i                     (csr_we_d_i),
+        .alu_control_d_i                (alu_control_d_i),
+        .width_src_d_i                  (width_src_d_i),
+        .csr_control_d_i                (csr_control_d_i),
+        .csr_src_d_i                    (csr_src_d_i),
         .forward_a_e_i                  (forward_a_e_i),
         .forward_b_e_i                  (forward_b_e_i),
         .flush_e_i                      (flush_e_i),
@@ -242,6 +253,7 @@ module data_path (
         .branch_op_e_o                  (branch_op_e_o),
         .mem_write_e_o                  (mem_write_e),
         .reg_write_e_o                  (reg_write_e),
+        .csr_we_e_o                     (csr_we_e),
         .pc_src_pred_e_o                (pc_src_pred_e_o),
         .target_match_e_o               (target_match_e_o)
     );
@@ -267,6 +279,7 @@ module data_path (
         .result_src_e_i                 (result_src_e_o),
         .mem_write_e_i                  (mem_write_e),
         .reg_write_e_i                  (reg_write_e),
+        .csr_we_e_i                     (csr_we_e),
         .stall_m_i                      (stall_m_i),
 
         // data outputs
@@ -285,7 +298,8 @@ module data_path (
         .result_src_m_o                 (result_src_m),
         .width_src_m_o                  (width_src_m_o),
         .mem_write_m_o                  (mem_write_m_o),
-        .reg_write_m_o                  (reg_write_m_o)
+        .reg_write_m_o                  (reg_write_m_o),
+        .csr_we_m_o                     (csr_we_m_o)
     );
 
     writeback_stage u_writeback_stage (
@@ -306,6 +320,7 @@ module data_path (
         .valid_m_i                      (valid_m),
         .result_src_m_i                 (result_src_m),
         .reg_write_m_i                  (reg_write_m_o),
+        .csr_we_m_i                     (csr_we_m_o),
         .stall_w_i                      (stall_w_i),
 
         // data outputs
@@ -316,7 +331,8 @@ module data_path (
         // Control outputs
         .valid_w_o                      (valid_w),
         .retire_w_o                     (retire_w),
-        .reg_write_w_o                  (reg_write_w_o)
+        .reg_write_w_o                  (reg_write_w_o),
+        .csr_we_w_o                     (csr_we_w_o)
     );
 
     reg_file u_reg_file (

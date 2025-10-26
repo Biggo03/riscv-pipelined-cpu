@@ -23,16 +23,16 @@ module csr_decoder (
 );
 
     always_comb begin
-        case(funct3_i[1:0])
-            2'b01:      csr_control_o = `CSR_PASS;
-            2'b10:      csr_control_o = `CSR_SET;
-            2'b11:      csr_control_o = `CSR_CLEAR;
+        casez(funct3_i)
+            3'b?01:      csr_control_o = `CSR_PASS;
+            3'b?10:      csr_control_o = `CSR_SET;
+            3'b?11:      csr_control_o = `CSR_CLEAR;
             default:    csr_control_o = `CSR_NA;
         endcase
 
-        case(funct3_i[2])
-            1'b0:       csr_src_o = `CSR_SRC_REG;
-            1'b1:       csr_src_o = `CSR_SRC_IMM;
+        case(funct3_i)
+            3'b0??:       csr_src_o = `CSR_SRC_REG;
+            3'b1??:       csr_src_o = `CSR_SRC_IMM;
             default:    csr_src_o = `CSR_SRC_NA;
         endcase
     end

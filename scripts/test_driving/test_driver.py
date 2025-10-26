@@ -279,6 +279,7 @@ def run_test(test_name, test_info, defines, top_out_dir, result_info):
         tb_file: Name of the testbench file
         test_out_dir: Where the outputs of the test are placed
     """
+    defines = list(defines)
     test_logger = logging.getLogger("test_logger")
 
     dir_paths = setup_paths(test_name, test_info["tb"], top_out_dir)

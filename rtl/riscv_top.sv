@@ -40,9 +40,6 @@ module riscv_top (
     logic [1:0]  pc_src_reg;
     logic [1:0]  branch_op_e;
 
-
-
-
     pipelined_riscv_core u_pipelined_riscv_core (
         // Clock & reset_i
         .clk_i                          (clk_i),

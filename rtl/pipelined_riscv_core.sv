@@ -39,22 +39,25 @@ module pipelined_riscv_core (
     output logic [1:0]  pc_src_reg_o,
     output logic        mem_write_m_o
 );
-                      
+
     // ----- Control unit inputs -----
     logic [6:0] op_d;
     logic [2:0] funct3_d;
     logic [6:0] funct7_d;
 
     // ----- Control unit outputs -----
-    logic [3:0] alu_control_d;
-    logic [2:0] width_src_d;
-    logic [2:0] result_src_d;
     logic [2:0] imm_src_d;
+    logic [2:0] result_src_d;
     logic [1:0] branch_op_d;
-    logic       reg_write_d;
-    logic       mem_write_d;
     logic       alu_src_d;
     logic       pc_base_src_d;
+    logic       reg_write_d;
+    logic       mem_write_d;
+    logic       csr_we_d;
+    logic [3:0] alu_control_d;
+    logic [2:0] width_src_d;
+    logic [1:0] csr_control_d;
+    logic       csr_src_d;
 
     // ----- Hazard control unit inputs -----
     logic [4:0] rs1_d;
@@ -67,6 +70,8 @@ module pipelined_riscv_core (
     logic [4:0] rd_w;
     logic       reg_write_m;
     logic       reg_write_w;
+    logic       csr_we_m;
+    logic       csr_we_w;
 
     // ----- Hazard control unit outputs -----
     logic [1:0] forward_a_e;
@@ -74,6 +79,8 @@ module pipelined_riscv_core (
     logic       stall_f;
     logic       stall_d;
     logic       stall_e;
+    logic       stall_m;
+    logic       stall_w;
     logic       flush_d;
     logic       flush_e;
 
@@ -83,7 +90,7 @@ module pipelined_riscv_core (
     logic        carry_flag;
     logic        v_flag;
     logic [2:0]  funct3_e;
-    logic [31:0] pc_e; 
+    logic [31:0] pc_e;
     logic [31:0] pc_target_e;
     logic        target_match_e;
     logic        pc_src_pred_e;
@@ -92,8 +99,8 @@ module pipelined_riscv_core (
     logic [31:0] pred_pc_target_f;
     logic [1:0]  pc_src;
     logic        pc_src_pred_f;
-    
-    
+
+
     control_unit u_control_unit (
         // Instruction decode inputs
         .op_d_i                         (op_d),
@@ -101,18 +108,21 @@ module pipelined_riscv_core (
         .funct7_d_i                     (funct7_d),
 
         // Control outputs
-        .alu_control_d_o                (alu_control_d),
         .imm_src_d_o                    (imm_src_d),
-        .width_src_d_o                  (width_src_d),
         .result_src_d_o                 (result_src_d),
         .branch_op_d_o                  (branch_op_d),
         .alu_src_d_o                    (alu_src_d),
-        .reg_write_d_o                  (reg_write_d),
+        .pc_base_src_d_o                (pc_base_src_d),
         .mem_write_d_o                  (mem_write_d),
-        .pc_base_src_d_o                (pc_base_src_d)
+        .reg_write_d_o                  (reg_write_d),
+        .csr_we_d_o                     (csr_we_d),
+        .alu_control_d_o                (alu_control_d),
+        .width_src_d_o                  (width_src_d),
+        .csr_control_d_o                (csr_control_d),
+        .csr_src_d_o                    (csr_src_d)
     );
-        
-        
+
+
     hazard_unit u_hazard_unit (
         // Fetch stage inputs
         .instr_hit_f_i                 (instr_hit_f_i),
@@ -155,7 +165,7 @@ module pipelined_riscv_core (
         .forward_a_e_o                  (forward_a_e),
         .forward_b_e_o                  (forward_b_e)
     );
-        
+
     branch_processing_unit u_branch_processing_unit (
         // Clock & reset_i
         .clk_i                          (clk_i),
@@ -168,6 +178,7 @@ module pipelined_riscv_core (
         .v_flag_i                       (v_flag),
 
         // Pipeline control inputs
+        .stall_e_i                      (stall_e),
         .flush_e_i                      (flush_e),
 
         // Instruction decode inputs
@@ -208,15 +219,18 @@ module pipelined_riscv_core (
         .read_data_m_i                  (read_data_m_i),
 
         // Control inputs
-        .alu_control_d_i                (alu_control_d),
-        .width_src_d_i                  (width_src_d),
-        .result_src_d_i                 (result_src_d),
         .imm_src_d_i                    (imm_src_d),
+        .result_src_d_i                 (result_src_d),
         .branch_op_d_i                  (branch_op_d),
-        .mem_write_d_i                  (mem_write_d),
-        .reg_write_d_i                  (reg_write_d),
         .alu_src_d_i                    (alu_src_d),
         .pc_base_src_d_i                (pc_base_src_d),
+        .reg_write_d_i                  (reg_write_d),
+        .mem_write_d_i                  (mem_write_d),
+        .csr_we_d_i                     (csr_we_d),
+        .alu_control_d_i                (alu_control_d),
+        .width_src_d_i                  (width_src_d),
+        .csr_control_d_i                (csr_control_d),
+        .csr_src_d_i                    (csr_src_d),
         .forward_a_e_i                  (forward_a_e),
         .forward_b_e_i                  (forward_b_e),
         .flush_d_i                      (flush_d),
@@ -257,7 +271,9 @@ module pipelined_riscv_core (
         .rd_m_o                         (rd_m),
         .rd_w_o                         (rd_w),
         .reg_write_m_o                  (reg_write_m),
-        .reg_write_w_o                  (reg_write_w)
+        .reg_write_w_o                  (reg_write_w),
+        .csr_we_m_o                     (csr_we_m),
+        .csr_we_w_o                     (csr_we_w)
     );
 
 endmodule

@@ -36,14 +36,17 @@ module execute_stage (
 
     // Control inputs
     input  logic        valid_d_i,
-    input  logic [3:0]  alu_control_d_i,
-    input  logic [2:0]  width_src_d_i,
     input  logic [2:0]  result_src_d_i,
     input  logic [1:0]  branch_op_d_i,
+    input  logic        alu_src_d_i,
+    input  logic        pc_base_src_d_i,
     input  logic        reg_write_d_i,
     input  logic        mem_write_d_i,
-    input  logic        pc_base_src_d_i,
-    input  logic        alu_src_d_i,
+    input  logic        csr_we_d_i,
+    input  logic [3:0]  alu_control_d_i,
+    input  logic [2:0]  width_src_d_i,
+    input  logic [1:0]  csr_control_d_i,
+    input  logic        csr_src_d_i,
     input  logic [1:0]  forward_a_e_i,
     input  logic [1:0]  forward_b_e_i,
     input  logic        flush_e_i,
@@ -74,6 +77,7 @@ module execute_stage (
     output logic [1:0]  branch_op_e_o,
     output logic        mem_write_e_o,
     output logic        reg_write_e_o,
+    output logic        csr_we_e_o,
     output logic        pc_src_pred_e_o,
     output logic        target_match_e_o
 );
@@ -90,6 +94,9 @@ module execute_stage (
         logic        pc_base_src;
         logic        alu_src;
         logic        reg_write;
+        logic        csr_we;
+        logic [1:0]  csr_control;
+        logic        csr_src;
         logic [4:0]  rd;
         logic [4:0]  rs1;
         logic [4:0]  rs2;
@@ -115,6 +122,8 @@ module execute_stage (
     logic [31:0] reg_data_2_e;
     logic [31:0] pred_pc_target_e;
     logic [3:0]  alu_control_e;
+    logic [1:0]  csr_control_e;
+    logic        csr_src_e;
     logic        pc_base_src_e;
     logic        alu_src_e;
 
@@ -134,6 +143,9 @@ module execute_stage (
         pc_base_src_d_i,
         alu_src_d_i,
         reg_write_d_i,
+        csr_we_d_i,
+        csr_control_d_i,
+        csr_src_d_i,
         rd_d_i,
         rs1_d_i,
         rs2_d_i,
@@ -173,6 +185,9 @@ module execute_stage (
         pc_base_src_e,
         alu_src_e,
         reg_write_e_o,
+        csr_we_e_o,
+        csr_control_e,
+        csr_src_e,
         rd_e_o,
         rs1_e_o,
         rs2_e_o,

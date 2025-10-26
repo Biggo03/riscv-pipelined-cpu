@@ -35,6 +35,7 @@ module memory_stage (
     input  logic [2:0]  result_src_e_i,
     input  logic        mem_write_e_i,
     input  logic        reg_write_e_i,
+    input  logic        csr_we_e_i,
     input  logic        stall_m_i,
 
     // data outputs
@@ -53,9 +54,10 @@ module memory_stage (
     output logic [2:0]  result_src_m_o,
     output logic [2:0]  width_src_m_o,
     output logic        mem_write_m_o,
-    output logic        reg_write_m_o
+    output logic        reg_write_m_o,
+    output logic        csr_we_m_o
 );
-    
+
     // ----- Pipeline data type -----
     typedef struct packed {
         logic [31:0] instr;
@@ -70,6 +72,7 @@ module memory_stage (
         logic [2:0]  result_src;
         logic        mem_write;
         logic        reg_write;
+        logic        csr_we;
     } memory_signals_t;
 
     // ----- Parameters -----
@@ -78,7 +81,7 @@ module memory_stage (
     // ----- Memory pipeline register -----
     memory_signals_t inputs_m;
     memory_signals_t outputs_m;
-    
+
     assign inputs_m = {
         instr_e_i,
         valid_e_i,
@@ -91,9 +94,10 @@ module memory_stage (
         width_src_e_i,
         result_src_e_i,
         mem_write_e_i,
-        reg_write_e_i
+        reg_write_e_i,
+        csr_we_e_i
     };
-    
+
     flop #(
         .WIDTH                          (REG_WIDTH)
     ) u_flop_memory_reg (
@@ -108,7 +112,7 @@ module memory_stage (
         // data output
         .Q                              (outputs_m)
     );
-    
+
     assign {
         instr_m_o,
         valid_m_o,
@@ -121,9 +125,10 @@ module memory_stage (
         width_src_m_o,
         result_src_m_o,
         mem_write_m_o,
-        reg_write_m_o
+        reg_write_m_o,
+        csr_we_m_o
     } = outputs_m;
-    
+
     // Forwarding mux
     always_comb begin
         case (result_src_m_o)
@@ -134,7 +139,7 @@ module memory_stage (
             default:          forward_data_m_o = '0;
         endcase
     end
-        
+
     reduce u_reduce_width_change (
         // data input
         .BaseResult                     (read_data_m_i),
@@ -145,5 +150,5 @@ module memory_stage (
         // data output
         .result_o                       (reduced_data_m_o)
     );
-    
+
 endmodule

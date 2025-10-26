@@ -27,12 +27,17 @@ module control_unit (
     output logic       pc_base_src_d_o,
     output logic       reg_write_d_o,
     output logic       mem_write_d_o,
+    output logic       csr_we_d_o,
 
     // ALU decoder output
     output logic [3:0] alu_control_d_o,
 
     // Width decoder output
-    output logic [2:0] width_src_d_o
+    output logic [2:0] width_src_d_o,
+
+    // csr decoder output
+    output logic [1:0] csr_control_d_o,
+    output logic       csr_src_d_o
 );
 
 
@@ -53,7 +58,8 @@ module control_unit (
         .alu_src_o                      (alu_src_d_o),
         .pc_base_src_o                  (pc_base_src_d_o),
         .reg_write_o                    (reg_write_d_o),
-        .mem_write_o                    (mem_write_d_o)
+        .mem_write_o                    (mem_write_d_o),
+        .csr_we_o                       (csr_we_d_o)
     );
 
     alu_decoder u_alu_decoder (
@@ -74,6 +80,15 @@ module control_unit (
 
         // Control output
         .width_src_o                    (width_src_d_o)
+    );
+
+    csr_decoder u_csr_decoder (
+        // Control Input
+        .funct3_i                       (funct3_d_i),
+
+        // Control Output
+        .csr_control_o                  (csr_control_d_o),
+        .csr_src_o                      (csr_src_d_o)
     );
 
 

@@ -20,7 +20,7 @@ module writeback_stage (
     input  logic        reset_i,
 
     // data inputs
-    input  logic [31:0] instr_m_i, 
+    input  logic [31:0] instr_m_i,
     input  logic [31:0] alu_result_m_i,
     input  logic [31:0] reduced_data_m_i,
     input  logic [31:0] pc_target_m_i,
@@ -32,6 +32,7 @@ module writeback_stage (
     input  logic        valid_m_i,
     input  logic [2:0]  result_src_m_i,
     input  logic        reg_write_m_i,
+    input  logic        csr_we_m_i,
     input  logic        stall_w_i,
 
     // data outputs
@@ -42,7 +43,8 @@ module writeback_stage (
     // Control outputs
     output logic        valid_w_o,
     output logic        retire_w_o,
-    output logic        reg_write_w_o
+    output logic        reg_write_w_o,
+    output logic        csr_we_w_o
 );
 
     // ----- Pipeline data type -----
@@ -57,6 +59,7 @@ module writeback_stage (
         logic [4:0]  rd;
         logic [2:0]  result_src;
         logic        reg_write;
+        logic        csr_we;
     } writeback_signals_t;
 
     // ----- Parameters -----
@@ -73,7 +76,7 @@ module writeback_stage (
     logic [31:0] reduced_data_w;
     logic [31:0] alu_result_w;
     logic [2:0]  result_src_w;
-    
+
     assign inputs_w = {
         instr_m_i,
         valid_m_i,
@@ -84,9 +87,10 @@ module writeback_stage (
         imm_ext_m_i,
         rd_m_i,
         result_src_m_i,
-        reg_write_m_i
+        reg_write_m_i,
+        csr_we_m_i
     };
-    
+
     flop #(
         .WIDTH                          (REG_WIDTH)
     ) u_flop_writeback_reg (
@@ -101,7 +105,7 @@ module writeback_stage (
         // data output
         .Q                              (outputs_w)
     );
-    
+
     assign {
         instr_w_o,
         valid_w_o,
@@ -112,9 +116,10 @@ module writeback_stage (
         imm_ext_w,
         rd_w_o,
         result_src_w,
-        reg_write_w_o
+        reg_write_w_o,
+        csr_we_w_o
     } = outputs_w;
-    
+
     // result mux
     always_comb begin
         case (result_src_w)
