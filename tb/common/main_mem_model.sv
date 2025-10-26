@@ -1,5 +1,6 @@
+`default_nettype none
 module main_mem_model (
-    
+
     input  logic         clk_i,
     input  logic         reset_i,
 
@@ -29,12 +30,12 @@ module main_mem_model (
     end
 
     always_ff @(posedge clk_i) begin
-        if (reset_i) begin 
+        if (reset_i) begin
             mem_state <= NO_REQ;
             cycle_cnt <= 0;
             fetch_addr <= 0;
             rep_ready_o <= 0;
-        end else       
+        end else begin
             case (mem_state)
                 NO_REQ: begin
                     if (~cache_hit_i) begin
@@ -55,7 +56,14 @@ module main_mem_model (
                     end
                 end
 
+                default: begin
+                    mem_state <= NO_REQ;
+                    cycle_cnt <= 0;
+                    fetch_addr <= 0;
+                    rep_ready_o <= 0;
+                end
             endcase
+        end
     end
 
     assign rep_word_o[31:0] = mem_array[(fetch_addr[31:6] * BLOCK_WORDS) + (WORDS_PER_CYCLE*cycle_cnt)];

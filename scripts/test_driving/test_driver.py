@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+from typing_extensions import TypeIs
 import yaml
 import subprocess
 import os
@@ -10,36 +11,36 @@ from pathlib import Path
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Run tests based on YAML-defined test groups."
+        description="Run regressions, test groups, or individual tests."
     )
 
-    # Positional argument: test group
     parser.add_argument(
-        "target",
-        type=str,
-        help="Name of the test or test_group to run (e.g., 'default', 'branching')"
+        "-r", "--regressions",
+        nargs="+",
+        default=[],
+        help="list of regressions to run"
+    )
+
+    parser.add_argument(
+        "-t", "--tests",
+        nargs="+",
+        default=[],
+        help="list of tests to run"
+    )
+
+    parser.add_argument(
+        "-D", "--defines",
+        nargs="+",
+        default=[],
+        help="list of additional defines to apply to test"
     )
 
     # Optional argument: output directory
     parser.add_argument(
-        "--single",
-        action="store_true",
-        help="Set if the test is an individual unit test rather than a test group (default: False)"
-    )
-
-    # Optional argument: output directory
-    parser.add_argument(
-        "--output_dir",
+        "-o", "--output_dir",
         type=str,
         default="../../sim_results",
         help="Directory to write test outputs (default: ../../sim_results)"
-    )
-
-    # Optional flag: verbose output
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Print full command output for each test"
     )
 
     return parser.parse_args()
@@ -83,57 +84,51 @@ def setup_logger(log_name, log_file_path, level=logging.INFO):
 
     return logger
 
-def setup(yaml_path):
-    """
-    Loads in the a YAML file safely
-
-    Args:
-        yaml_path: Path to the yaml file
-    
-    Returns:
-        yaml_data: Data contained within the yaml    
-    """
-    args = parse_args()
-    test_logger = setup_logger("test_logger", f"{args.output_dir}/test_run.log")
-
+def load_yaml(yaml_path):
     try:
         with open(yaml_path, "r") as f:
             yaml_data = yaml.safe_load(f)
     except FileNotFoundError:
         print(f"Error: File not found at {yaml_path}")
+        yaml_data = None
     except yaml.YAMLError as e:
         print(f"Error parsing YAML: {e}")
-    
-    return args, test_logger, yaml_data
+        yaml_data = None
 
-def resolve_target(target, test_data, single):
+    return yaml_data
 
-    run_info = {}
-    try:
-        if (single == True):
-            for category, local_tests in test_data["TESTS"].items():
-                if (target in local_tests):
-                    run_info[target] = test_data["TESTS"][category][target]
+def select_active_tests(regressions, tests, test_catalog):
+    """
+    Gets all test information related to recieved tests
 
-            if (not run_info):
-                raise ValueError(f"Test {target} not found in any category.")
-        else:
-            categories = test_data["TEST_GROUPS"][target]["modules"]
+    Args:
+        regressions: List of regressions to run
+        tests: List of individual tests to run
+        test_catalog: Dict containing test information
 
-            for category, tests in test_data["TESTS"].items():
-                if (category in categories):
-                    for test in tests.keys():
-                        run_info[test] = test_data["TESTS"][category][test]
+    Returns:
+        active_test_info: dict containing info for tests that are to be run
+    """
+    test_logger = logging.getLogger("test_logger")
 
-        for test in run_info.keys():
-            if ("system" in run_info[test]["tags"]):
-                run_info["programs"] = test_data["RISCV_PROGRAMS"]
-                break
+    tests = set(tests)
+    active_test_info = {}
+    for regression in regressions:
+        try:
+            for test in test_catalog["regressions"][regression]:
+                tests.add(test)
+        except:
+            test_logger.warning(f"unable to find regression: {regression}")
 
-    except Exception as e:
-        print(f"Unable to find test in yaml file: {e}")
+    for test in tests:
+        try:
+            active_test_info[test] = test_catalog["tests"][test]
+        except Exception as e:
+            test_logger.warning(f"Unable to find test: {test} in test list")
 
-    return run_info
+    test_logger.info(f"running tests: {', '.join(tests)}")
+
+    return active_test_info
 
 def get_module_paths(rtl_dir, module_path, module_paths=None):
     """
@@ -165,7 +160,117 @@ def get_module_paths(rtl_dir, module_path, module_paths=None):
 
     return module_paths
 
-def run_test(test_name, config, test_out_dir, result_info, program=None):
+def gen_run_cmd(test_name, test_info, dir_paths, defines):
+
+    test_logger = logging.getLogger("test_logger")
+
+    defines.extend(test_info["defines"])
+
+    # -- Included directories
+    inc_dirs = [
+        str(dir_paths["include_dir"]),
+        str(dir_paths["tb_include_dir"])
+    ]
+
+    # --- Source files ---
+    src_files = [dir_paths["tb_path"], *dir_paths["common_tb"]]
+
+    # --- Defines ---
+    defines.append(f'DUMP_PATH="{dir_paths["test_out_dir"]}/{test_name}.vcd"')
+    defines.append(f'SIM')
+
+    if ("system" in test_info["tags"]):
+        instr_match = next(dir_paths["hex_path"].rglob(f"{test_name}.text.hex"), None)
+        data_match = next(dir_paths["hex_path"].rglob(f"{test_name}.data.hex"), None)
+
+        if (instr_match):
+            dir_paths["instr_path"] = instr_match.resolve()
+            defines.append(f"INSTR_HEX_FILE=\"{dir_paths['instr_path']}\"")
+        else:
+            test_logger.warning(f"Could not find instruction file for: {test_name}")
+
+        if (data_match):
+            data_path = data_match.resolve()
+            defines.append(f"DATA_HEX_FILE=\"{data_path}\"")
+        else:
+            test_logger.info(f"No data file for: {test_name}")
+
+    # --- Flags ---
+    iverilog_flags = [
+        "-g2012",
+        "-Wall",
+        "-Wextra",
+        "-Wimplicit",
+        "-Wno-timescale",
+        "-Wno-fatal",
+        "-Winfloop",
+        "-Wportbind",
+        "-Wmultidriver",
+        "-Wwidth",
+        "-Wselect-range",
+        "-Wcaseincomplete",
+        "-Wno-sensitivity-entire",
+        "-Wno-sensitivity-incomplete",
+        "-Wno-sensitivity-complete",
+        "-pfileline=1",
+        "-Ttyp",
+        "-DDEBUG_BUILD",
+    ]
+
+    # --- File list ---
+    module_paths = get_module_paths(dir_paths["rtl_dir"], dir_paths["tb_path"])
+    if ("system" in test_info["tags"]):
+        filelist = dir_paths["filelist_dir"] / "top.f"
+    else:
+        filelist = dir_paths["filelist_dir"] / f"{test_name}.f"
+    with open (filelist, "w") as f:
+        f.write("\n".join(map(str, module_paths)) + "\n")
+
+    # --- Create command ---
+    run_cmd = ["iverilog"]
+    run_cmd.extend(iverilog_flags)
+
+    for inc_dir in inc_dirs:
+        run_cmd.extend(["-I", inc_dir])
+
+    for define in defines:
+        run_cmd.extend(["-D", define])
+
+    run_cmd.extend(["-f", filelist])
+
+    for src in src_files:
+        run_cmd.append(src)
+
+    run_cmd.extend(["-o", f"{dir_paths['test_out_dir']}/{test_name}.vvp"])
+
+    # Ensure everything is of proper type
+    for i in range(len(run_cmd)):
+        run_cmd[i] = str(run_cmd[i])
+
+    return run_cmd
+
+def setup_paths(test_name, tb_file, top_out_dir):
+
+    dir_paths = {}
+
+    dir_paths["proj_dir"]        = Path(__file__).resolve().parent.parent.parent
+    dir_paths["rtl_dir"]         = dir_paths["proj_dir"] / "rtl"
+    dir_paths["include_dir"]     = dir_paths["proj_dir"] / "common" / "includes"
+    dir_paths["filelist_dir"]    = dir_paths["proj_dir"] / "filelists"
+    dir_paths["tb_path"]         = dir_paths["proj_dir"] / "tb" / tb_file
+    dir_paths["tb_include_dir"]  = dir_paths["proj_dir"].joinpath("tb", "common")
+    dir_paths["common_tb"]       = list(dir_paths["proj_dir"].joinpath("tb", "common").rglob("*v*"))
+    dir_paths["hex_path"]        = dir_paths["proj_dir"] / "test_inputs" / "compiled_programs"
+
+    dir_paths["test_out_dir"]    = top_out_dir / test_name
+
+    os.makedirs(dir_paths["test_out_dir"], exist_ok=True)
+    os.makedirs(dir_paths["filelist_dir"], exist_ok=True)
+    subprocess.run(f"rm -rf {dir_paths['test_out_dir']}/*", shell=True)
+
+    return dir_paths
+
+def run_test(test_name, test_info, defines, top_out_dir, result_info):
     """
     Runs a specific testbench using Icarus Verilog
 
@@ -174,81 +279,19 @@ def run_test(test_name, config, test_out_dir, result_info, program=None):
         tb_file: Name of the testbench file
         test_out_dir: Where the outputs of the test are placed
     """
-    # Get info from config
-    tb_file = config["tb"]
-    defines = config["defines"]
-
     test_logger = logging.getLogger("test_logger")
-    # --- Project directories ---
-    proj_dir       = Path(__file__).resolve().parent.parent.parent
-    rtl_dir        = proj_dir / "rtl"
-    include_dir    = proj_dir / "common" / "includes"
-    filelist_dir   = proj_dir / "filelists"
-    tb_path        = proj_dir / "tb" / tb_file
-    tb_include_dir = proj_dir.joinpath("tb", "common")
-    common_tb      = list(proj_dir.joinpath("tb", "common").rglob("*v*"))
 
-    os.makedirs(filelist_dir, exist_ok=True)
-
-    # --- Source files ---
-    source_files = [tb_path, *common_tb]
-
-    # --- Defines ---
-    defines.append(f'DUMP_PATH="{test_out_dir}/{test_name}.vcd"')
-    defines.append(f'SIM')
-
-    if program:
-        search_path = proj_dir / 'test_inputs' / 'compiled_programs'
-        instr_match = next(search_path.rglob(f"{program}.text.hex"), None)
-        data_match = next(search_path.rglob(f"{program}.data.hex"), None)
-
-        if (instr_match):
-            instr_path = instr_match.resolve()
-            defines.append(f"INSTR_HEX_FILE=\"{instr_path}\"")
-        else:
-            test_logger.error(f"Could not find instruction file for program: {program}")
-            return
-        
-        if (data_match):
-            data_path = data_match.resolve()
-            defines.append(f"DATA_HEX_FILE=\"{data_path}\"")
-
-    # --- Build compile command ---
-    run_cmd = [
-        "iverilog", "-g2012",
-        "-I", str(include_dir),
-        "-I", str(tb_include_dir)
-    ]
-
-    # Add defines
-    for d in defines:
-        run_cmd.extend(["-D", d])
-
-    # Write filelist for RTL modules
-    module_paths = get_module_paths(rtl_dir, tb_path)
-    if ("system" in config["tags"]): 
-        filelist = filelist_dir / "top.f"
-    else:
-        filelist = filelist_dir / f"{test_name}.f"
-    with open (filelist, "w") as f:
-        f.write("\n".join(map(str, module_paths)) + "\n")
-
-    # Add filelist, sources, and output
-    run_cmd.extend([
-        "-f", str(filelist),
-        *map(str, source_files),
-        "-o", f"{test_out_dir}/{test_name}.vvp"
-    ])
+    dir_paths = setup_paths(test_name, test_info["tb"], top_out_dir)
+    run_cmd = gen_run_cmd(test_name, test_info, dir_paths, defines)
 
     # --- Run compilation and simulation ---
     test_passed = False
     warning_present = False
-    log_path = Path(test_out_dir) / f"{test_name}.log"
+    log_path = Path(dir_paths['test_out_dir']) / f"{test_name}.log"
     with open(log_path, "w") as log_file:
-
         try:
             log_file.write(f"Compilation command:\n {' '.join(run_cmd)}\n")
-            process = subprocess.Popen(run_cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=proj_dir)
+            process = subprocess.Popen(run_cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=dir_paths["proj_dir"])
             for line in process.stdout:
                 log_file.write(f"{line}\n")
             log_file.write(f"Compilation of {test_name} complete\n")
@@ -256,59 +299,37 @@ def run_test(test_name, config, test_out_dir, result_info, program=None):
             process.wait()
 
             log_file.write(f"Beginning simulation of test: {test_name}...\n")
-            process = subprocess.Popen([f"{test_out_dir}/{test_name}.vvp"], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=proj_dir)
+            process = subprocess.Popen([f"{dir_paths['test_out_dir']}/{test_name}.vvp"], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=dir_paths["proj_dir"])
             for line in process.stdout:
                 log_file.write(f"{line}\n")
                 if "TEST PASSED" in line:
                     test_passed = True
                 if ("WARNING" in line.upper() and "VCD" not in line.upper()):
                     warning_present = True
-            
+
             process.wait()
-        except Exception as e:
+        except:
             test_passed = False
 
     if (test_passed == True):
-        result_info["PASSED_TESTS"][test_name] = test_out_dir
+        result_info["PASSED_TESTS"][test_name] = dir_paths['test_out_dir']
         test_logger.info(f"{test_name} PASSED")
     else:
-        result_info["FAILED_TESTS"][test_name] = test_out_dir
+        result_info["FAILED_TESTS"][test_name] = dir_paths['test_out_dir']
         test_logger.info(f"{test_name} FAILED")
     if (warning_present == True):
-        result_info["WARNING_TESTS"][test_name] = test_out_dir
+        result_info["WARNING_TESTS"][test_name] = dir_paths['test_out_dir']
         test_logger.info(f"{test_name} CONTAINS WARNINGS")
 
     return
 
-def run_all_tests(run_info, result_info, top_out_dir):
-    # Run all tests
-    for test, config in run_info.items():
-        #Will want to add more specifiers later
-        if (test == "programs"):
-            continue
-        
-        if ("system" in config["tags"]):
-            if ("basic_asm" in config["tags"]):
-                test_programs = run_info["programs"]["basic_asm_tests"]
-            elif ("benchmark" in config["tags"]):
-                test_programs = run_info["programs"]["benchmark"]
-            elif ("c_programs" in config["tags"]):
-                test_programs = run_info["programs"]["c_programs"]
-            for program in test_programs:
-                test_out_dir = top_out_dir / test / program
-                test_out_dir.mkdir(parents=True, exist_ok=True)
-                subprocess.run(f"rm -rf {test_out_dir}/*", shell=True)
+def run_all_tests(active_test_info, defines, top_out_dir, result_info):
 
-                test_name = f"{test}_{program}"
+    os.makedirs(top_out_dir, exist_ok=True)
 
-                run_test(test_name, config, test_out_dir, result_info, program)
-        else:
-            test_out_dir = top_out_dir / test
-            test_out_dir.mkdir(parents=True, exist_ok=True)
+    for test_name, test_info in active_test_info.items():
+        run_test(test_name, test_info, defines, top_out_dir, result_info)
 
-            subprocess.run(f"rm -rf {test_out_dir}/*", shell=True)
-
-            run_test(test, config, test_out_dir, result_info)
 
 def generate_report(result_info, test_logger):
     # Report results
@@ -329,27 +350,27 @@ def generate_report(result_info, test_logger):
             test_logger.info(f"{test}: {failed_tests[test]}")
     else:
         test_logger.info("==================== NO TESTS FAILED ====================")
-    
+
     if (len(warning_tests) != 0):
         test_logger.info("==================== TESTS WITH WARNINGS ====================")
         for test in warning_tests.keys():
             test_logger.info(f"{test}: {warning_tests[test]}")
-    
+
     test_logger.info(f"==================== SUMMARY ====================")
     test_logger.info(f"Total PASSED tests: {len(passed_tests)}")
     test_logger.info(f"Total FAILED tests: {len(failed_tests)}")
 
 def main():
+    args = parse_args()
+    test_logger = setup_logger("test_logger", f"{args.output_dir}/test_run.log")
+    test_catalog = load_yaml("test_catalog.yml")
 
-    args, test_logger, test_data = setup("test_list.yml")
-    run_info = resolve_target(args.target, test_data, args.single)
+    active_test_info = select_active_tests(args.regressions, args.tests, test_catalog)
 
     top_out_dir = Path(os.path.abspath(args.output_dir))
     result_info = {"PASSED_TESTS": {}, "FAILED_TESTS": {}, "WARNING_TESTS": {}}
 
-    test_logger.info(f"Beginning test for {args.target}")
-
-    run_all_tests(run_info, result_info, top_out_dir)
+    run_all_tests(active_test_info, args.defines, top_out_dir, result_info)
     generate_report(result_info, test_logger)
 
 if __name__ == "__main__":

@@ -46,10 +46,10 @@ module instr_cache_ctlr #(
     // Decode input set
     assign active_array_o = 1'b1 << set_i;
     assign instr_hit_f_o = ~miss_array_i[set_i];
-    
+
     // Determines if signal active
     assign ic_repl_permit_o = ((branch_op_e_i == `NON_BRANCH) | instr_hit_f_o | present_state) & ~pc_src_reg_i[1];
-    
+
     // State update logic
     always_ff @(posedge clk_i) begin
         if (reset_i) present_state <= READY_TO_DELAY;
@@ -60,9 +60,10 @@ module instr_cache_ctlr #(
     always_comb begin
         next_state = present_state;
         case (present_state)
-            READY_TO_DELAY: if (~ic_repl_permit_o)             next_state = DELAYING;
-            DELAYING: if (~instr_hit_f_o | pc_src_reg_i[1])       next_state = READY_TO_DELAY;
+            READY_TO_DELAY: if (~ic_repl_permit_o)                  next_state = DELAYING;
+            DELAYING:       if (~instr_hit_f_o | pc_src_reg_i[1])   next_state = READY_TO_DELAY;
+            default: next_state = READY_TO_DELAY;
         endcase
     end
-  
+
 endmodule

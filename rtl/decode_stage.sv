@@ -47,7 +47,7 @@ module decode_stage (
     // Control outputs
     output logic        valid_d_o
 );
-    
+
     // ----- Pipeline data type -----
     typedef struct packed {
         logic        valid;
@@ -74,7 +74,7 @@ module decode_stage (
         pred_pc_target_f_i,
         pc_src_pred_f_i
     };
-    
+
     flop #(
         .WIDTH                          (REG_WIDTH)
     ) u_flop_decode_reg (
@@ -89,7 +89,7 @@ module decode_stage (
         // data output
         .Q                              (outputs_d)
     );
-    
+
     assign {
         valid_d_o,
         instr_d_o,
@@ -98,15 +98,15 @@ module decode_stage (
         pred_pc_target_d_o,
         pc_src_pred_d_o
     } = outputs_d;
-    
+
     assign rd_d_o = instr_d_o[11:7];
     assign rs1_d_o = instr_d_o[19:15];
     assign rs2_d_o = instr_d_o[24:20];
-    
+
     assign op_d_o = instr_d_o[6:0];
     assign funct3_d_o = instr_d_o[14:12];
     assign funct7_d_o[5] = instr_d_o[30];
-    
+
     imm_extend u_imm_extend (
         // Instruction input
         .instr_i                        (instr_d_o[31:7]),
@@ -117,5 +117,5 @@ module decode_stage (
         // data output
         .imm_ext_o                      (imm_ext_d_o)
     );
-    
+
 endmodule

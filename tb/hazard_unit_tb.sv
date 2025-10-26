@@ -1,22 +1,22 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 10/02/2024 04:04:23 PM
-// Design Name: 
+// Design Name:
 // Module Name: hazardcontrol_TB
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
 module hazard_unit_tb();
@@ -119,22 +119,22 @@ module hazard_unit_tb();
         .forward_a_e_o                  (forward_a_e),
         .forward_b_e_o                  (forward_b_e)
     );
-    
+
     //Parameters to consolidate signal values
     localparam [1:0] NO_FORWARD = 2'b00;
     localparam [1:0] WB_FORWARD = 2'b01;
     localparam [1:0] MEM_FORWARD = 2'b10;
-    
+
 
     task AssertForwardA();
         assert (ForwardExpectedA === forward_a_e) else $error(1, "Error: ForwardingAE doesn't match expected\nRs1E: %b, rd_m: %b, rd_w: %b, reg_write_m: %b reg_write_w: %b\nExpected Output: %b\nActual Output:   %b",
                                                               rs1_e, rd_m, rd_w, reg_write_m, reg_write_w, ForwardExpectedA, forward_a_e);
-    
+
     endtask
 
     //Asserts correct outputs when checking functionality of forward_b_e
     task AssertForwardB();
-        
+
         assert (ForwardExpectedB === forward_a_e) else $error(1, "Error: ForwardingAE doesn't match expected\nRs1E: %b, rd_m: %b, rd_w: %b, reg_write_m: %b reg_write_w: %b\nExpected Output: %b\nActual Output:   %b",
                                                               rs1_e, rd_m, rd_w, reg_write_m, reg_write_w, ForwardExpectedB, forward_b_e);
     endtask
@@ -159,45 +159,45 @@ module hazard_unit_tb();
         ic_repl_permit = 0;
 
         #10;
-        
+
         //Test all register combinations for ForwrdAE and forward_b_e
         for (int i = 0; i < 64; i++) begin
-            
+
             //Do this so can test both types of forwarding
             if (i < 32) rd_m = i;
             else rd_w = i-32;
-        
+
             for (int j = 0; j < 32; j++) begin
-            
+
                 rs1_e = j;
                 rs2_e = j;
-                
+
                 //Test ForwardExpectedAE
                 if (rs1_e === 0) ForwardExpectedA = NO_FORWARD;
-                else if (rs1_e === rd_m & reg_write_m) ForwardExpectedA = MEM_FORWARD; 
+                else if (rs1_e === rd_m & reg_write_m) ForwardExpectedA = MEM_FORWARD;
                 else if (rs1_e === rd_w & reg_write_w) ForwardExpectedA = WB_FORWARD;
                 else ForwardExpectedA = NO_FORWARD;
-                
+
                 #10;
-                
+
                 AssertForwardA();
-                
+
                 //Test ForwardExpectedBE
                 if (rs2_e === 0) ForwardExpectedB = NO_FORWARD;
-                else if (rs2_e === rd_m & reg_write_m) ForwardExpectedB = MEM_FORWARD; 
+                else if (rs2_e === rd_m & reg_write_m) ForwardExpectedB = MEM_FORWARD;
                 else if (rs2_e === rd_w & reg_write_w) ForwardExpectedB = WB_FORWARD;
                 else ForwardExpectedB = NO_FORWARD;
-                
+
                 #10;
-                
+
                 AssertForwardB();
-                
+
             end
-            
+
         end
-        
+
         $display("Forwarding Successful!");
-        
+
         drive_no_hazard();
         expect_no_hazard();
 
@@ -238,7 +238,7 @@ module hazard_unit_tb();
         if (error_cnt == 0) $display("TEST PASSED");
         else $display("TEST FAILED");
         $finish;
-        
+
     end
 
     //Drive tasks
@@ -317,7 +317,7 @@ module hazard_unit_tb();
         ic_repl_permit = 1;
         pc_src = 2'b01;
         pc_src_reg = 0;
-        
+
     endtask
 
     //Expect tasks
@@ -331,7 +331,7 @@ module hazard_unit_tb();
         `CHECK(flush_d == 0, "[%t] No hazard case: flush_d should be 0", $time)
         `CHECK(flush_e == 0, "[%t] No hazard case: flush_e should be 0", $time)
     endtask
-    
+
     task expect_load_hazard(input string variant);
         `CHECK(stall_f == 1, "[%t] %s: stall_f should be 1", $time, variant)
         `CHECK(stall_d == 1, "[%t] %s: stall_d should be 1", $time, variant)

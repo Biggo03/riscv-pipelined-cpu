@@ -34,12 +34,12 @@ module control_unit (
     // Width decoder output
     output logic [2:0] width_src_d_o
 );
-        
-    
+
+
     // ----- Control signals -----
     logic [1:0] alu_op;
     logic width_op;
-    
+
     main_decoder u_main_decoder (
         // Instruction decode input
         .op                             (op_d_i),
@@ -55,7 +55,7 @@ module control_unit (
         .reg_write_o                    (reg_write_d_o),
         .mem_write_o                    (mem_write_d_o)
     );
-    
+
     alu_decoder u_alu_decoder (
         // Instruction decode inputs
         .funct3_i                       (funct3_d_i),
@@ -66,7 +66,7 @@ module control_unit (
         // Control output
         .alu_control_o                  (alu_control_d_o)
     );
-        
+
     width_decoder u_width_decoder (
         // Instruction decode inputs
         .funct3_i                       (funct3_d_i),
@@ -75,6 +75,6 @@ module control_unit (
         // Control output
         .width_src_o                    (width_src_d_o)
     );
-        
-        
+
+
 endmodule

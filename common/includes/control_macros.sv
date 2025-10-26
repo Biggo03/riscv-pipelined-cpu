@@ -12,6 +12,7 @@
 `define B_EXT           3'b010
 `define J_EXT           3'b011
 `define U_EXT           3'b100
+`define CSR_EXT         3'b101
 `define NA_EXT          3'b000  // fallback
 
 //////////////////////////////////////////////
@@ -35,6 +36,7 @@
 `define RESULT_PCPLUS4  3'b010
 `define RESULT_IMM_EXT  3'b011
 `define RESULT_MEM_DATA 3'b100
+`define RESULT_CSR      3'b101
 `define RESULT_NA       3'b000   // fallback
 
 //////////////////////////////////////////////
@@ -96,10 +98,30 @@
 `define PC_BASE_SRCA    1'b1
 `define PC_BASE_NA      1'b0 // fallback
 
-
 //////////////////////////////////////////////
-//               forward_a                  //
+//               forward_<sig>              //
 //////////////////////////////////////////////
 `define NO_FORWARD      2'b00
 `define WB_FORWARD      2'b01
 `define MEM_FORWARD     2'b10
+
+//////////////////////////////////////////////
+//                 csr_we                   //
+//////////////////////////////////////////////
+`define WRITE_CSR       1'b1
+`define NO_WRITE_CSR    1'b0
+
+//////////////////////////////////////////////
+//               csr_control                //
+//////////////////////////////////////////////
+`define CSR_PASS        2'b01
+`define CSR_SET         2'b10
+`define CSR_CLEAR       2'b11
+`define CSR_NA          2'b01
+
+//////////////////////////////////////////////
+//                  csr_src                 //
+//////////////////////////////////////////////
+`define CSR_SRC_REG         1'b0
+`define CSR_SRC_IMM         1'b1
+`define CSR_SRC_NA          1'b1

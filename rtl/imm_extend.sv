@@ -12,7 +12,6 @@
 //
 //  Notes:        N/A
 //==============================================================//
-
 `include "control_macros.sv"
 
 module imm_extend (
@@ -25,16 +24,17 @@ module imm_extend (
     // data_o output
     output logic [31:0] imm_ext_o
 );
-    
-    always @(*) begin
+
+    always_comb begin
         case(imm_src_i)
-            `I_EXT:  imm_ext_o = {{20{instr_i[31]}}, instr_i[31:20]};
-            `S_EXT:  imm_ext_o = {{20{instr_i[31]}}, instr_i[31:25], instr_i[11:7]};
-            `B_EXT:  imm_ext_o = {{20{instr_i[31]}}, instr_i[7], instr_i[30:25], instr_i[11:8], 1'b0};
-            `J_EXT:  imm_ext_o = {{12{instr_i[31]}}, instr_i[19:12], instr_i[20], instr_i[30:21], 1'b0};
-            `U_EXT:  imm_ext_o = {instr_i[31:12], 12'b0};
-            default: imm_ext_o = 32'bx; 
+            `I_EXT:     imm_ext_o = {{20{instr_i[31]}}, instr_i[31:20]};
+            `S_EXT:     imm_ext_o = {{20{instr_i[31]}}, instr_i[31:25], instr_i[11:7]};
+            `B_EXT:     imm_ext_o = {{20{instr_i[31]}}, instr_i[7], instr_i[30:25], instr_i[11:8], 1'b0};
+            `J_EXT:     imm_ext_o = {{12{instr_i[31]}}, instr_i[19:12], instr_i[20], instr_i[30:21], 1'b0};
+            `U_EXT:     imm_ext_o = {instr_i[31:12], 12'b0};
+            `CSR_EXT:   imm_ext_o = {27'b0, instr_i[19:15]};
+            default:    imm_ext_o = 0;
         endcase
     end
-    
+
 endmodule

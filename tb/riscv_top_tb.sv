@@ -1,26 +1,26 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 09/12/2024 09:34:38 PM
-// Design Name: 
+// Design Name:
 // Module Name: top_level_TB
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
  module riscv_top_tb();
-    
+
     logic        clk;
     logic        reset;
 
@@ -29,8 +29,8 @@
     logic        mem_write_m;
 
     int cycle_cnt;
-    
-    
+
+
     riscv_top u_riscv_top (
         // Clock & reset
         .clk_i                          (clk),
@@ -45,27 +45,27 @@
     cycle_monitor u_cycle_monitor (
         // Clock & reset
         .clk_i          (clk),
-        .reset_i        (reset),       
+        .reset_i        (reset),
 
 
         .valid_w_i      (u_riscv_top.u_pipelined_riscv_core.u_data_path.valid_w),
         .stall_w_i      (u_riscv_top.u_pipelined_riscv_core.u_data_path.stall_w_i),
         .instr_w_i      (u_riscv_top.u_pipelined_riscv_core.u_data_path.instr_w)
     );
-    
+
     initial begin
         dump_setup;
 
         cycle_cnt = 0;
-        clk = 0; 
+        clk = 0;
         reset = 1; #20; reset = 0;
     end
-    
+
     always begin
-        clk = ~clk; 
+        clk = ~clk;
         #5;
     end
-    
+
     always @(negedge clk) begin
 
         if (u_cycle_monitor.cycle_cnt > 1000000) $finish;
@@ -81,7 +81,7 @@
                 end
             end
         `endif
-   
+
     end
-    
+
 endmodule

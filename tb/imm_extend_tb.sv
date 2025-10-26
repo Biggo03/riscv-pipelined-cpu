@@ -1,23 +1,25 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 09/08/2024 02:48:27 PM
-// Design Name: 
+// Design Name:
 // Module Name: extend_TB
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name:
+// Target Devices:
+// Tool Versions:
 // Description: Testbench for the extend module
-// 
-// Dependencies: 
-// 
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
+`include "control_macros.sv"
+`include "tb_macros.sv"
 
 
 module imm_extend_tb();
@@ -26,6 +28,8 @@ module imm_extend_tb();
     logic [2:0]  imm_src;
     logic [31:0] imm_ext;
     logic [31:0] ImmExtExpected;
+
+    int error_cnt;
 
     int file;
     int read;
@@ -36,13 +40,13 @@ module imm_extend_tb();
         .imm_src_i                      (imm_src),
         .imm_ext_o                      (imm_ext)
     );
-    
+
     initial begin
-        
+
         dump_setup;
 
         read = 0;
-        
+
         file = $fopen("test_inputs/vectors/ext_unit_test_vectors.txt", "r");
 
         if (file == 0) begin
@@ -50,30 +54,38 @@ module imm_extend_tb();
         end else begin
             $display("Vector file opened succesfully");
         end
-        
-        
+
+
         //Iterate through file
         while (!$feof(file)) begin
             read = $fscanf(file, "%b %b %b\n", instr, imm_src, ImmExtExpected);
-            
+
             //Ensure file reads correct number of elements
             if (read == 3) begin
                 #1;
                 assert (imm_ext == ImmExtExpected) else begin
-                    $fatal(1, "Error: imm_src = %b, instr = %b\nExpected output: %b\nActual output:   %b", 
+                    $fatal(1, "Error: imm_src = %b, instr = %b\nExpected output: %b\nActual output:   %b",
                        imm_src, instr, ImmExtExpected,imm_ext);
                 end
-                
+
             end else begin
                 $fatal(1, "Incorrect number of elements read");
             end
-            
+
         end
-        
+
+        instr[19:15] = 5'b11010;
+        imm_src = `CSR_EXT;
+        $display("imm_src: %b", imm_src);
+        #1;
+        $display("imm_ext: %b", imm_ext);
+
+        `CHECK(imm_ext == {27'b0, 5'b11010}, "CSR extension failed");
+
         $display("TEST PASSED");
         $fclose(file);
         $finish;
-        
+
     end
 
 

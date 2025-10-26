@@ -40,17 +40,18 @@ module ghr (
     ghr_state_t next_state;
 
     // State transition logic
-    always @(posedge clk_i, posedge reset_i) begin
+    always_ff @(posedge clk_i) begin : transition_logic
         if (reset_i) begin
             present_state <= UT;
-            next_state <= UT;
         end else begin
             present_state <= next_state;
         end
     end
 
     // Next state logic
-    always_comb begin
+    always_comb begin : next_state_logic
+        next_state = present_state;
+
         if (branch_op_e_i[0] & ~stall_e_i) begin
             case (present_state)
                 UU: begin
@@ -69,6 +70,7 @@ module ghr (
                     if (pc_src_res_e_i) next_state = TT;
                     else                next_state = TU;
                 end
+                default: next_state = UT; // Should never hit
             endcase
         end
     end

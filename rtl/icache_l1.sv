@@ -39,7 +39,7 @@ module icache_l1 #(
     output logic        instr_hit_f_o,
     output logic        ic_repl_permit_o
 );
-    
+
     // ----- Parameters -----
     localparam b            = $clog2(B);
     localparam s            = $clog2(S);
@@ -59,14 +59,14 @@ module icache_l1 #(
     logic ic_repl_grant;
 
     assign block = pc_f_i[b-1:0];
-    assign set = pc_f_i[s+b-1:b]; 
-    assign tag = pc_f_i[31:s+b]; 
-    
+    assign set = pc_f_i[s+b-1:b];
+    assign tag = pc_f_i[31:s+b];
+
     assign ic_repl_grant = ic_repl_permit_o & l2_repl_ready_i;
-    
+
     //Generate Sets
     genvar i;
-    generate 
+    generate
         for (i = 0; i < S; i = i + 1) begin
             instr_cache_set_multi #( // u_instr_cache_set_multi (
                 .B                              (B),
@@ -96,7 +96,7 @@ module icache_l1 #(
             );
         end
     endgenerate
-    
+
     //Cache Controller
     instr_cache_ctlr #( // u_instr_cache_ctlr ()
         .S                              (S)
@@ -116,7 +116,7 @@ module icache_l1 #(
         .instr_hit_f_o                  (instr_hit_f_o),
         .ic_repl_permit_o               (ic_repl_permit_o)
     );
-    
+
     //Assign output
     assign instr_f_o = data_array[set];
 

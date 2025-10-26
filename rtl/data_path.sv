@@ -8,7 +8,7 @@
 //  Project:      RISC-V Processor
 //  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
 //
-//  Parameters:   N/A   
+//  Parameters:   N/A
 //
 //  Notes:        N/A
 //==============================================================//
@@ -127,7 +127,7 @@ module data_path (
     // ----- Register file -----
     logic [31:0] reg_data_1_d;
     logic [31:0] reg_data_2_d;
-    
+
     fetch_stage u_fetch_stage (
         // Clock & reset_i
         .clk_i                          (clk_i),
@@ -245,7 +245,7 @@ module data_path (
         .pc_src_pred_e_o                (pc_src_pred_e_o),
         .target_match_e_o               (target_match_e_o)
     );
-    
+
     memory_stage u_memory_stage (
         // Clock & reset_i
         .clk_i                          (clk_i),
@@ -352,5 +352,5 @@ module data_path (
             .csr_rdata_o                    ()
         );
     `endif
-                         
+
 endmodule

@@ -24,8 +24,8 @@ module reduce (
     // data outputs
     output logic [31:0] result_o
 );
-    
-    always @(*) begin
+
+    always_comb begin
         case(width_src_i)
             `WIDTH_32:  result_o = BaseResult;
             `WIDTH_16S: result_o = {{16{BaseResult[15]}}, BaseResult[15:0]};
@@ -34,7 +34,5 @@ module reduce (
             `WIDTH_8U:  result_o = {24'b0, BaseResult[7:0]};
             default:    result_o = 32'bx;
         endcase
-    
     end
-    
 endmodule

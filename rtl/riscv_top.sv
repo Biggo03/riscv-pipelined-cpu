@@ -23,7 +23,7 @@ module riscv_top (
     output logic [31:0] alu_result_m_o,
     output logic        mem_write_m_o
 );
-    
+
     // ----- Pipeline signals -----
     logic [31:0] pc_f;
     logic [31:0] instr_f;
@@ -39,10 +39,10 @@ module riscv_top (
     // ----- Branch/control -----
     logic [1:0]  pc_src_reg;
     logic [1:0]  branch_op_e;
-    
 
-    
-    
+
+
+
     pipelined_riscv_core u_pipelined_riscv_core (
         // Clock & reset_i
         .clk_i                          (clk_i),
@@ -123,7 +123,7 @@ module riscv_top (
         .ic_repl_permit_o               (ic_repl_permit)
     );
 `endif
-        
+
     data_mem u_data_mem (
         // Clock & control inputs
         .clk_i                          (clk_i),
@@ -137,5 +137,5 @@ module riscv_top (
         // Read data output
         .RD                             (read_data_m)
     );
-    
+
 endmodule

@@ -52,7 +52,7 @@ module branch_processing_unit (
     );
 
     logic pc_src_res_e;
-    
+
     branch_resolution_unit u_branch_resolution_unit (
         // Instruction decode inputs
         .funct3_i                       (funct3_e_i),
@@ -67,7 +67,7 @@ module branch_processing_unit (
         // Resolution output
         .pc_src_res_o                   (pc_src_res_e)
     );
-    
+
     branch_predictor u_branch_predictor (
         // Clock & reset_i
         .clk_i                          (clk_i),
@@ -107,7 +107,7 @@ module branch_processing_unit (
         // Control output
         .pc_src_o                       (pc_src_o)
     );
-    
+
     flop #(
         .WIDTH                          (2)
     ) u_src_reg (

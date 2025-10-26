@@ -40,25 +40,25 @@ module csr_regfile (
     // -- Other --
     input logic         retire_w_i
 );
-    
+
     // csr signal definitions
-    
+
     // Bottom 32-bits storing number of cycles
     logic [31:0] mcycle_q;
     logic [31:0] mcycle_next;
-    
+
     // Top 32-bits storing number of cycles
     logic [31:0] mcycleh_q;
     logic [31:0] mcycleh_next;
-    
+
     // Bottom 32-bits storing number of instructions retired
     logic [31:0] minstret_q;
     logic [31:0] minstret_next;
-    
+
     // Top 32-bits storing number of instructions retired
     logic [31:0] minstreth_q;
     logic [31:0] minstreth_next;
-    
+
 
     // Write logic (only implementing specific registers as of now)
     always_ff @(posedge clk_i) begin : csr_write_ff
@@ -88,10 +88,10 @@ module csr_regfile (
 
     always_comb begin : csr_next_comb
         // Standard writable registers
-        
+
         // Following registers next cycle behaviour manually generated:
-        //mcycle mcycleh minstret minstreth 
-        
+        //mcycle mcycleh minstret minstreth
+
         // mcycle handelling
         mcycle_next = (csr_we_i && csr_waddr_i == `MCYCLE_ADDR) ? csr_wdata_i : mcycle_q + 1;
 

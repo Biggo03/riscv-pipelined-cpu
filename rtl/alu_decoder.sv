@@ -25,15 +25,15 @@ module alu_decoder (
     // Decode outputs
     output logic [3:0] alu_control_o
 );
-                  
+
     always @(*) begin
         case(alu_op_i)
         `ALU_OP_ADD: alu_control_o = `ALU_ADD; //S-type Instructions and I-type loads
         `ALU_OP_SUB: alu_control_o = `ALU_SUB; //B-type Instructions
-        
+
         //R- and I-Type instructions
         `ALU_OP_PROCESS: begin
-            
+
             //Different op depending on funct3_i
             case(funct3_i)
                 `F3_SLT:  alu_control_o = `ALU_SLT;
@@ -58,7 +58,7 @@ module alu_decoder (
         end
 
         default: alu_control_o = 4'b0;
-        
+
         endcase
     end
 

@@ -23,7 +23,7 @@ module adder #(
     // data outputs
     output logic [WIDTH-1:0] y
 );
-    
+
     assign y = a + b;
-    
+
 endmodule

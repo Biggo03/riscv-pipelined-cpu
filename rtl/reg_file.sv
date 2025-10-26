@@ -34,10 +34,10 @@ module reg_file #(
     output logic [WIDTH-1:0] reg_data_1_o,
     output logic [WIDTH-1:0] reg_data_2_o
 );
-    
+
     // ----- Register file storage -----
     logic [WIDTH-1:0] RegisterArray [31:0];
-    
+
     // ----- Write enables -----
     logic [31:0] en;
 
@@ -72,15 +72,15 @@ module reg_file #(
             );
         end
     endgenerate
-    
+
     always @(*) begin
         if (a1_i == a3_i & we3_i & a1_i != 0) reg_data_1_o = wd3_i;
         else reg_data_1_o = RegisterArray[a1_i];
-        
+
         if (a2_i == a3_i & we3_i & a2_i != 0) reg_data_2_o = wd3_i;
-        else reg_data_2_o = RegisterArray[a2_i]; 
+        else reg_data_2_o = RegisterArray[a2_i];
     end
-    
+
     write_decoder u_write_decoder (
         // Register address input
         .A                              (a3_i),
@@ -90,6 +90,6 @@ module reg_file #(
 
         // Decoder output
         .en                             (en)
-    );  
-          
+    );
+
 endmodule

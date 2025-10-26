@@ -33,52 +33,52 @@ module data_mem #(
     logic [31:0] addr;
 
     assign addr = {4'h0, A[27:0]};
-               
+
     (* ram_style = "block" *) logic [31:0] RAM[8195:0];
 
     always @(posedge clk_i) begin
-        
+
         //Write logic
         if (WE) begin
         //Change last bit of addr index to maintain word, and half-word alignment
             case(width_src[1:0])
                 2'b00: RAM[addr[31:2]] = WD; //Word
-                
+
                 //Half-word
                 2'b10: begin
                     if (addr[1]) RAM[addr[31:2]][31:16] = WD[15:0]; //Upper HW
                     else RAM[addr[31:2]][15:0] = WD[15:0];       //Lower HW
                 end
-                
+
                 //Byte
                 2'b01: begin
                     case(A[1:0])
                         2'b00: RAM[addr[31:2]][7:0] = WD[7:0];
-                        2'b01: RAM[addr[31:2]][15:8] = WD[7:0];  
+                        2'b01: RAM[addr[31:2]][15:8] = WD[7:0];
                         2'b10: RAM[addr[31:2]][23:16] = WD[7:0];
                         2'b11: RAM[addr[31:2]][31:24] = WD[7:0];
                     endcase
-                
+
                 end
-                
+
             endcase
-        
+
         end
-        
+
     end
-    
+
     //Read logic
     always @(*) begin
-    
+
         case(width_src[1:0])
             2'b00: RD = RAM[addr[31:2]]; //Word
-            
+
             //Half-word
             2'b10: begin
                 if (addr[1]) RD = RAM[addr[31:2]][31:16]; //Upper HW
                 else RD = RAM[addr[31:2]][15:0];       //Lower HW
             end
-            
+
             //Byte
             2'b01: begin
                 case(A[1:0])
@@ -89,12 +89,12 @@ module data_mem #(
                 endcase
 
             end
-            
+
             default: RD = 32'bx;
-        
+
         endcase
-        
+
     end
-    
+
 
 endmodule

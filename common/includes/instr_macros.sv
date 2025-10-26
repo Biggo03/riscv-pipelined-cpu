@@ -48,14 +48,6 @@
 `define F3_HALF_U   3'b101
 `define F3_BYTE_U   3'b100
 
-// CSR
-`define F3_CSRRW    3'b001
-`define F3_CSRRS    3'b010
-`define F3_CSRRC    3'b110
-`define F3_CSRRWI   3'b101
-`define F3_CSRRSI   3'b110
-`define F3_CSRRCI   3'b111
-
 //////////////////////////////////////////////
 //                   OTHER                  //
 //////////////////////////////////////////////

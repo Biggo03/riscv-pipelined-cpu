@@ -105,7 +105,7 @@ module execute_stage (
 
     // ----- Parameters -----
     localparam REG_WIDTH = $bits(execution_signals_t);
-                    
+
     // ----- Execute pipeline register -----
     execution_signals_t inputs_e;
     execution_signals_t outputs_e;
@@ -146,7 +146,7 @@ module execute_stage (
         pred_pc_target_d_i,
         pc_src_pred_d_i
     };
-    
+
     flop #(
         .WIDTH                          (REG_WIDTH)
     ) u_execute_reg (
@@ -161,7 +161,7 @@ module execute_stage (
         // data output
         .Q                              (outputs_e)
     );
-    
+
     assign {
         instr_e_o,
         valid_e_o,
@@ -185,15 +185,15 @@ module execute_stage (
         pred_pc_target_e,
         pc_src_pred_e_o
     } = outputs_e;
-   
+
    // Check Branch Prediction
     always_comb begin
         if (pc_target_e_o == pred_pc_target_e) target_match_e_o = 1;
         else                                   target_match_e_o = 0;
     end
-   
+
     // Multiplexer Logic
-    always_comb begin
+    always_comb begin : ex_multiplexers
         // a forward mux
         case (forward_a_e_i)
             `NO_FORWARD:     src_a_e = reg_data_1_e;
@@ -202,12 +202,12 @@ module execute_stage (
             default:         src_a_e = 0;
         endcase
 
-        // b forward mux 
+        // b forward mux
         case (forward_b_e_i)
             `NO_FORWARD:     write_data_e_o = reg_data_2_e;
             `WB_FORWARD:     write_data_e_o = result_w_i;
             `MEM_FORWARD:    write_data_e_o = forward_data_m_i;
-            default:         write_data_e_o = 0; 
+            default:         write_data_e_o = 0;
         endcase
 
         //src b mux
@@ -224,7 +224,7 @@ module execute_stage (
             default:         pc_base_e = 0;
         endcase
     end
-     
+
     //Arithmetic units:
     alu u_alu (
         // Control inputs
@@ -243,7 +243,7 @@ module execute_stage (
         .carry_flag_o                   (carry_flag_o),
         .v_flag_o                       (v_flag_o)
     );
-                
+
     adder u_pc_target_adder (
         // data inputs
         .a                              (pc_base_e),

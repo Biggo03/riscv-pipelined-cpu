@@ -39,7 +39,7 @@ module local_predictor (
     pred_state_t next_state;
     
     // State transition logic
-    always @(posedge clk_i, posedge reset_i) begin
+    always_ff @(posedge clk_i, posedge reset_i) begin : transition_logic
         if (reset_i) begin
             present_state <= WU;
         end else if (enable_i) begin
@@ -48,27 +48,30 @@ module local_predictor (
     end             
     
     // Next state logic
-    always @(*) begin
+    always_comb begin : next_state_logic
+        next_state = present_state;
+
         if (enable_i) begin
             case (present_state)
                 ST: begin
-                    if (pc_src_res_e_i) next_state <= ST;
-                    else next_state <= WT;
+                    if (pc_src_res_e_i) next_state = ST;
+                    else                next_state = WT;
                 end
                 WT: begin
-                    if (pc_src_res_e_i) next_state <= ST;
-                    else next_state <= WU;
+                    if (pc_src_res_e_i) next_state = ST;
+                    else                next_state = WU;
                 end
                 WU: begin
-                    if (pc_src_res_e_i) next_state <= WT;
-                    else next_state <= SU;
+                    if (pc_src_res_e_i) next_state = WT;
+                    else                next_state = SU;
                 end
                 SU: begin
-                    if (pc_src_res_e_i) next_state <= WU;
-                    else next_state <= SU;
+                    if (pc_src_res_e_i) next_state = WU;
+                    else                next_state = SU;
                 end
+                default: next_state = present_state; // Should never hit
             endcase
-        end
+        end 
     end
     
     // Assign output
