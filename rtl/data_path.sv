@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-//==============================================================//
+//===================m==========================================//
 //  Module:       data_path
 //  File:         data_path.sv
 //  Description:  All logic contained within the datapath
@@ -42,6 +42,7 @@ module data_path (
     // Hazard control inputs
     input  logic [1:0]  forward_a_e_i,
     input  logic [1:0]  forward_b_e_i,
+    input  logic [1:0]  forward_csr_e_i,
     input  logic        flush_d_i,
     input  logic        flush_e_i,
     input  logic        stall_d_i,
@@ -77,11 +78,14 @@ module data_path (
     // Hazard control outputs
     output logic [4:0]  rs1_d_o,
     output logic [4:0]  rs2_d_o,
+    output logic [11:0] csr_addr_e_o,
     output logic [4:0]  rs1_e_o,
     output logic [4:0]  rs2_e_o,
     output logic [4:0]  rd_e_o,
     output logic [2:0]  result_src_e_o,
+    output logic [11:0] csr_addr_m_o,
     output logic [4:0]  rd_m_o,
+    output logic [11:0] csr_addr_w_o,
     output logic [4:0]  rd_w_o,
     output logic        reg_write_m_o,
     output logic        reg_write_w_o,
@@ -99,6 +103,7 @@ module data_path (
     logic [31:0] pc_plus4_d;
     logic [31:0] pred_pc_target_d;
     logic [4:0]  rd_d;
+    logic [11:0] csr_addr_d;
     logic        pc_src_pred_d;
     logic        valid_d;
 
@@ -108,6 +113,8 @@ module data_path (
     logic [31:0] write_data_e;
     logic [31:0] pc_plus4_e;
     logic [31:0] imm_ext_e;
+    logic [31:0] csr_result_e;
+    logic [31:0] csr_data_e;
     logic [2:0]  width_src_e;
     logic [1:0]  csr_control_e;
     logic        csr_src_e;
@@ -122,6 +129,8 @@ module data_path (
     logic [31:0] pc_target_m;
     logic [31:0] pc_plus4_m;
     logic [31:0] imm_ext_m;
+    logic [31:0] csr_result_m;
+    logic [31:0] csr_data_m;
     logic [31:0] forward_data_m;
     logic [2:0]  result_src_m;
     logic        valid_m;
@@ -129,12 +138,17 @@ module data_path (
     // ----- Writeback stage -----
     logic [31:0] instr_w;
     logic [31:0] result_w;
+    logic [31:0] csr_result_w;
+    logic [31:0] csr_data_w;
     logic        valid_w;
     logic        retire_w;
 
     // ----- Register file -----
     logic [31:0] reg_data_1_d;
     logic [31:0] reg_data_2_d;
+
+    // ----- CSR reg file -----
+    logic [31:0] csr_rdata_d;
 
     fetch_stage u_fetch_stage (
         // Clock & reset_i
@@ -176,6 +190,7 @@ module data_path (
         .instr_d_o                      (instr_d),
         .imm_ext_d_o                    (imm_ext_d),
         .pred_pc_target_d_o             (pred_pc_target_d),
+        .csr_addr_d_o                   (csr_addr_d),
         .pc_d_o                         (pc_d),
         .pc_plus4_d_o                   (pc_plus4_d),
         .rd_d_o                         (rd_d),
@@ -205,6 +220,8 @@ module data_path (
         .pc_plus4_d_i                   (pc_plus4_d),
         .imm_ext_d_i                    (imm_ext_d),
         .pred_pc_target_d_i             (pred_pc_target_d),
+        .csr_rdata_d_i                  (csr_rdata_d),
+        .csr_addr_d_i                   (csr_addr_d),
 
         // Control inputs
         .valid_d_i                      (valid_d),
@@ -225,6 +242,7 @@ module data_path (
         .csr_src_d_i                    (csr_src_d_i),
         .forward_a_e_i                  (forward_a_e_i),
         .forward_b_e_i                  (forward_b_e_i),
+        .forward_csr_e_i                (forward_csr_e_i),
         .flush_e_i                      (flush_e_i),
         .stall_e_i                      (stall_e_i),
         .pc_src_pred_d_i                (pc_src_pred_d),
@@ -237,6 +255,9 @@ module data_path (
         .pc_plus4_e_o                   (pc_plus4_e),
         .imm_ext_e_o                    (imm_ext_e),
         .pc_e_o                         (pc_e_o),
+        .csr_result_e_o                 (csr_result_e),
+        .csr_data_e_o                   (csr_data_e),
+        .csr_addr_e_o                   (csr_addr_e_o),
         .rs1_e_o                        (rs1_e_o),
         .rs2_e_o                        (rs2_e_o),
         .rd_e_o                         (rd_e_o),
@@ -271,6 +292,9 @@ module data_path (
         .pc_plus4_e_i                   (pc_plus4_e),
         .imm_ext_e_i                    (imm_ext_e),
         .read_data_m_i                  (read_data_m_i),
+        .csr_result_e_i                 (csr_result_e),
+        .csr_data_e_i                   (csr_data_e),
+        .csr_addr_e_i                   (csr_addr_e_o),
         .rd_e_i                         (rd_e_o),
 
         // Control inputs
@@ -291,6 +315,9 @@ module data_path (
         .pc_plus4_m_o                   (pc_plus4_m),
         .imm_ext_m_o                    (imm_ext_m),
         .forward_data_m_o               (forward_data_m),
+        .csr_result_m_o                 (csr_result_m),
+        .csr_data_m_o                   (csr_data_m),
+        .csr_addr_m_o                   (csr_addr_m_o),
         .rd_m_o                         (rd_m_o),
 
         // Control outputs
@@ -314,6 +341,8 @@ module data_path (
         .pc_target_m_i                  (pc_target_m),
         .pc_plus4_m_i                   (pc_plus4_m),
         .imm_ext_m_i                    (imm_ext_m),
+        .csr_result_m_i                 (csr_result_m),
+        .csr_addr_m_i                   (csr_addr_m_o),
         .rd_m_i                         (rd_m_o),
 
         // Control inputs
@@ -326,6 +355,8 @@ module data_path (
         // data outputs
         .instr_w_o                      (instr_w),
         .result_w_o                     (result_w),
+        .csr_result_w_o                 (csr_result_w),
+        .csr_addr_w_o                   (csr_addr_w_o),
         .rd_w_o                         (rd_w_o),
 
         // Control outputs
@@ -354,19 +385,18 @@ module data_path (
         .reg_data_2_o                  (reg_data_2_d)
     );
 
-    `ifdef TEST_CSR
-        csr_reg_file u_csr_reg_file (
-            .clk_i                          (clk_i),
-            .reset_i                        (reset_i),
+    csr_regfile u_csr_regfile (
+        .clk_i                          (clk_i),
+        .reset_i                        (reset_i),
 
-            .csr_we_i                       (),
-            .csr_addr_i                     (),
-            .csr_wdata_i                    (),
+        .csr_we_i                       (csr_we_w_o),
+        .csr_waddr_i                    (csr_addr_w_o),
+        .csr_wdata_i                    (csr_result_w),
 
-            .retire_w_i                     (retire_w),
+        .csr_raddr_i                    (csr_addr_d),
+        .csr_rdata_o                    (csr_rdata_d),
 
-            .csr_rdata_o                    ()
-        );
-    `endif
+        .retire_w_i                     (retire_w)
+    );
 
 endmodule

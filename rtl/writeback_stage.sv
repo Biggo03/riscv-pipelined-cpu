@@ -26,6 +26,9 @@ module writeback_stage (
     input  logic [31:0] pc_target_m_i,
     input  logic [31:0] pc_plus4_m_i,
     input  logic [31:0] imm_ext_m_i,
+    input  logic [31:0] csr_result_m_i,
+    input  logic [31:0] csr_data_m_i,
+    input  logic [11:0] csr_addr_m_i,
     input  logic [4:0]  rd_m_i,
 
     // Control inputs
@@ -38,6 +41,8 @@ module writeback_stage (
     // data outputs
     output logic [31:0] instr_w_o,
     output logic [31:0] result_w_o,
+    output logic [31:0] csr_result_w_o,
+    output logic [11:0] csr_addr_w_o,
     output logic [4:0]  rd_w_o,
 
     // Control outputs
@@ -56,6 +61,9 @@ module writeback_stage (
         logic [31:0] pc_target;
         logic [31:0] pc_plus4;
         logic [31:0] imm_ext;
+        logic [31:0] csr_result;
+        logic [31:0] csr_data;
+        logic [11:0] csr_addr;
         logic [4:0]  rd;
         logic [2:0]  result_src;
         logic        reg_write;
@@ -75,6 +83,7 @@ module writeback_stage (
     logic [31:0] pc_target_w;
     logic [31:0] reduced_data_w;
     logic [31:0] alu_result_w;
+    logic [31:0] csr_data_w;
     logic [2:0]  result_src_w;
 
     assign inputs_w = {
@@ -85,6 +94,9 @@ module writeback_stage (
         pc_target_m_i,
         pc_plus4_m_i,
         imm_ext_m_i,
+        csr_result_m_i,
+        csr_data_m_i,
+        csr_addr_m_i,
         rd_m_i,
         result_src_m_i,
         reg_write_m_i,
@@ -114,6 +126,9 @@ module writeback_stage (
         pc_target_w,
         pc_plus4_w,
         imm_ext_w,
+        csr_result_w_o,
+        csr_data_w,
+        csr_addr_w_o,
         rd_w_o,
         result_src_w,
         reg_write_w_o,
@@ -128,6 +143,7 @@ module writeback_stage (
             `RESULT_PCPLUS4:  result_w_o = pc_plus4_w;
             `RESULT_IMM_EXT:  result_w_o = imm_ext_w;
             `RESULT_MEM_DATA: result_w_o = reduced_data_w;
+            `RESULT_CSR:      result_w_o = csr_data_w;
             default:          result_w_o = '0;
         endcase
     end

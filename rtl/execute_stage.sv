@@ -29,13 +29,15 @@ module execute_stage (
     input  logic [31:0] pc_plus4_d_i,
     input  logic [31:0] imm_ext_d_i,
     input  logic [31:0] pred_pc_target_d_i,
-    input  logic [2:0]  funct3_d_i,
+    input  logic [31:0] csr_rdata_d_i,
+    input  logic [11:0] csr_addr_d_i,
     input  logic [4:0]  rd_d_i,
     input  logic [4:0]  rs1_d_i,
     input  logic [4:0]  rs2_d_i,
 
     // Control inputs
     input  logic        valid_d_i,
+    input  logic [2:0]  funct3_d_i,
     input  logic [2:0]  result_src_d_i,
     input  logic [1:0]  branch_op_d_i,
     input  logic        alu_src_d_i,
@@ -49,6 +51,7 @@ module execute_stage (
     input  logic        csr_src_d_i,
     input  logic [1:0]  forward_a_e_i,
     input  logic [1:0]  forward_b_e_i,
+    input  logic [1:0]  forward_csr_e_i,
     input  logic        flush_e_i,
     input  logic        stall_e_i,
     input  logic        pc_src_pred_d_i,
@@ -61,6 +64,9 @@ module execute_stage (
     output logic [31:0] pc_plus4_e_o,
     output logic [31:0] imm_ext_e_o,
     output logic [31:0] pc_e_o,
+    output logic [31:0] csr_result_e_o,
+    output logic [31:0] csr_data_e_o,
+    output logic [11:0] csr_addr_e_o,
     output logic [4:0]  rs1_e_o,
     output logic [4:0]  rs2_e_o,
     output logic [4:0]  rd_e_o,
@@ -97,6 +103,8 @@ module execute_stage (
         logic        csr_we;
         logic [1:0]  csr_control;
         logic        csr_src;
+        logic [11:0] csr_addr;
+        logic [31:0] csr_data;
         logic [4:0]  rd;
         logic [4:0]  rs1;
         logic [4:0]  rs2;
@@ -131,6 +139,8 @@ module execute_stage (
     logic [31:0] src_a_e;
     logic [31:0] src_b_e;
     logic [31:0] pc_base_e;
+    logic [31:0] csr_op_a_e;
+    logic [31:0] csr_rdata_e;
 
     assign inputs_e = {
         instr_d_i,
@@ -146,6 +156,8 @@ module execute_stage (
         csr_we_d_i,
         csr_control_d_i,
         csr_src_d_i,
+        csr_addr_d_i,
+        csr_rdata_d_i,
         rd_d_i,
         rs1_d_i,
         rs2_d_i,
@@ -188,6 +200,8 @@ module execute_stage (
         csr_we_e_o,
         csr_control_e,
         csr_src_e,
+        csr_addr_e_o,
+        csr_rdata_e,
         rd_e_o,
         rs1_e_o,
         rs2_e_o,
@@ -225,6 +239,21 @@ module execute_stage (
             default:         write_data_e_o = 0;
         endcase
 
+        // csr_forward_mux
+        case (forward_csr_e_i)
+            `NO_FORWARD:     csr_data_e_o = csr_rdata_d_i;
+            `WB_FORWARD:     csr_data_e_o = result_w_i; //TODO need to come back
+            `MEM_FORWARD:    csr_data_e_o = forward_data_m_i; //TODO need to come back
+            default:         csr_data_e_o = 0;
+        endcase
+
+        // csr mux
+        case (csr_src_e)
+            `CSR_SRC_REG: csr_op_a_e = src_a_e;
+            `CSR_SRC_IMM: csr_op_a_e = imm_ext_e_o;
+            default:      csr_op_a_e = 0;
+        endcase
+
         //src b mux
         case (alu_src_e)
             `ALU_SRC_WD:     src_b_e = write_data_e_o;
@@ -257,6 +286,15 @@ module execute_stage (
         .zero_flag_o                    (zero_flag_o),
         .carry_flag_o                   (carry_flag_o),
         .v_flag_o                       (v_flag_o)
+    );
+
+    csr_alu u_csr_alu (
+        .csr_control_i                  (csr_control_e),
+
+        .csr_op_a_i                     (csr_op_a_e),
+        .csr_data_i                     (csr_data_e_o),
+
+        .csr_result_o                   (csr_result_e_o)
     );
 
     adder u_pc_target_adder (

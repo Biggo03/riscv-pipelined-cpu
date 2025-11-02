@@ -27,6 +27,9 @@ module memory_stage (
     input  logic [31:0] pc_plus4_e_i,
     input  logic [31:0] imm_ext_e_i,
     input  logic [31:0] read_data_m_i,
+    input  logic [31:0] csr_result_e_i,
+    input  logic [31:0] csr_data_e_i,
+    input  logic [11:0] csr_addr_e_i,
     input  logic [4:0]  rd_e_i,
 
     // Control inputs
@@ -47,6 +50,9 @@ module memory_stage (
     output logic [31:0] pc_plus4_m_o,
     output logic [31:0] imm_ext_m_o,
     output logic [31:0] forward_data_m_o,
+    output logic [31:0] csr_result_m_o,
+    output logic [31:0] csr_data_m_o,
+    output logic [11:0] csr_addr_m_o,
     output logic [4:0]  rd_m_o,
 
     // Control outputs
@@ -67,6 +73,9 @@ module memory_stage (
         logic [31:0] pc_target;
         logic [31:0] pc_plus4;
         logic [31:0] imm_ext;
+        logic [31:0] csr_result;
+        logic [31:0] csr_data;
+        logic [11:0] csr_addr;
         logic [4:0]  rd;
         logic [2:0]  width_src;
         logic [2:0]  result_src;
@@ -90,6 +99,9 @@ module memory_stage (
         pc_target_e_i,
         pc_plus4_e_i,
         imm_ext_e_i,
+        csr_result_e_i,
+        csr_data_e_i,
+        csr_addr_e_i,
         rd_e_i,
         width_src_e_i,
         result_src_e_i,
@@ -121,6 +133,9 @@ module memory_stage (
         pc_target_m_o,
         pc_plus4_m_o,
         imm_ext_m_o,
+        csr_result_m_o,
+        csr_data_m_o,
+        csr_addr_m_o,
         rd_m_o,
         width_src_m_o,
         result_src_m_o,

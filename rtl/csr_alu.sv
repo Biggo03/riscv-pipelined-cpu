@@ -21,8 +21,8 @@ module csr_alu #(
     input  logic [1:0] csr_control_i,
 
     // Data inputs
-    input  logic [WIDTH-1:0] operand_a_i, //rs1 or immediate data
-    input  logic [WIDTH-1:0] operand_b_i, // csr data
+    input  logic [WIDTH-1:0] csr_op_a_i, //rs1 or immediate data
+    input  logic [WIDTH-1:0] csr_data_i, // csr data
 
     // Data output
     output logic [WIDTH-1:0] csr_result_o
@@ -30,9 +30,9 @@ module csr_alu #(
 
     always_comb begin
         case(csr_control_i)
-             `CSR_SET:      csr_result_o = operand_a_i | operand_b_i;
-             `CSR_CLEAR:    csr_result_o = ~(operand_a_i) & operand_b_i;
-             `CSR_PASS:     csr_result_o = operand_a_i;
+             `CSR_SET:      csr_result_o = csr_op_a_i | csr_data_i;
+             `CSR_CLEAR:    csr_result_o = ~(csr_op_a_i) & csr_data_i;
+             `CSR_PASS:     csr_result_o = csr_op_a_i;
              default:       csr_result_o = 0;
         endcase
     end

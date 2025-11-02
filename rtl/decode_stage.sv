@@ -36,6 +36,7 @@ module decode_stage (
     output logic [31:0] pc_d_o,
     output logic [31:0] pc_plus4_d_o,
     output logic [31:0] pred_pc_target_d_o,
+    output logic [11:0] csr_addr_d_o,
     output logic [4:0]  rd_d_o,
     output logic [4:0]  rs1_d_o,
     output logic [4:0]  rs2_d_o,
@@ -99,9 +100,11 @@ module decode_stage (
         pc_src_pred_d_o
     } = outputs_d;
 
+    // decode instruction fields
     assign rd_d_o = instr_d_o[11:7];
     assign rs1_d_o = instr_d_o[19:15];
     assign rs2_d_o = instr_d_o[24:20];
+    assign csr_addr_d_o = instr_d_o[31:20];
 
     assign op_d_o = instr_d_o[6:0];
     assign funct3_d_o = instr_d_o[14:12];

@@ -60,22 +60,26 @@ module pipelined_riscv_core (
     logic       csr_src_d;
 
     // ----- Hazard control unit inputs -----
-    logic [4:0] rs1_d;
-    logic [4:0] rs2_d;
-    logic [4:0] rs1_e;
-    logic [4:0] rs2_e;
-    logic [4:0] rd_e;
-    logic [2:0] result_src_e;
-    logic [4:0] rd_m;
-    logic [4:0] rd_w;
-    logic       reg_write_m;
-    logic       reg_write_w;
-    logic       csr_we_m;
-    logic       csr_we_w;
+    logic [4:0]  rs1_d;
+    logic [4:0]  rs2_d;
+    logic [11:0] csr_addr_e;
+    logic [4:0]  rs1_e;
+    logic [4:0]  rs2_e;
+    logic [4:0]  rd_e;
+    logic [2:0]  result_src_e;
+    logic [11:0] csr_addr_m;
+    logic [4:0]  rd_m;
+    logic [11:0] csr_addr_w;
+    logic [4:0]  rd_w;
+    logic        reg_write_m;
+    logic        reg_write_w;
+    logic        csr_we_m;
+    logic        csr_we_w;
 
     // ----- Hazard control unit outputs -----
     logic [1:0] forward_a_e;
     logic [1:0] forward_b_e;
+    logic [1:0] forward_csr_e;
     logic       stall_f;
     logic       stall_d;
     logic       stall_e;
@@ -135,16 +139,21 @@ module pipelined_riscv_core (
         .rs1_e_i                        (rs1_e),
         .rs2_e_i                        (rs2_e),
         .rd_e_i                         (rd_e),
+        .csr_addr_e_i                   (csr_addr_e),
         .result_src_e_i                 (result_src_e),
         .pc_src_i                       (pc_src),
 
         // Memory stage inputs
         .rd_m_i                         (rd_m),
         .reg_write_m_i                  (reg_write_m),
+        .csr_addr_m_i                   (csr_addr_m),
+        .csr_we_m_i                     (csr_we_m),
 
         // Writeback stage inputs
         .rd_w_i                         (rd_w),
         .reg_write_w_i                  (reg_write_w),
+        .csr_addr_w_i                   (csr_addr_w),
+        .csr_we_w_i                     (csr_we_w),
 
         // Branch predictor / cache inputs
         .pc_src_reg_i                   (pc_src_reg_o),
@@ -163,7 +172,8 @@ module pipelined_riscv_core (
 
         // Forwarding outputs
         .forward_a_e_o                  (forward_a_e),
-        .forward_b_e_o                  (forward_b_e)
+        .forward_b_e_o                  (forward_b_e),
+        .forward_csr_e_o                (forward_csr_e)
     );
 
     branch_processing_unit u_branch_processing_unit (
@@ -233,6 +243,7 @@ module pipelined_riscv_core (
         .csr_src_d_i                    (csr_src_d),
         .forward_a_e_i                  (forward_a_e),
         .forward_b_e_i                  (forward_b_e),
+        .forward_csr_e_i                (forward_csr_e),
         .flush_d_i                      (flush_d),
         .flush_e_i                      (flush_e),
         .stall_d_i                      (stall_d),
@@ -264,11 +275,14 @@ module pipelined_riscv_core (
         .target_match_e_o               (target_match_e),
         .rs1_d_o                        (rs1_d),
         .rs2_d_o                        (rs2_d),
+        .csr_addr_e_o                   (csr_addr_e),
         .rs1_e_o                        (rs1_e),
         .rs2_e_o                        (rs2_e),
         .rd_e_o                         (rd_e),
         .result_src_e_o                 (result_src_e),
+        .csr_addr_m_o                   (csr_addr_m),
         .rd_m_o                         (rd_m),
+        .csr_addr_w_o                   (csr_addr_w),
         .rd_w_o                         (rd_w),
         .reg_write_m_o                  (reg_write_m),
         .reg_write_w_o                  (reg_write_w),

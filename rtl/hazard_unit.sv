@@ -26,16 +26,21 @@ module hazard_unit (
     input  logic [4:0]  rs1_e_i,
     input  logic [4:0]  rs2_e_i,
     input  logic [4:0]  rd_e_i,
+    input  logic [11:0] csr_addr_e_i,
     input  logic [2:0]  result_src_e_i,
     input  logic [1:0]  pc_src_i,
 
     // Memory stage inputs
     input  logic [4:0]  rd_m_i,
     input  logic        reg_write_m_i,
+    input  logic [11:0] csr_addr_m_i,
+    input  logic        csr_we_m_i,
 
     // Writeback stage inputs
     input  logic [4:0]  rd_w_i,
     input  logic        reg_write_w_i,
+    input  logic [11:0] csr_addr_w_i,
+    input  logic        csr_we_w_i,
 
     // Branch predictor / cache inputs
     input  logic [1:0]  pc_src_reg_i,
@@ -54,7 +59,8 @@ module hazard_unit (
 
     // Forwarding outputs
     output logic [1:0]  forward_a_e_o,
-    output logic [1:0]  forward_b_e_o
+    output logic [1:0]  forward_b_e_o,
+    output logic [1:0]  forward_csr_e_o
 );
 
     // ----- Forwarding control -----
@@ -66,7 +72,7 @@ module hazard_unit (
     logic LoadStall;
 
     //Forward logic
-    always @(*) begin
+    always_comb begin
 
         //forward_a_e_o
         if (((rs1_e_i == rd_m_i) & reg_write_m_i) & (rs1_e_i != 0)) forward_a_e_o = MEM_FORWARD;
@@ -78,6 +84,10 @@ module hazard_unit (
         else if (((rs2_e_i == rd_w_i) & reg_write_w_i) & (rs2_e_i != 0)) forward_b_e_o = WB_FORWARD;
         else forward_b_e_o = NO_FORWARD;
 
+        //forward_csr
+        if ((csr_addr_e_i == csr_addr_m_i) & csr_we_m_i) forward_csr_e_o = MEM_FORWARD;
+        else if ((csr_addr_e_i == csr_addr_w_i) & csr_we_w_i) forward_csr_e_o = WB_FORWARD;
+        else forward_csr_e_o = NO_FORWARD;
     end
 
     //stall and flush logic
