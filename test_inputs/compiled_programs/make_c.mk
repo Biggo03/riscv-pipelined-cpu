@@ -1,12 +1,15 @@
 # make_c.mk — C programs with object files
 
-CC      = riscv32-unknown-elf-gcc
-OBJCOPY = riscv32-unknown-elf-objcopy
-OBJDUMP = riscv32-unknown-elf-objdump
+CC       = riscv32-unknown-elf-gcc
+OBJCOPY  = riscv32-unknown-elf-objcopy
+OBJDUMP  = riscv32-unknown-elf-objdump
 
-LINKER  = linker.ld
-STARTUP = _start.s
+LINKER    = linker.ld
+STARTUP   = _start.s
 STARTUP_OBJ = $(STARTUP:.s=.o)
+
+# Compiler flags (set ISA/ABI etc.)
+CC_FLAGS  = -march=rv32i -mabi=ilp32 -O2 -std=gnu89 
 
 # List of program directories
 C_DIRS  := $(wildcard c_programs/*)
@@ -23,11 +26,11 @@ c: $(C_ELFS) $(C_DUMPS) $(C_TEXT_HEXS) $(C_DATA_HEXS)
 
 # Compile startup once
 $(STARTUP_OBJ): $(STARTUP)
-	$(CC) -c -o $@ $<
+	$(CC) $(CC_FLAGS) -c -o $@ $<
 
 # Rule for each ELF: use $@ to locate subdir and base name
 $(C_ELFS): $(STARTUP_OBJ) $(LINKER)
-	$(CC) -nostdlib -T $(LINKER) -o $@ $(STARTUP_OBJ) $(wildcard $(dir $@)*.c)
+	$(CC) $(CC_FLAGS) -nostdlib -T $(LINKER) -o $@ $(STARTUP_OBJ) $(wildcard $(dir $@)*.c) -lgcc
 
 # Dump
 %.dump: %.elf

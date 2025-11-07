@@ -30,7 +30,7 @@ module csr_decoder (
             default:     csr_control_o = `CSR_NA;
         endcase
 
-        case(funct3_i)
+        casez(funct3_i)
             3'b0??:       csr_src_o = `CSR_SRC_REG;
             3'b1??:       csr_src_o = `CSR_SRC_IMM;
             default:      csr_src_o = `CSR_SRC_NA;

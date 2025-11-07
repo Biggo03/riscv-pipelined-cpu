@@ -151,6 +151,7 @@ module memory_stage (
             `RESULT_PCTARGET: forward_data_m_o = pc_target_m_o;
             `RESULT_PCPLUS4:  forward_data_m_o = pc_plus4_m_o;
             `RESULT_IMM_EXT:  forward_data_m_o = imm_ext_m_o;
+            `RESULT_CSR:      forward_data_m_o = csr_data_m_o;
             default:          forward_data_m_o = '0;
         endcase
     end

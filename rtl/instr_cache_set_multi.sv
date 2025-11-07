@@ -38,7 +38,7 @@ module instr_cache_set_multi #(
     output logic [31:0]             data_o,
     output logic                    cache_set_miss_o
 );
-    
+
     // ----- Parameters -----
     localparam b      = $clog2(B);
     localparam words  = B/4;
@@ -53,7 +53,7 @@ module instr_cache_set_multi #(
     logic [$clog2(E)-1:0]       last_lru_status;
     logic [$clog2(E)-1:0]       next_fill;
     logic [$clog2(E)-1:0]       removed_block;
-    logic [$clog2(words)-1:0]   rep_counter; 
+    logic [$clog2(words)-1:0]   rep_counter;
     logic                       ic_rep_active;
     logic                       rep_complete;
     logic                       rep_begin;
@@ -69,16 +69,16 @@ module instr_cache_set_multi #(
     // ----- Looping constructs -----
     integer i;
     genvar n;
-    
+
     assign ic_rep_active = cache_set_miss_o && active_set_i && ic_repl_grant_i;
 
     //tag_i and valid comparison logic
     always @(*) begin
-    
+
         matched_block = 0;
         cache_set_miss_o = 1;
         last_lru_status = 0;
-        
+
         if (active_set_i) begin
              //Determine if a block matches
             for (i = 0; i < E; i = i + 1) begin
@@ -89,32 +89,32 @@ module instr_cache_set_multi #(
                     matched_block[i] = 0;
                 end
             end
-        
+
             //Declare a miss
             if (matched_block == 0) cache_set_miss_o = 1;
             else cache_set_miss_o = 0;
-            
+
         end
     end
-    
+
     //block_i to remove logic
     always @(posedge clk_i) begin
         if (cache_set_miss_o && active_set_i && ~rep_begin) begin
             if (valid_bits == {E{1'b1}}) begin
                 for (i = 0; i < E; i = i + 1) begin
-                    if (lru_bits[i] == E-1) begin              
+                    if (lru_bits[i] == E-1) begin
                         removed_block <= i;
-                    end 
+                    end
                 end
             end else begin
                 removed_block <= next_fill;
             end
         end
     end
-    
+
     //LRU and ValidBit updates
     always @(posedge clk_i) begin
-        
+
         //reset_i logic
         if (reset_i) begin
             valid_bits <= 0;
@@ -123,25 +123,25 @@ module instr_cache_set_multi #(
             for (i = 0; i < E; i = i + 1) begin
                 lru_bits[i] <= 0;
             end
-        
+
         //Handle block_i Replacement LRU and ValidBit updates
         end else if (ic_rep_active && ~rep_begin) begin
             rep_begin <= 1;
-            
+
             //Replace when sets full of valid data
             if (valid_bits == {E{1'b1}}) begin
                 for (i = 0; i < E; i = i + 1) begin
-                    if (lru_bits[i] == E-1) begin              
+                    if (lru_bits[i] == E-1) begin
                         lru_bits[removed_block] <= 0;
                     end else begin
                         lru_bits[i] <= lru_bits[i] + 1;
                     end
                 end
-                
+
             //Populate cache with data
             end else begin
                 lru_bits[removed_block] <= 0;
-                valid_bits[removed_block] <= 1;   
+                valid_bits[removed_block] <= 1;
                 next_fill <= next_fill + 1;
                 for (i = 0; i < E; i = i + 1) begin
                     if (i < next_fill) begin
@@ -149,7 +149,7 @@ module instr_cache_set_multi #(
                     end
                 end
             end
-        
+
         //Handle LRU updates on non-replacing accesses
         end else if (active_set_i && ~cache_set_miss_o) begin
             rep_begin <= 0;
@@ -164,9 +164,9 @@ module instr_cache_set_multi #(
             rep_begin <= 0;
         end
     end
-    
+
     assign rep_complete = rep_counter == (words/2)-1;
-    
+
     //Replacement logic
     always @(posedge clk_i) begin
         if (ic_rep_active) begin
@@ -182,13 +182,13 @@ module instr_cache_set_multi #(
             rep_counter <= 0;
         end
     end
-    
+
     //Output logic
     always @(*) begin
         if (matched_block != 0) begin
             for (i = 0; i < E; i = i + 1) begin
                 if (matched_block[i]) out_set = i;
-            end 
+            end
         end else begin
             out_set = 0;
         end
@@ -196,5 +196,5 @@ module instr_cache_set_multi #(
 
     assign block_offset = block_i[b-1:3];
     assign data_o = block_i[2] ? set_data[(out_set*words)/2 + block_offset][63:32] : set_data[(out_set*words)/2 + block_offset][31:0];
-    
+
 endmodule

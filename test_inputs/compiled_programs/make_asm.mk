@@ -3,6 +3,9 @@ CC      = riscv32-unknown-elf-gcc
 OBJCOPY = riscv32-unknown-elf-objcopy
 OBJDUMP = riscv32-unknown-elf-objdump
 
+ARCH = rv32i_zicsr
+ABI  = ilp32
+
 LINKER  = linker.ld
 
 # Find all assembly tests (one per subdirectory)
@@ -17,7 +20,7 @@ asm: $(ASM_ELFS) $(ASM_HEXS) $(ASM_DUMPS)
 
 # ELF from .s
 %.elf: %.s $(LINKER)
-	$(CC) -nostdlib -T $(LINKER) -o $@ $<
+	$(CC) -march=$(ARCH) -mabi=$(ABI) -nostdlib -T $(LINKER) -o $@ $<
 
 # HEX from ELF
 %.text.hex: %.elf

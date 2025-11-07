@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
-from typing_extensions import TypeIs
 import yaml
 import subprocess
 import os
 import logging
 import re
 from pathlib import Path
+from ordered_set import OrderedSet
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -41,6 +41,12 @@ def parse_args():
         type=str,
         default="../../sim_results",
         help="Directory to write test outputs (default: ../../sim_results)"
+    )
+
+    parser.add_argument(
+        "-l", "--list_tests",
+        action="store_true",
+        help="Lists all currently supported tests, then exits the program"
     )
 
     return parser.parse_args()
@@ -97,6 +103,39 @@ def load_yaml(yaml_path):
 
     return yaml_data
 
+def list_tests(test_catalog):
+    asm_tests = {}
+    c_tests = {}
+    unit_tests = {}
+
+    for test_name, test_info in test_catalog["tests"].items():
+        if ("asm" in test_info["tags"]):
+            asm_tests[test_name] = test_info
+        elif ("c_program" in test_info["tags"]):
+            c_tests[test_name] = test_info
+        elif ("unit" in test_info["tags"]):
+            unit_tests[test_name] = test_info
+
+    print("="*40)
+    print("=UNIT TESTS")
+    print("="*40)
+    for test in unit_tests.keys():
+        print(test)
+
+    print("="*40)
+    print("=ASM TESTS")
+    print("="*40)
+    for test in asm_tests.keys():
+        print(test)
+
+    print("="*40)
+    print("=C TESTS")
+    print("="*40)
+    for test in c_tests.keys():
+        print(test)
+
+    return
+
 def select_active_tests(regressions, tests, test_catalog):
     """
     Gets all test information related to recieved tests
@@ -111,7 +150,7 @@ def select_active_tests(regressions, tests, test_catalog):
     """
     test_logger = logging.getLogger("test_logger")
 
-    tests = set(tests)
+    tests = OrderedSet(tests)
     active_test_info = {}
     for regression in regressions:
         try:
@@ -363,6 +402,10 @@ def main():
     args = parse_args()
     test_logger = setup_logger("test_logger", f"{args.output_dir}/test_run.log")
     test_catalog = load_yaml("test_catalog.yml")
+
+    if (args.list_tests):
+        list_tests(test_catalog)
+        return
 
     active_test_info = select_active_tests(args.regressions, args.tests, test_catalog)
 

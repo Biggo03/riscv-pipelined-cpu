@@ -23,6 +23,8 @@ module execute_stage (
     input  logic [31:0] instr_d_i,
     input  logic [31:0] reg_data_1_d_i,
     input  logic [31:0] reg_data_2_d_i,
+    input  logic [31:0] csr_result_m_i,
+    input  logic [31:0] csr_result_w_i,
     input  logic [31:0] result_w_i,
     input  logic [31:0] forward_data_m_i,
     input  logic [31:0] pc_d_i,
@@ -242,8 +244,8 @@ module execute_stage (
         // csr_forward_mux
         case (forward_csr_e_i)
             `NO_FORWARD:     csr_data_e_o = csr_rdata_d_i;
-            `WB_FORWARD:     csr_data_e_o = result_w_i; //TODO need to come back
-            `MEM_FORWARD:    csr_data_e_o = forward_data_m_i; //TODO need to come back
+            `WB_FORWARD:     csr_data_e_o = csr_result_w_i;
+            `MEM_FORWARD:    csr_data_e_o = csr_result_m_i;
             default:         csr_data_e_o = 0;
         endcase
 

@@ -30,3 +30,11 @@ MINSTRETH:
   BEHAV: special
   DESCRIPTION: Top 32-bits storing number of instructions retired
   ADDR_MACRO: MINSTRETH_ADDR
+MSTATUS:
+  ADDRESS: '300'
+  PRIVILEGE: M
+  ACCESS: R/W
+  RESET_VAL: 0
+  BEHAV: standard
+  DESCRIPTION: machine status register (currently only used for testing)
+  ADDR_MACRO: MSTATUS_ADDR

@@ -36,6 +36,11 @@
 
 # directories
 filelists/
+sim_results/
+
+#test_inputs
+*.dump
+*.hex
 
 # Other
 *.un*

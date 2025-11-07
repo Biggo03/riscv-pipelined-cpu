@@ -61,7 +61,7 @@ module instr_cache_ctlr #(
         next_state = present_state;
         case (present_state)
             READY_TO_DELAY: if (~ic_repl_permit_o)                  next_state = DELAYING;
-            DELAYING:       if (~instr_hit_f_o | pc_src_reg_i[1])   next_state = READY_TO_DELAY;
+            DELAYING:       if (instr_hit_f_o | pc_src_reg_i[1])   next_state = READY_TO_DELAY;
             default: next_state = READY_TO_DELAY;
         endcase
     end

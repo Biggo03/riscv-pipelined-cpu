@@ -40,25 +40,29 @@ module csr_regfile (
     // -- Other --
     input logic         retire_w_i
 );
-    
+
     // csr signal definitions
-    
+
     // Bottom 32-bits storing number of cycles
     logic [31:0] mcycle_q;
     logic [31:0] mcycle_next;
-    
+
     // Top 32-bits storing number of cycles
     logic [31:0] mcycleh_q;
     logic [31:0] mcycleh_next;
-    
+
     // Bottom 32-bits storing number of instructions retired
     logic [31:0] minstret_q;
     logic [31:0] minstret_next;
-    
+
     // Top 32-bits storing number of instructions retired
     logic [31:0] minstreth_q;
     logic [31:0] minstreth_next;
-    
+
+    // machine status register (currently only used for testing)
+    logic [31:0] mstatus_q;
+    logic [31:0] mstatus_next;
+
 
     // Write logic (only implementing specific registers as of now)
     always_ff @(posedge clk_i) begin : csr_write_ff
@@ -67,11 +71,13 @@ module csr_regfile (
             mcycleh_q   <= 32'h0;
             minstret_q  <= 32'h0;
             minstreth_q <= 32'h0;
+            mstatus_q   <= 32'h0;
         end else begin
             mcycle_q    <= mcycle_next;
             mcycleh_q   <= mcycleh_next;
             minstret_q  <= minstret_next;
             minstreth_q <= minstreth_next;
+            mstatus_q   <= mstatus_next;
         end
     end
 
@@ -82,16 +88,18 @@ module csr_regfile (
             `MCYCLEH_ADDR  : csr_rdata_o = (csr_we_i && csr_waddr_i == csr_raddr_i) ? csr_wdata_i : mcycleh_q;
             `MINSTRET_ADDR : csr_rdata_o = (csr_we_i && csr_waddr_i == csr_raddr_i) ? csr_wdata_i : minstret_q;
             `MINSTRETH_ADDR: csr_rdata_o = (csr_we_i && csr_waddr_i == csr_raddr_i) ? csr_wdata_i : minstreth_q;
+            `MSTATUS_ADDR  : csr_rdata_o = (csr_we_i && csr_waddr_i == csr_raddr_i) ? csr_wdata_i : mstatus_q;
             default: csr_rdata_o = 32'h0;
         endcase
     end
 
     always_comb begin : csr_next_comb
         // Standard writable registers
-        
+        mstatus_next = csr_we_i && (`MSTATUS_ADDR == csr_waddr_i) ? csr_wdata_i : mstatus_q;
+
         // Following registers next cycle behaviour manually generated:
-        //mcycle mcycleh minstret minstreth 
-        
+        //mcycle mcycleh minstret minstreth
+
         // mcycle handelling
         mcycle_next = (csr_we_i && csr_waddr_i == `MCYCLE_ADDR) ? csr_wdata_i : mcycle_q + 1;
 

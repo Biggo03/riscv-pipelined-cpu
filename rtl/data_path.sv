@@ -214,6 +214,8 @@ module data_path (
         .instr_d_i                      (instr_d),
         .reg_data_1_d_i                 (reg_data_1_d),
         .reg_data_2_d_i                 (reg_data_2_d),
+        .csr_result_m_i                 (csr_result_m),
+        .csr_result_w_i                 (csr_result_w),
         .result_w_i                     (result_w),
         .forward_data_m_i               (forward_data_m),
         .pc_d_i                         (pc_d),
@@ -342,6 +344,7 @@ module data_path (
         .pc_plus4_m_i                   (pc_plus4_m),
         .imm_ext_m_i                    (imm_ext_m),
         .csr_result_m_i                 (csr_result_m),
+        .csr_data_m_i                   (csr_data_m),
         .csr_addr_m_i                   (csr_addr_m_o),
         .rd_m_i                         (rd_m_o),
 
