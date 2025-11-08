@@ -100,7 +100,7 @@ module csr_reg_file_tb;
     end
     endtask
 
-    //Read on falling edge of clock to allow for 
+    //Read on falling edge of clock to allow for
     task read_register(
         input logic [11:0] raddr,
         output logic [31:0] rdata
@@ -174,7 +174,7 @@ module csr_reg_file_tb;
     //  Test Sequence (Placeholder)
     // ------------------------------------------------------------
     initial begin
-        
+
         dump_setup;
 
         $display("==== Starting CSR Register File Test ====");
@@ -188,7 +188,7 @@ module csr_reg_file_tb;
         `CHECK(u_dut.minstreth_q === 32'h0, "minstreth reset value incorrect");
         `CHECK(u_dut.mstatus_q === 32'h0, "mstatus reset value incorrect");
 
-        //Readcheck for standard registers 
+        //Readcheck for standard registers
         $display("[%t] Beginning read check for standard registers...", $realtime);
         read_register(`MSTATUS_ADDR, tb_rdata);
         `CHECK(csr_rdata_o === 32'h0, "Reset check for mstatus failed");
@@ -239,21 +239,21 @@ module csr_reg_file_tb;
         // Writethrough check
         $display("[%t] Beginning writethrough check for all writable registers...", $realtime);
         tb_wdata = $urandom();
-        write_through(`MCYCLE_ADDR, tb_wdata); 
+        write_through(`MCYCLE_ADDR, tb_wdata);
         
         tb_wdata = $urandom();
-        write_through(`MCYCLEH_ADDR, tb_wdata); 
+        write_through(`MCYCLEH_ADDR, tb_wdata);
         
         tb_wdata = $urandom();
-        write_through(`MINSTRET_ADDR, tb_wdata); 
+        write_through(`MINSTRET_ADDR, tb_wdata);
         
         tb_wdata = $urandom();
-        write_through(`MINSTRETH_ADDR, tb_wdata); 
+        write_through(`MINSTRETH_ADDR, tb_wdata);
         
         tb_wdata = $urandom();
-        write_through(`MSTATUS_ADDR, tb_wdata); 
+        write_through(`MSTATUS_ADDR, tb_wdata);
         
-        
+
         // reset all special registers
         $display("[%t] Resetting all special registers...", $realtime);
         write_register(`MCYCLE_ADDR, clk_counter[31:0]);
@@ -276,7 +276,7 @@ module csr_reg_file_tb;
         retire_w_i = 0;
         read_register(`MINSTRET_ADDR, intermediate_data);
         repeat (20) @(posedge clk_i);
-        
+
         read_register(`MINSTRET_ADDR, tb_rdata);
         `CHECK(tb_rdata === intermediate_data, "minstret incrementing when retire_w_i low");
 

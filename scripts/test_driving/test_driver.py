@@ -406,6 +406,9 @@ def main():
     if (args.list_tests):
         list_tests(test_catalog)
         return
+    elif (args.regressions == [] and args.tests == []):
+        test_logger.error("No regressions or tests provided")
+        return
 
     active_test_info = select_active_tests(args.regressions, args.tests, test_catalog)
 

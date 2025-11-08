@@ -40,7 +40,7 @@ module csr_regfile (
     // -- Other --
     input logic         retire_w_i
 );
-    
+
     // csr signal definitions
     {% for csr_name, csr_info in csr_data.items() %}
     // {{ csr_info.DESCRIPTION }}
@@ -86,15 +86,15 @@ module csr_regfile (
         {{ (csr_name.lower() + "_next").ljust(max_name_len) }} = csr_we_i && ({{ csr_info.ADDR_MACRO }} == csr_waddr_i) ? csr_wdata_i : {{ csr_name.lower() }}_q;
         {%- endif %}
         {%- endfor %}
-        
+
         // Following registers next cycle behaviour manually generated:
-        // 
+        //
         {%- for csr_name, csr_info in csr_data.items() -%}
         {%- if "special" in csr_info.BEHAV -%}
         {{ (csr_name.lower() + " ") }}
         {%- endif -%}
         {%- endfor %}
-        
+
         // mcycle handelling
         mcycle_next = (csr_we_i && csr_waddr_i == `MCYCLE_ADDR) ? csr_wdata_i : mcycle_q + 1;
 

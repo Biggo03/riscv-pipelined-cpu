@@ -1,8 +1,8 @@
 # Supported Instructions
 
 ## Overview
-This document lists all instructions currently supported by the processor, grouped by type.  
-Each entry includes a short description of its function and operands.  
+This document lists all instructions currently supported by the processor, grouped by type.
+Each entry includes a short description of its function and operands.
 The full instruction encodings and decode mappings are maintained in [`spreadsheets/instr_decode_table.xlsx`](spreadsheets/instr_decode_table.xlsx).
 
 ## Arithmetic and Logical Instructions
@@ -62,7 +62,7 @@ The full instruction encodings and decode mappings are maintained in [`spreadshe
 | LUI   | U | Load upper immediate. |
 | AUIPC | U | Add upper immediate to PC. |
 
-## System Instructions (planned)
+## System Instructions
 | Mnemonic | Type | Description |
 |----------|------|-------------|
 | CSRRW  | I | Read CSR and write new value. |
