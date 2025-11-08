@@ -1,3 +1,6 @@
+# Directories
+COMMON_DIR = common
+
 include make_asm.mk
 include make_c.mk
 

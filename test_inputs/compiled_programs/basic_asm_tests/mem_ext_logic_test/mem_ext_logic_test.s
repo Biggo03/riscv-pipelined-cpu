@@ -1,55 +1,66 @@
     .section .text
     .globl _start
+
+    .include "test_macros.s"
+
 _start:
     # x18 = 500 (0x1F4)
-    addi x18, x0, 500         
+    addi x18, x0, 500
 
     # mem[40] = 0x..F4 (store byte)
-    sb   x18, 40(x0)          
+    sb   x18, 40(x0)
 
     # x18 = 1950 (0x79E)
-    addi x18, x0, 1950        
+    addi x18, x0, 1950
 
     # mem[42..43] = 0x079E (store halfword)
-    sh   x18, 42(x0)          
+    sh   x18, 42(x0)
 
     # x19 = -1 (0xFFFFFFFF)
-    addi x19, x0, -1          
+    addi x19, x0, -1
 
     # mem[41] = 0xFF (store byte)
-    sb   x19, 41(x0)          
+    sb   x19, 41(x0)
 
     # Branch taken: unsigned(-1) >= unsigned(1950)
-    bgeu x19, x18, branch1    
+    bgeu x19, x18, branch1
 
     # Should not execute
-    sh   x18, 40(x0)          
+    sh   x18, 40(x0)
 
 branch1:
     # Load byte (sign-extended): x18 = -12 (0xFFFFFFF4)
-    lb   x18, 40(x0)          
+    lb   x18, 40(x0)
 
     # Load byte (zero-extended): x19 = 158 (0x9E)
-    lbu  x19, 42(x0)          
+    lbu  x19, 42(x0)
 
     # x19 = 158 & 125 = 4
-    andi x19, x19, 125        
+    andi x19, x19, 125
 
     # x19 = 4 | 25 = 29
-    ori  x19, x19, 25         
+    ori  x19, x19, 25
 
     # x19 = 29 ^ 4 = 25
-    xori x19, x19, 4          
+    xori x19, x19, 4
 
     # x19 = 25 + (-12) = 13
-    add  x19, x19, x18        
+    add  x19, x19, x18
 
     # x19 = 13 + 12 = 25
-    addi x19, x19, 12         
+    addi x19, x19, 12
 
-    # Store result at mem[100] = 25
-    sw   x19, 100(x0)         
+    # -------- Final: branch to PASS/FAIL via CSR test register --------
+    li    t0, 25
+    beq   x19, t0, success
+    j     fail
 
-done:
-    # Infinite loop
-    beq  x0, x0, done         
+success:
+    SIGNAL_TEST_PASS
+    j     end_test
+
+fail:
+    SIGNAL_TEST_FAIL
+
+end_test:
+    nop

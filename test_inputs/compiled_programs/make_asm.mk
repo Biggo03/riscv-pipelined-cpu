@@ -15,12 +15,13 @@ ASM_ELFS := $(ASM_SRCS:.s=.elf)
 ASM_HEXS := $(ASM_SRCS:.s=.text.hex)
 ASM_DUMPS := $(ASM_SRCS:.s=.dump)
 
+
 # Default: build all assembly tests
 asm: $(ASM_ELFS) $(ASM_HEXS) $(ASM_DUMPS)
 
 # ELF from .s
 %.elf: %.s $(LINKER)
-	$(CC) -march=$(ARCH) -mabi=$(ABI) -nostdlib -T $(LINKER) -o $@ $<
+	$(CC) -march=$(ARCH) -mabi=$(ABI) -nostdlib -T $(LINKER) -I $(COMMON_DIR) -o $@ $<
 
 # HEX from ELF
 %.text.hex: %.elf

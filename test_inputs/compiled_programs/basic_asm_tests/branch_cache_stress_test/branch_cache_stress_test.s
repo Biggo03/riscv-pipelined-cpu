@@ -1,5 +1,8 @@
     .section .text
     .globl _start
+
+    .include "test_macros.s"
+
 _start:
     addi x31, x0, 0          # fail_flag = 0 (set to 1 if any wrong-path commits)
 
@@ -66,13 +69,16 @@ D_cont:
     addi  x7, x7, 1
 
     ############################################################
-    # Final: only store 25 if NO wrong-path markers committed
+    # Final: pass if fail_flag == 0
     ############################################################
-    bne   x31, x0, done       # if fail_flag != 0, skip the store
-    addi  x10, x0, 25
-    sw    x10, 100(x0)        # mem[100] = 25 (only when all 4 cases behaved)
+    bne   x31, x0, fail        # if fail_flag != 0, jump to fail
 
-done:
-    beq   x0, x0, done        # spin
+    # All predictor and cache interactions behaved correctly
+    SIGNAL_TEST_PASS
+    j     end_test
 
+fail:
+    SIGNAL_TEST_FAIL
 
+end_test:
+    nop

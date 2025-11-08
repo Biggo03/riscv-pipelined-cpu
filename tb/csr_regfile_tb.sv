@@ -187,11 +187,15 @@ module csr_reg_file_tb;
         `CHECK(u_dut.minstret_q === 32'h0, "minstret reset value incorrect");
         `CHECK(u_dut.minstreth_q === 32'h0, "minstreth reset value incorrect");
         `CHECK(u_dut.mstatus_q === 32'h0, "mstatus reset value incorrect");
+        `CHECK(u_dut.mtest_status_q === 32'h0, "mtest_status reset value incorrect");
 
         //Readcheck for standard registers
         $display("[%t] Beginning read check for standard registers...", $realtime);
         read_register(`MSTATUS_ADDR, tb_rdata);
         `CHECK(csr_rdata_o === 32'h0, "Reset check for mstatus failed");
+        
+        read_register(`MTEST_STATUS_ADDR, tb_rdata);
+        `CHECK(csr_rdata_o === 32'h0, "Reset check for mtest_status failed");
         
 
         // Readcheck for special registers
@@ -235,6 +239,11 @@ module csr_reg_file_tb;
         read_register(`MSTATUS_ADDR, tb_rdata);
         `CHECK(tb_rdata === tb_wdata, "Write check for mstatus failed");
         
+        tb_wdata = $urandom();
+        write_register(`MTEST_STATUS_ADDR, tb_wdata);
+        read_register(`MTEST_STATUS_ADDR, tb_rdata);
+        `CHECK(tb_rdata === tb_wdata, "Write check for mtest_status failed");
+        
 
         // Writethrough check
         $display("[%t] Beginning writethrough check for all writable registers...", $realtime);
@@ -252,6 +261,9 @@ module csr_reg_file_tb;
         
         tb_wdata = $urandom();
         write_through(`MSTATUS_ADDR, tb_wdata);
+        
+        tb_wdata = $urandom();
+        write_through(`MTEST_STATUS_ADDR, tb_wdata);
         
 
         // reset all special registers

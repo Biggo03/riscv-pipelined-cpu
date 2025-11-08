@@ -1,7 +1,12 @@
     .section .text
     .globl _start
+
+    .include "test_macros.s"
+
 _start:
+    ################################################################
     # Fail flag and path selector
+    ################################################################
     addi x31, x0, 0      # fail_flag = 0  (set to 1 only if wrong path commits)
     addi x28, x0, 0      # path_flag = 0  (armed just before the branch)
 
@@ -52,10 +57,16 @@ from_branch:
 
 # ----------------------- Success epilogue -----------------------------
 after_branch:
-    bne  x31, x0, done           # if any wrong-path op committed, skip success
-    addi x22, x0, 25
-    sw   x22, 100(x0)            # mem[100] = 25  (only on correct rollback)
+    # If any wrong-path op committed (x31 != 0), test fails
+    bne  x31, x0, fail
 
-done:
-    beq  x0, x0, done            # spin
+    # Correct rollback → success
+    li   t0, 25
+    SIGNAL_TEST_PASS
+    j    end_test
 
+fail:
+    SIGNAL_TEST_FAIL
+
+end_test:
+    nop

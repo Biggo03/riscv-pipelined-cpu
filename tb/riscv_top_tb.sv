@@ -18,6 +18,7 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
+`include "tb_macros.sv"
 
  module riscv_top_tb();
 
@@ -71,13 +72,13 @@
         if (u_cycle_monitor.cycle_cnt > 1000000) $finish;
 
         `ifndef C_PROGRAMS
-            if (mem_write_m & alu_result_m > 90 & alu_result_m < 120) begin
-                if (alu_result_m === 100 & write_data_m === 25) begin
+            if (u_riscv_top.u_pipelined_riscv_core.u_data_path.csr_we_w_o && u_riscv_top.u_pipelined_riscv_core.u_data_path.csr_addr_w_o == `MTEST_STATUS_ADDR) begin
+                if (u_riscv_top.u_pipelined_riscv_core.u_data_path.csr_result_w == `TEST_PASS) begin
                     $display("TEST PASSED");
                     $finish;
-                end else if (alu_result_m !== 96 & write_data_m != 0) begin
-                $display("Failed.");
-                $finish;
+                end else if (u_riscv_top.u_pipelined_riscv_core.u_data_path.csr_result_w == `TEST_FAIL) begin
+                    $display("TEST FAILED");
+                    $finish;
                 end
             end
         `endif

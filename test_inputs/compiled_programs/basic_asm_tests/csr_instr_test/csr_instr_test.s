@@ -1,5 +1,6 @@
     .section .text
     .globl _start
+    .include "test_macros.s"
 
 _start:
     # -----------------------------------------------------------------
@@ -58,11 +59,11 @@ _start:
     # 5. Success condition
     # -----------------------------------------------------------------
 success:
-    sw x5, 100(x0)           # store 25 to memory[100]
+    SIGNAL_TEST_PASS
     beq x0, x0, end
 
 fail:
-    sw x6, 100(x0)           # store 0 to memory[100]
+    SIGNAL_TEST_FAIL
 
 end:
     nop

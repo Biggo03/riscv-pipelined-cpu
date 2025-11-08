@@ -1,5 +1,8 @@
     .section .text
     .globl _start
+
+    .include "test_macros.s"
+
 _start:
     # --- First block: LUI, ADDI, stores, compares, branches ---
     lui   x18, 709518              # x18 = 0xAD38E000
@@ -31,20 +34,20 @@ branch0:
 
     # --- Second block: store/loads with bytes/halfwords ---
     add   x18, x0, x0              # clear x18
-    addi  x1, x0, 500              # x1 = 500
-    sb    x1, 40(x0)               # mem[40] = ..F4
-    addi  x1, x0, 1950             # x1 = 1950
-    sh    x1, 42(x0)               # mem[42..43] = 0x079E
-    addi  x2, x0, -1               # x2 = -1
-    sb    x2, 41(x0)               # mem[41] = 0xFF
+    addi  x1,  x0, 500             # x1 = 500
+    sb    x1,  40(x0)              # mem[40] = ..F4
+    addi  x1,  x0, 1950            # x1 = 1950
+    sh    x1,  42(x0)              # mem[42..43] = 0x079E
+    addi  x2,  x0, -1              # x2 = -1
+    sb    x2,  41(x0)              # mem[41] = 0xFF
     bgeu  x2, x11, branch1         # branch taken
-    sh    x1, 40(x0)               # should not run
+    sh    x1,  40(x0)              # should not run
 
 branch1:
-    lb    x1, 40(x0)               # x1 = -12
-    lbu   x2, 42(x0)               # x2 = 158
-    andi  x2, x2, 125              # x2 = 4
-    ori   x2, x2, 25               # x2 = 29
+    lb    x1,  40(x0)              # x1 = -12
+    lbu   x2,  42(x0)              # x2 = 158
+    andi  x2,  x2, 125             # x2 = 4
+    ori   x2,  x2, 25              # x2 = 29
     xori  x2, x2, 4                # x2 = 25
     add   x2, x2, x1               # x2 = 13
     addi  x2, x2, 12               # x2 = 25
@@ -52,8 +55,8 @@ branch1:
 
     # --- Third block: shift + branch test ---
     add   x18, x0, x0
-    addi  x3, x0, 15
-    addi  x4, x0, 14
+    addi  x3,  x0, 15
+    addi  x4,  x0, 14
     bge   x3, x4, branch2
     addi  x3, x0, -1               # should not run
 
@@ -72,20 +75,20 @@ store3:
 
     # --- Fourth block: more branch/shift mix ---
     add   x18, x0, x0
-    addi  x7, x0, 15
-    addi  x8, x0, 14
+    addi  x7,  x0, 15
+    addi  x8,  x0, 14
     bne   x8, x7, branch3          # branch taken
-    addi  x9, x0, -1               # should not run
+    addi  x9,  x0, -1              # should not run
 
 branch3:
-    sll   x9, x7, x8               # x9 = 229376
-    srl   x9, x9, x7               # x9 = 7
-    addi  x9, x9, 18               # x9 = 25
+    sll   x9,  x7, x8              # x9 = 229376
+    srl   x9,  x9, x7              # x9 = 7
+    addi  x9,  x9, 18              # x9 = 25
     addi  x10, x0, -1              # x10 = -1
     sra   x10, x10, x8             # x10 = -1
     blt   x10, x7, store4          # branch taken
-    addi  x9, x0, 2                # should not run
-    sw    x9, 100(x0)              # should not run
+    addi  x9,  x0, 2               # should not run
+    sw    x9,  100(x0)             # should not run
 
 store4:
     sw    x9, 156(x0)              # mem[156] = 25
@@ -144,9 +147,19 @@ end1:
     sub   x6, x6, x2
     add   x6, x6, x3
     sub   x6, x6, x4
-    add   x6, x6, x5
-    sw    x6, 100(x0)              # mem[100] = 25
+    add   x6, x6, x5               # x6 = 25
 
-done:
-    beq   x0, x0, done             # infinite loop
+    # -------- Final: branch to PASS/FAIL via CSR test register --------
+    li    t0, 25
+    beq   x6, t0, success
+    j     fail
 
+success:
+    SIGNAL_TEST_PASS
+    j     end_test
+
+fail:
+    SIGNAL_TEST_FAIL
+
+end_test:
+    nop
