@@ -8,7 +8,7 @@ import os
 def excel_to_yaml(input_file, output_file):
     wb = load_workbook(input_file)
     ws = wb.active
-    
+
     reg_data = {}
 
     headers = [cell.value for cell in next(ws.iter_rows(min_row=1, max_row=1))]
@@ -34,7 +34,7 @@ def generate_macros(yaml_file, macro_file):
         f.write("////////////////////////////////////////\n")
         f.write("// AUTO-GENERATED CSR REGISTER MACROS //\n")
         f.write("////////////////////////////////////////\n")
-        
+
         # figure out longest CSR name for alignment
         max_name_len = max(len(csr_name) for csr_name in reg_data.keys())
 
@@ -56,8 +56,8 @@ def generate_rtl(yaml_file, rtl_op_path, tb_op_path):
 
 
     max_macro_len = max(len(csr_info["ADDR_MACRO"]) for csr_info in reg_data.values())
-    max_name_len = max(len(name) for name in reg_data.keys()) 
-    
+    max_name_len = max(len(name) for name in reg_data.keys())
+
     # Jinja setup
     env = Environment(loader=FileSystemLoader("templates"))
 
@@ -73,30 +73,55 @@ def generate_rtl(yaml_file, rtl_op_path, tb_op_path):
 
     return
 
+def generate_c_defs(yaml_file, cdef_op_path):
+    with open(yaml_file, "r") as f:
+        reg_data = yaml.safe_load(f)
+
+    define_info = {}
+    for csr_name, csr_info in reg_data.items():
+        define_info[f"CSR_{csr_name}"] = {
+                                          "ADDRESS": f"0x{csr_info['ADDRESS']}u",
+                                          "DESCRIPTION": csr_info["DESCRIPTION"]
+                                         }
+
+    max_name_len = max(len(name) for name in define_info.keys())
+
+    env = Environment(loader=FileSystemLoader("templates"))
+
+    csr_defs_template = env.get_template("csr_defs.h.j2")
+    csr_defs_output = csr_defs_template.render(define_info=define_info, max_name_len=max_name_len)
+
+    with open(cdef_op_path, "w") as cdef_file:
+        cdef_file.write(csr_defs_output)
+
 def main():
-    if len(sys.argv) != 5:
-        print("Usage: python gen_csr_tb.py <spreadsheet_path> <rtl_output_path> <tb_output_path> <macro_output_path>")
+    if len(sys.argv) != 6:
+        print("Usage: python gen_csr_tb.py <spreadsheet_path> <rtl_output_path> <tb_output_path> <macro_output_path> <c_def_output_path>")
         sys.exit(1)
 
     spreadsheet_path = sys.argv[1]
     rtl_output_path = sys.argv[2]
     tb_output_path = sys.argv[3]
     macro_output_path = sys.argv[4]
+    cdef_output_path = sys.argv[5]
 
     yaml_file = "./outputs/csr_registers.yml"
 
     os.makedirs(os.path.dirname(rtl_output_path), exist_ok=True)
     os.makedirs(os.path.dirname(tb_output_path), exist_ok=True)
     os.makedirs(os.path.dirname(macro_output_path), exist_ok=True)
+    os.makedirs(os.path.dirname(cdef_output_path), exist_ok=True)
     os.makedirs(os.path.dirname("./outputs"), exist_ok=True)
 
     excel_to_yaml(spreadsheet_path, yaml_file)
     generate_macros(yaml_file, macro_output_path)
     generate_rtl(yaml_file, rtl_output_path, tb_output_path)
+    generate_c_defs(yaml_file, cdef_output_path)
 
     print(f"[OK] Generated RTL:   {rtl_output_path}")
     print(f"[OK] Generated TB:    {tb_output_path}")
     print(f"[OK] Generated Macros:{macro_output_path}")
+    print(f"[OK] Generated C Defines:{cdef_output_path}")
 
 if __name__ == "__main__":
     main()

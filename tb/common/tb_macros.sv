@@ -1,8 +1,19 @@
+//////////////////////////////////////////////
+//             FUNCTIONAL MACROS            //
+//////////////////////////////////////////////
 `define CHECK(cond, msg, arg1=, arg2=) \
     assert(cond) else begin \
         $error(msg, arg1, arg2); \
         error_cnt++; \
     end
 
+//////////////////////////////////////////////
+//             TESTING MACROS               //
+//////////////////////////////////////////////
 `define TEST_PASS 32'hABCD1234
 `define TEST_FAIL 32'hDEADBEEF
+
+//////////////////////////////////////////////
+//             HIERARCHY MACROS             //
+//////////////////////////////////////////////
+`define DATA_PATH_HIER u_riscv_top.u_pipelined_riscv_core.u_data_path

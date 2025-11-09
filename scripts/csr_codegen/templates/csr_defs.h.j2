@@ -4,13 +4,9 @@
 // ------------------------------------------------------------
 // Custom implementation-defined CSRs
 // ------------------------------------------------------------
-
-#define CSR_MCYCLE         0xB00u //Bottom 32-bits storing number of cycles
-#define CSR_MCYCLEH        0xB80u //Top 32-bits storing number of cycles
-#define CSR_MINSTRET       0xB02u //Bottom 32-bits storing number of instructions retired
-#define CSR_MINSTRETH      0xB82u //Top 32-bits storing number of instructions retired
-#define CSR_MSTATUS        0x300u //machine status register (currently only used for testing)
-#define CSR_MTEST_STATUS   0x7C0u //Custom Register for handelling test success/failure in simulation
+{% for def_name, def_info in define_info.items() %}
+#define {{ def_name.upper().ljust(max_name_len +2) }} {{ def_info.ADDRESS }} //{{ def_info.DESCRIPTION }}
+{%- endfor %}
 
 // ------------------------------------------------------------
 //  inline access helpers (generic)

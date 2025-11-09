@@ -37,6 +37,7 @@
 # directories
 filelists/
 sim_results/
+test_inputs/compiled_programs/c_programs/dhrystone
 
 #test_inputs
 *.dump

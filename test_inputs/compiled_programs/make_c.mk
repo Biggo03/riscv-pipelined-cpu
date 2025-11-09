@@ -9,7 +9,10 @@ STARTUP   = _start.s
 STARTUP_OBJ = $(STARTUP:.s=.o)
 
 # Compiler flags (set ISA/ABI etc.)
-CC_FLAGS  = -march=rv32i -mabi=ilp32 -O2 -std=gnu89 
+ARCH = rv32i_zicsr
+ABI  = ilp32
+
+CC_FLAGS  = -march=$(ARCH) -mabi=$(ABI) -O2 -std=gnu11 -Icommon
 
 # List of program directories
 C_DIRS  := $(wildcard c_programs/*)

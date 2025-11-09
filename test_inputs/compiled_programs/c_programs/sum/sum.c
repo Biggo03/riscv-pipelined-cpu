@@ -1,12 +1,20 @@
+#include "test_status.h"
+
 int main() {
     int sum = 0;
-    for (int i = 1; i <= 10; i++) {
-        sum += i;
+
+    // // Do some work (e.g., sum 1..10)
+    for (int i = 0; i < 25; i++) {
+        sum += 1;
     }
 
-    volatile int *out = (int*)200; // memory-mapped location
-    *out = sum;                    // store result (should be 55)
+    if (sum == 25) {
+        signal_test_pass();
+    } else {
+        signal_test_fail();
+    }
 
-    while (1);                     // infinite loop
+    // Prevent program from exiting
+    while (1);
     return 0;
 }

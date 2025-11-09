@@ -49,9 +49,9 @@
         .reset_i        (reset),
 
 
-        .valid_w_i      (u_riscv_top.u_pipelined_riscv_core.u_data_path.valid_w),
-        .stall_w_i      (u_riscv_top.u_pipelined_riscv_core.u_data_path.stall_w_i),
-        .instr_w_i      (u_riscv_top.u_pipelined_riscv_core.u_data_path.instr_w)
+        .valid_w_i      (`DATA_PATH_HIER.valid_w),
+        .stall_w_i      (`DATA_PATH_HIER.stall_w_i),
+        .instr_w_i      (`DATA_PATH_HIER.instr_w)
     );
 
     initial begin
@@ -72,11 +72,11 @@
         if (u_cycle_monitor.cycle_cnt > 1000000) $finish;
 
         `ifndef C_PROGRAMS
-            if (u_riscv_top.u_pipelined_riscv_core.u_data_path.csr_we_w_o && u_riscv_top.u_pipelined_riscv_core.u_data_path.csr_addr_w_o == `MTEST_STATUS_ADDR) begin
-                if (u_riscv_top.u_pipelined_riscv_core.u_data_path.csr_result_w == `TEST_PASS) begin
+            if (`DATA_PATH_HIER.csr_we_w_o && `DATA_PATH_HIER.csr_addr_w_o == `MTEST_STATUS_ADDR) begin
+                if (`DATA_PATH_HIER.csr_result_w == `TEST_PASS) begin
                     $display("TEST PASSED");
                     $finish;
-                end else if (u_riscv_top.u_pipelined_riscv_core.u_data_path.csr_result_w == `TEST_FAIL) begin
+                end else if (`DATA_PATH_HIER.csr_result_w == `TEST_FAIL) begin
                     $display("TEST FAILED");
                     $finish;
                 end
