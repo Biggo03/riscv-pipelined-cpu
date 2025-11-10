@@ -1,22 +1,23 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 09/09/2024 03:08:14 PM
-// Design Name: 
+// Design Name:
 // Module Name: reduce_TB
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -36,13 +37,13 @@ module reduce_tb();
         .width_src_i                    (width_src),
         .result_o                       (result)
     );
-    
+
     initial begin
 
         dump_setup;
-        
+
         read = 0;
-        
+
         file = $fopen("test_inputs/vectors/reduce_test_vectors.txt", "r");
 
         if (file == 0) begin
@@ -50,34 +51,34 @@ module reduce_tb();
         end else begin
             $display("Vector file opened succesfully");
         end
-        
-        
+
+
         //Iterate through file
         while (!$feof(file)) begin
             read = $fscanf(file, "%b %b %b\n", BaseResult, width_src, ResultExpected);
-            
+
             //Ensure file reads correct number of elements
             if (read == 3) begin
                 #1;
                 assert (result == ResultExpected) else begin
-                    $fatal(1, "Error: width_src = %b, BaseResult = %b\nExpected output: %b\nActual output:   %b", 
+                    $fatal(1, "Error: width_src = %b, BaseResult = %b\nExpected output: %b\nActual output:   %b",
                        width_src, BaseResult, ResultExpected, result);
                 end
-                
+
             end else begin
                 $fatal(1, "Incorrect number of elements read");
             end
-            
+
         end
-      
-  
+
+
         $display("TEST PASSED");
         $fclose(file);
-        
+
         $finish;
 
 
-        
+
     end
 
 

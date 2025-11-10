@@ -19,6 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 `include "tb_macros.sv"
+`include "misc_tasks.sv"
 
  module riscv_top_tb();
 
@@ -47,7 +48,6 @@
         // Clock & reset
         .clk_i          (clk),
         .reset_i        (reset),
-
 
         .valid_w_i      (`DATA_PATH_HIER.valid_w),
         .stall_w_i      (`DATA_PATH_HIER.stall_w_i),

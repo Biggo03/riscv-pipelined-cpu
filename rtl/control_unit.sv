@@ -91,5 +91,4 @@ module control_unit (
         .csr_src_o                      (csr_src_d_o)
     );
 
-
 endmodule

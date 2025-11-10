@@ -203,21 +203,29 @@ def gen_run_cmd(test_name, test_info, dir_paths, defines):
 
     test_logger = logging.getLogger("test_logger")
 
+    defines = list(defines)
     defines.extend(test_info["defines"])
 
-    # -- Included directories
+    # -- Included directories ---
     inc_dirs = [
         str(dir_paths["include_dir"]),
         str(dir_paths["tb_include_dir"])
     ]
 
+    # -- Module Libraries ---
+    module_libs = [dir_paths["common_tb"]]
+
+    if ("system" in test_info["tags"]):
+        module_libs.append(os.path.dirname(dir_paths["tb_path"]))
     # --- Source files ---
-    src_files = [dir_paths["tb_path"], *dir_paths["common_tb"]]
+    src_files = [dir_paths["tb_path"]]
+
 
     # --- Defines ---
     defines.append(f'DUMP_PATH="{dir_paths["test_out_dir"]}/{test_name}.vcd"')
     defines.append(f'SIM')
 
+    # System specific defines
     if ("system" in test_info["tags"]):
         instr_match = next(dir_paths["hex_path"].rglob(f"{test_name}.text.hex"), None)
         data_match = next(dir_paths["hex_path"].rglob(f"{test_name}.data.hex"), None)
@@ -272,6 +280,10 @@ def gen_run_cmd(test_name, test_info, dir_paths, defines):
     for inc_dir in inc_dirs:
         run_cmd.extend(["-I", inc_dir])
 
+    for module_lib in module_libs:
+        run_cmd.extend(["-y", module_lib])
+        run_cmd.extend(["-Y", ".sv"])
+
     for define in defines:
         run_cmd.extend(["-D", define])
 
@@ -298,7 +310,7 @@ def setup_paths(test_name, tb_file, top_out_dir):
     dir_paths["filelist_dir"]    = dir_paths["proj_dir"] / "filelists"
     dir_paths["tb_path"]         = dir_paths["proj_dir"] / "tb" / tb_file
     dir_paths["tb_include_dir"]  = dir_paths["proj_dir"].joinpath("tb", "common")
-    dir_paths["common_tb"]       = list(dir_paths["proj_dir"].joinpath("tb", "common").rglob("*v*"))
+    dir_paths["common_tb"]       = dir_paths["proj_dir"].joinpath("tb", "common")
     dir_paths["hex_path"]        = dir_paths["proj_dir"] / "test_inputs" / "compiled_programs"
 
     dir_paths["test_out_dir"]    = top_out_dir / test_name
@@ -320,7 +332,12 @@ def run_test(test_name, test_info, defines, top_out_dir, result_info):
     """
     test_logger = logging.getLogger("test_logger")
 
-    dir_paths = setup_paths(test_name, test_info["tb"], top_out_dir)
+    if ("system" in test_info["tags"]):
+        tb_file = f"system_test/{test_info['tb']}"
+    else:
+        tb_file = f"module_tests/{test_info['tb']}"
+
+    dir_paths = setup_paths(test_name, tb_file, top_out_dir)
     run_cmd = gen_run_cmd(test_name, test_info, dir_paths, defines)
 
     # --- Run compilation and simulation ---

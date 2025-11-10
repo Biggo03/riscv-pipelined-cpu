@@ -15,30 +15,30 @@
 
 module riscv_top (
     // Clock & reset_i
-    input  logic        clk_i,
-    input  logic        reset_i,
+    (* keep = "true" *) input  logic        clk_i,
+    (* keep = "true" *) input  logic        reset_i,
 
     // Memory outputs
-    output logic [31:0] write_data_m_o,
-    output logic [31:0] alu_result_m_o,
-    output logic        mem_write_m_o
+    (* keep = "true" *) output logic [31:0] write_data_m_o,
+    (* keep = "true" *) output logic [31:0] alu_result_m_o,
+    (* keep = "true" *) output logic        mem_write_m_o
 );
 
     // ----- Pipeline signals -----
-    logic [31:0] pc_f;
-    logic [31:0] instr_f;
-    logic [31:0] read_data_m;
-    logic [2:0]  width_src_m;
+    (* keep = "true" *) logic [31:0] pc_f;
+    (* keep = "true" *) logic [31:0] instr_f;
+    (* keep = "true" *) logic [31:0] read_data_m;
+    (* keep = "true" *) logic [2:0]  width_src_m;
 
     // ----- Cache control -----
-    logic        instr_hit_f;
-    logic        ic_repl_permit;
-    logic        l2_repl_ready;
-    logic [63:0] rep_word;
+    (* keep = "true" *) logic        instr_hit_f;
+    (* keep = "true" *) logic        ic_repl_permit;
+    (* keep = "true" *) logic        l2_repl_ready;
+    (* keep = "true" *) logic [63:0] rep_word;
 
     // ----- Branch/control -----
-    logic [1:0]  pc_src_reg;
-    logic [1:0]  branch_op_e;
+    (* keep = "true" *) logic [1:0]  pc_src_reg;
+    (* keep = "true" *) logic [1:0]  branch_op_e;
 
     pipelined_riscv_core u_pipelined_riscv_core (
         // Clock & reset_i

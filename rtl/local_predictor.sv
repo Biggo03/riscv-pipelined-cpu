@@ -3,8 +3,7 @@
 //  Module:       local_predictor
 //  File:         local_predictor.sv
 //  Description:  State machine that updates based on if a branch is taken or untaken
-//
-//  Author:       Viggo Wozniak
+// Author:       Viggo Wozniak
 //  Project:      RISC-V Processor
 //  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
 //
@@ -37,43 +36,36 @@ module local_predictor (
     // ----- State registers -----
     pred_state_t present_state;
     pred_state_t next_state;
-    
+
     // State transition logic
-    always_ff @(posedge clk_i, posedge reset_i) begin : transition_logic
-        if (reset_i) begin
-            present_state <= WU;
-        end else if (enable_i) begin
-            present_state <= next_state;
-        end
-    end             
-    
+    always_ff @(posedge clk_i) begin : transition_logic
+        if (reset_i)            present_state <= WU;
+        else if (enable_i)      present_state <= next_state;
+    end
+
     // Next state logic
     always_comb begin : next_state_logic
-        next_state = present_state;
-
-        if (enable_i) begin
-            case (present_state)
-                ST: begin
-                    if (pc_src_res_e_i) next_state = ST;
-                    else                next_state = WT;
-                end
-                WT: begin
-                    if (pc_src_res_e_i) next_state = ST;
-                    else                next_state = WU;
-                end
-                WU: begin
-                    if (pc_src_res_e_i) next_state = WT;
-                    else                next_state = SU;
-                end
-                SU: begin
-                    if (pc_src_res_e_i) next_state = WU;
-                    else                next_state = SU;
-                end
-                default: next_state = present_state; // Should never hit
-            endcase
-        end 
+        unique case (present_state)
+            ST: begin
+                if (pc_src_res_e_i) next_state = ST;
+                else                next_state = WT;
+            end
+            WT: begin
+                if (pc_src_res_e_i) next_state = ST;
+                else                next_state = WU;
+            end
+            WU: begin
+                if (pc_src_res_e_i) next_state = WT;
+                else                next_state = SU;
+            end
+            SU: begin
+                if (pc_src_res_e_i) next_state = WU;
+                else                next_state = SU;
+            end
+            default: next_state = present_state; // Should never hit
+        endcase
     end
-    
+
     // Assign output
     assign pc_src_pred_o = present_state[1];
 

@@ -1,4 +1,7 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
+`include "csr_macros.sv"
+`include "tb_macros.sv"
 //==============================================================//
 //  Module:       csr_reg_file_tb
 //  File:         csr_reg_file_tb.sv
@@ -21,8 +24,6 @@
 //                - Manual sections (e.g., monitors or scoreboards) are
 //                  safe to modify and extend.
 //==============================================================//
-`include "csr_macros.sv"
-`include "tb_macros.sv"
 
 module csr_reg_file_tb;
 

@@ -38,20 +38,20 @@ module branching_buffer (
     // ----- Memories -----
     (* ram_style = "distributed" *) reg [31:0] buffer_entry [1023:0];
     logic [3:0] lp_outputs [1023:0];
-    
+
     // ----- Control inputs -----
-    logic [4095:0] enable; 
+    logic [4095:0] enable;
     logic [1023:0] local_reset;
-    
+
     // ----- Generate indices -----
     genvar i;
-    
+
     //Every group of 4 bits corrosponds to a given pc_e index
     assign enable = (branch_op_e_i != `NON_BRANCH) ? 1'b1 << {pc_e, local_src_i} : 0;
-    
+
     generate
-        for (i = 0; i < 4096; i = i + 1) begin
-            
+        for (i = 0; i < 4096; i = i + 1) begin : g_local_predictors
+
             // i/4 so have group of 4, i%4 to increment internal entry
             local_predictor u_local_predictor (
                 // Clock & reset_i
@@ -67,7 +67,7 @@ module branching_buffer (
             );
         end
     endgenerate
-    
+
     //Execute stage and reset_i logic
     always @(posedge clk_i) begin
         if (reset_i) begin
@@ -80,9 +80,9 @@ module branching_buffer (
             local_reset <= 0; //Ensures all local predictors are ready after a reset_i
         end
     end
-    
+
     //Fetch stage logic
     assign pc_src_pred_f_o = lp_outputs[pc_f_i][local_src_i];
     assign pred_pc_target_f_o = buffer_entry[pc_f_i][31:0];
-    
+
 endmodule

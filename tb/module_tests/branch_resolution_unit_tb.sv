@@ -1,22 +1,23 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 09/12/2024 05:46:53 PM
-// Design Name: 
+// Design Name:
 // Module Name: branchdecoder_TB
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name:
+// Target Devices:
+// Tool Versions:
 // Description: Testbench for branchdecoder module
-// 
-// Dependencies: 
-// 
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -48,17 +49,17 @@ module branch_resolution_unit_tb();
         .v_flag_i                       (v_flag),
         .pc_src_res_o                   (pc_src_res)
     );
-    
+
     //Assert that expected and actual oputputs match
     task AssertCorrect();
-        
+
         assert (pc_src_res === PCSrcResExp) else
         $fatal(1, "Error: branch_op: %b, funct3: %b\nN: %b, Z: %b, C: %b, V: %b\nExpected Output: %b\nActual Output:   %b", branch_op, funct3, neg_flag, zero_flag, carry_flag, v_flag, PCSrcResExp, pc_src_res);
-    
+
     endtask
 
     initial begin
-        
+
         dump_setup;
         funct3Val[0] = 3'b000;
         funct3Val[1] = 3'b001;
@@ -70,31 +71,31 @@ module branch_resolution_unit_tb();
         //Non-branching instructions
         branch_op = 2'b00; PCSrcResExp = 1'b0; #10;
         AssertCorrect();
-        
+
         //Jumps
         branch_op = 2'b01; PCSrcResExp = 1'b1; #10;
         AssertCorrect();
-        
+
         //Conditional branches
         branch_op = 2'b11;
-        
+
         //Initialize all possible combinations of flags
         for (int i = 0; i < 32; i++) begin
             Flags[i] = i;
         end
-        
+
         foreach (funct3Val[i]) begin
-            
+
             funct3 = funct3Val[i];
-            
+
             for (int j = 0; j < 32; j++) begin
-                
+
                 //set Flag values
                 neg_flag = Flags[j][0];
                 neg_flag = Flags[j][1];
                 neg_flag = Flags[j][2];
                 neg_flag = Flags[j][3];
-                
+
                 //Determine correct output
                 case (funct3Val[i])
                     3'b000: PCSrcResExp = zero_flag;
@@ -105,17 +106,17 @@ module branch_resolution_unit_tb();
                     3'b110: PCSrcResExp = ~carry_flag;
                     default: PCSrcResExp = 1'bx;
                 endcase
-                
+
                 #10;
                 AssertCorrect();
-            
+
             end
-        
+
         end
-        
+
         $display("TEST PASSED");
         $finish;
-             
+
     end
 
 

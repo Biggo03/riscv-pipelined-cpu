@@ -1,27 +1,27 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
+`include "tb_macros.sv"
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 01/19/2025 04:24:58 PM
-// Design Name: 
+// Design Name:
 // Module Name: BranchingBuffer_TB
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
-
 module branching_buffer_tb();
-    `include "tb_macros.sv"
 
 
     logic        clk;
@@ -55,73 +55,73 @@ module branching_buffer_tb();
     always begin
         clk = ~clk; #5;
     end
-    
+
     initial begin
 
         dump_setup;
         error_cnt = 0;
-        
+
         //Initialize
         clk = 0; reset = 1; pc_target_e = 0; pc_f = 0; pc_e = 0; local_src = 0;
         pc_src_res_e = 0; target_match = 0; branch_op_e = 0;
-        
+
         #100;
         reset = 0;
 
         #100;
         branch_op_e[0] = 1;
-        
+
         //Start by populating entries with target addresses
         for (int i = 0; i < 1024; i++) begin
             pc_e = i;
             pc_target_e = i;
             #10;
         end
-        
+
         branch_op_e[0] = 0;
         target_match = 1;
-        
+
         //Check if correct address is fetched by pc_f
         for (int i = 0; i < 1024; i = i + 1) begin
             pc_f = i;
             #10;
             `CHECK(pred_pc_target_f === i, "[%t] Incorrect target address", $time)
         end
-        
+
         //Check to see if branch updates work correctly (Should be in WU)
         pc_e = 0; pc_f = 0; local_src = 0; branch_op_e[0] = 1; pc_src_res_e = 1;
         #10;
         `CHECK(pc_src_pred_f === 1, "[%t] Local predictor transition failed (first)", $time)
-        
+
         //Put back into WU
         pc_src_res_e = 0;
         #10;
         `CHECK(pc_src_pred_f === 0, "[%t] Local predictor transition failed (third)", $time)
-        
+
         //Put 1st index into strongly taken state
         pc_src_res_e = 1;
         #20;
-        
+
         //Put scond index local predictor into WT
         pc_e = 1;
-        #21; 
-        
+        #21;
+
         //Trigger reset of first indexed local predictor
         pc_e = 0; target_match = 0; pc_target_e = 1000; pc_src_res_e = 0;
         #10;
         `CHECK(pc_src_pred_f === 0 && pred_pc_target_f == 1000, "[%t] Local reset failed (first)", $time)
 
-        
+
         //Ensure no other predictors changes
         pc_f = 1;
         #10;
         `CHECK(pc_src_pred_f === 1, "[%t] Local reset failed (second)", $time)
-        
+
         //Ensure taking correct local predictor based on local_src
         pc_e = 100; pc_target_e = 1001; local_src = 1; target_match = 0; pc_src_res_e = 1;
         #10;
         `CHECK(pc_src_pred_f === 0 && pred_pc_target_f == 1, "[%t] local_src indexed incorrectly", $time)
-        
+
         //Test to see if replacement for PCE100 worked correctly, and if local predictor updated properly
         //
         target_match = 1; pc_f = 100;
@@ -132,15 +132,15 @@ module branching_buffer_tb();
         local_src = 0; pc_src_res_e = 0;
         #10;
         `CHECK(pc_src_pred_f === 0 && pred_pc_target_f === 1001, "[%t] Incorrect local branch update on change (second)", $time)
-        
+
         pc_src_res_e = 1;
         #20; //Wait two cycles for local predictor to be in weakly taken
         `CHECK(pc_src_pred_f === 1 && pred_pc_target_f === 1001, "[%t] Incorrect local branch update on change (second)", $time)
-        
+
         if (error_cnt == 0) $display("TEST PASSED");
         else $display("TEST FAILED");
         $finish;
-        
+
     end
 
 endmodule

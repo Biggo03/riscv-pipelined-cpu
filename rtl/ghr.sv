@@ -53,7 +53,7 @@ module ghr (
         next_state = present_state;
 
         if (branch_op_e_i[0] & ~stall_e_i) begin
-            case (present_state)
+            unique case (present_state)
                 UU: begin
                     if (pc_src_res_e_i) next_state = UT;
                     else                next_state = UU;

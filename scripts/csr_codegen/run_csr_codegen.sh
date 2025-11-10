@@ -14,7 +14,7 @@ mkdir -p "./outputs"
 SPREADSHEET_PATH="$PROJECT_ROOT/docs/spreadsheets/csr_spec.xlsx"
 
 RTL_OUTPUT_PATH="$PROJECT_ROOT/rtl/csr_regfile.sv"
-TB_OUTPUT_PATH="$PROJECT_ROOT/tb/csr_regfile_tb.sv"
+TB_OUTPUT_PATH="$PROJECT_ROOT/tb/module_tests/csr_regfile_tb.sv"
 MACRO_OUTPUT_PATH="$PROJECT_ROOT/common/includes/csr_macros.sv"
 C_DEFINE_PATH="$PROJECT_ROOT/test_inputs/compiled_programs/common/csr_defs.h"
 # ------------------------------------------------------------

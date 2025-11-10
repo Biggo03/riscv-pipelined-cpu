@@ -1,4 +1,6 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
+`include "tb_macros.sv"
 //////////////////////////////////////////////////////////////////////////////////
 // Company:
 // Engineer:
@@ -21,7 +23,6 @@
 
 
 module local_predictor_tb();
-    `include "tb_macros.sv"
 
     localparam ST = 2'b11;
     localparam WT = 2'b10;

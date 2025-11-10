@@ -1,4 +1,7 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
+`include "csr_macros.sv"
+`include "tb_macros.sv"
 //==============================================================//
 //  Module:       csr_reg_file_tb
 //  File:         csr_reg_file_tb.sv
@@ -21,8 +24,6 @@
 //                - Manual sections (e.g., monitors or scoreboards) are
 //                  safe to modify and extend.
 //==============================================================//
-`include "csr_macros.sv"
-`include "tb_macros.sv"
 
 module csr_reg_file_tb;
 
@@ -193,10 +194,10 @@ module csr_reg_file_tb;
         $display("[%t] Beginning read check for standard registers...", $realtime);
         read_register(`MSTATUS_ADDR, tb_rdata);
         `CHECK(csr_rdata_o === 32'h0, "Reset check for mstatus failed");
-        
+
         read_register(`MTEST_STATUS_ADDR, tb_rdata);
         `CHECK(csr_rdata_o === 32'h0, "Reset check for mtest_status failed");
-        
+
 
         // Readcheck for special registers
         $display("[%t] Beginning read check for special registers...", $realtime);
@@ -218,53 +219,53 @@ module csr_reg_file_tb;
         write_register(`MCYCLE_ADDR, tb_wdata);
         read_register(`MCYCLE_ADDR, tb_rdata);
         `CHECK(tb_rdata === tb_wdata, "Write check for mcycle failed");
-        
+
         tb_wdata = $urandom();
         write_register(`MCYCLEH_ADDR, tb_wdata);
         read_register(`MCYCLEH_ADDR, tb_rdata);
         `CHECK(tb_rdata === tb_wdata, "Write check for mcycleh failed");
-        
+
         tb_wdata = $urandom();
         write_register(`MINSTRET_ADDR, tb_wdata);
         read_register(`MINSTRET_ADDR, tb_rdata);
         `CHECK(tb_rdata === tb_wdata, "Write check for minstret failed");
-        
+
         tb_wdata = $urandom();
         write_register(`MINSTRETH_ADDR, tb_wdata);
         read_register(`MINSTRETH_ADDR, tb_rdata);
         `CHECK(tb_rdata === tb_wdata, "Write check for minstreth failed");
-        
+
         tb_wdata = $urandom();
         write_register(`MSTATUS_ADDR, tb_wdata);
         read_register(`MSTATUS_ADDR, tb_rdata);
         `CHECK(tb_rdata === tb_wdata, "Write check for mstatus failed");
-        
+
         tb_wdata = $urandom();
         write_register(`MTEST_STATUS_ADDR, tb_wdata);
         read_register(`MTEST_STATUS_ADDR, tb_rdata);
         `CHECK(tb_rdata === tb_wdata, "Write check for mtest_status failed");
-        
+
 
         // Writethrough check
         $display("[%t] Beginning writethrough check for all writable registers...", $realtime);
         tb_wdata = $urandom();
         write_through(`MCYCLE_ADDR, tb_wdata);
-        
+
         tb_wdata = $urandom();
         write_through(`MCYCLEH_ADDR, tb_wdata);
-        
+
         tb_wdata = $urandom();
         write_through(`MINSTRET_ADDR, tb_wdata);
-        
+
         tb_wdata = $urandom();
         write_through(`MINSTRETH_ADDR, tb_wdata);
-        
+
         tb_wdata = $urandom();
         write_through(`MSTATUS_ADDR, tb_wdata);
-        
+
         tb_wdata = $urandom();
         write_through(`MTEST_STATUS_ADDR, tb_wdata);
-        
+
 
         // reset all special registers
         $display("[%t] Resetting all special registers...", $realtime);

@@ -1,18 +1,20 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
+`include "tb_macros.sv"
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 03/19/2025 10:13:14 PM
-// Design Name: 
+// Design Name:
 // Module Name: DirL1InstrCache_TB
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:Already tested more complex functionality at set level, will leave at ensuring basic functions work
@@ -20,8 +22,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module icache_l1_dir_tb();
-    `include "tb_macros.sv"
-    
+
     // Test cache parameters
     localparam S         = 32;
     localparam E         = 4;
@@ -77,13 +78,13 @@ module icache_l1_dir_tb();
     always begin
         clk = ~clk; #5;
     end
-    
+
     initial begin
 
         dump_setup;
 
-        reset = 1; clk = 0; branch_op_e = 0; pc_src_reg = 0; #100; reset = 0; 
-        
+        reset = 1; clk = 0; branch_op_e = 0; pc_src_reg = 0; #100; reset = 0;
+
         //Fill up cache and check initial reads
         for (int i = 0; i < S; i = i + 1) begin
             SetNum = i;
@@ -96,7 +97,7 @@ module icache_l1_dir_tb();
                 Tags[i][n] = pc_f[31:s+b];
                 #10;
                 l2_repl_ready = 1;
-                
+
                 //Do replacement
                 for (int k = 0; k < RepCycles; k = k + 1) begin
                     if (i == 0) begin
@@ -105,14 +106,14 @@ module icache_l1_dir_tb();
                     end else begin
                         rep_word[31:0] = (i * 1111) * k**2 + i**2;
                         rep_word[63:32] = (i * 2222) * k**2 + i**2;
-                    end 
-                    
+                    end
+
                     RepBlocks[i][n][k*64 +: 64] = rep_word;
                     #10;
                 end
                 l2_repl_ready = 0;
-                
-                //Check 
+
+                //Check
                 for (int k = 0; k < words; k = k + 1) begin
                     ByteAddr = k * 4;
                     pc_f[b-1:0] = ByteAddr;
@@ -121,7 +122,7 @@ module icache_l1_dir_tb();
                 end
             end
         end
-        
+
         //Reread
         for (int i = 0; i < S; i = i + 1) begin
             SetNum = i;
@@ -136,13 +137,13 @@ module icache_l1_dir_tb();
                     `CHECK(instr_f === RepBlocks[i][n][k*32 +: 32] && instr_hit_f === 1, "[%t] Reread Read Error", $time)
                 end
             end
-            
+
         end
-        
+
         if (error_cnt == 0) $display("TEST PASSED");
         else $display("TEST FAILED");
         $finish;
     end
-              
+
 
 endmodule

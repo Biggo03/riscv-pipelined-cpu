@@ -12,8 +12,6 @@
 //
 //  Notes:        Active-high synchronous reset
 //==============================================================//
-
-
 module flop #(
     parameter int WIDTH = 32
 ) (
@@ -28,11 +26,10 @@ module flop #(
     // data_i output
     output logic [WIDTH-1:0] Q
 );
-    
+
     always @(posedge clk_i) begin
-        if (reset) Q <= 0;
-        else if (en) Q <= D;
+        if      (reset) Q <= 0;
+        else if (en)    Q <= D;
     end
-    
-   
+
 endmodule

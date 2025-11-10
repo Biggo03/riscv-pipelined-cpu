@@ -1,27 +1,28 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 09/13/2024 07:37:50 PM
-// Design Name: 
+// Design Name:
 // Module Name: datamem_TB
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name:
+// Target Devices:
+// Tool Versions:
 // Description: Testbench for datamem module
-// 
-// Dependencies: 
-// 
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
 
 module data_mem_tb();
-    
+
     // Stimulus and device outputs
     logic        clk;
     logic        WE;
@@ -44,87 +45,87 @@ module data_mem_tb();
         .WD                             (WD),
         .RD                             (RD)
     );
-    
+
     //Clock generation
     always begin
         clk = ~clk; #5;
     end
-    
+
     initial begin
 
         dump_setup;
-        
-        //Initialize input signals 
+
+        //Initialize input signals
         clk = 0; WE = 1; width_src = `WIDTH_32;
-        
+
         //Populate memory with values using word storage
         for (int i = 0; i < 64; i++) begin
-        
+
             A = (i * 4); WD = i; RDWExp[i] = i; #10;
-            
-            assert (RD === RDWExp[i]) 
-            else $fatal(1, "Error: width_src: %b.\nAddress: %d\nExpected value: %b\nActual value:   %b", 
+
+            assert (RD === RDWExp[i])
+            else $fatal(1, "Error: width_src: %b.\nAddress: %d\nExpected value: %b\nActual value:   %b",
                         width_src, A, RDWExp[i], RD);
-            
+
         end
-        
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         //set storage mode to HW
         width_src = `WIDTH_16S;
-        
+
         //Populate halfword intervals with unique values
         for (int i = 0; i < 128; i++) begin
-            
+
             A = (i * 2); WD = i; RDHWExp[i] = i; #10;
-            
+
         end
-        
+
         //Disable WE, and set intial low and high indices
         WE = 0;
-        
-       
+
+
         //Ensure values are as expected
         for (int i = 0; i < 128; i++) begin
-            
+
             A = (i * 2); #20;
-            
-            assert (RD[15:0] === RDHWExp[i]) 
-            else $fatal(1, "Error: width_src: %b.\nAddress: %d\nExpected value: %b\nActual value:   %b", 
+
+            assert (RD[15:0] === RDHWExp[i])
+            else $fatal(1, "Error: width_src: %b.\nAddress: %d\nExpected value: %b\nActual value:   %b",
                      width_src, A, RDHWExp[i], RD[15:0]);
-            
+
         end
-        
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         //set storage mode to byte, enable writing
         width_src = `WIDTH_8S; WE = 1;
-        
+
         //Populate byte intervals with unique values
         for (int i = 0; i < 256; i++) begin
-            
+
             A = i; WD = i; RDByteExp[i] = i; #10;
-            
+
         end
-        
+
         //Disable WE, and set intial byte indices
         WE = 0;
-        
+
         for (int i = 0; i < 256; i++) begin
-        
+
             A = i; #20;
-            
+
             assert(RD[7:0] === RDByteExp[i])
             else $fatal(1, "Error: width_src: %b.\nAddress: %d\nExpected byte: %b\nActual byte:   %b",
                          width_src, A, RDByteExp[i], RD[7:0]);
-        
-         
+
+
         end
-        
+
         $display("TEST PASSED");
         $finish;
-        
+
     end
-    
+
 
 endmodule

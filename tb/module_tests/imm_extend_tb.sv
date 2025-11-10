@@ -1,4 +1,7 @@
 `timescale 1ns / 1ps
+`include "misc_tasks.sv"
+`include "control_macros.sv"
+`include "tb_macros.sv"
 //////////////////////////////////////////////////////////////////////////////////
 // Company:
 // Engineer:
@@ -18,8 +21,6 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-`include "control_macros.sv"
-`include "tb_macros.sv"
 
 
 module imm_extend_tb();
