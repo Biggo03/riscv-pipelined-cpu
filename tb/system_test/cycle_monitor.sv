@@ -60,9 +60,3 @@ module cycle_monitor (
     assign retire_w = valid_w_i & ~stall_w_i;
 
 endmodule
-
-// task write_cycle_info;
-// begin
-
-// end
-// endtask;

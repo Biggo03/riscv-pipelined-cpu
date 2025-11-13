@@ -42,31 +42,31 @@ module csr_regfile (
 );
 
     // csr signal definitions
-    
+
     // Bottom 32-bits storing number of cycles
     logic [31:0] mcycle_q;
     logic [31:0] mcycle_next;
-    
+
     // Top 32-bits storing number of cycles
     logic [31:0] mcycleh_q;
     logic [31:0] mcycleh_next;
-    
+
     // Bottom 32-bits storing number of instructions retired
     logic [31:0] minstret_q;
     logic [31:0] minstret_next;
-    
+
     // Top 32-bits storing number of instructions retired
     logic [31:0] minstreth_q;
     logic [31:0] minstreth_next;
-    
+
     // machine status register (currently only used for testing)
     logic [31:0] mstatus_q;
     logic [31:0] mstatus_next;
-    
+
     // Custom Register for handelling test success/failure in simulation
     logic [31:0] mtest_status_q;
     logic [31:0] mtest_status_next;
-    
+
 
     // Write logic (only implementing specific registers as of now)
     always_ff @(posedge clk_i) begin : csr_write_ff
@@ -106,7 +106,7 @@ module csr_regfile (
         mtest_status_next = csr_we_i && (`MTEST_STATUS_ADDR == csr_waddr_i) ? csr_wdata_i : mtest_status_q;
 
         // Following registers next cycle behaviour manually generated:
-        //mcycle mcycleh minstret minstreth 
+        //mcycle mcycleh minstret minstreth
 
         // mcycle handelling
         mcycle_next = (csr_we_i && csr_waddr_i == `MCYCLE_ADDR) ? csr_wdata_i : mcycle_q + 1;

@@ -5,6 +5,7 @@ module main_mem_model (
     input  logic         reset_i,
 
     input  logic [31:0]  addr_i,
+    input  logic         ic_repl_permit_i,
     input  logic         cache_hit_i,
 
     output logic        rep_ready_o,
@@ -38,7 +39,7 @@ module main_mem_model (
         end else begin
             case (mem_state)
                 NO_REQ: begin
-                    if (~cache_hit_i) begin
+                    if (ic_repl_permit_i & ~cache_hit_i) begin
                         mem_state <= REQ;
                         cycle_cnt <= 0;
                         fetch_addr <= {addr_i[31:6], 6'b0};

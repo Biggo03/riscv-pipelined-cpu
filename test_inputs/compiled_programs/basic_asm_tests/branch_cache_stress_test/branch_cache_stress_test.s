@@ -12,10 +12,15 @@ _start:
     # - First encounter => predict NOT-TAKEN (WNT)
     # - Actual outcome = TAKEN  => MIS-PREDICT
     ############################################################
-    .align 6                  # align to 64B block boundary
+    .align 5                  # align to 32B block boundary
+    .rept 6                   # Repeat 6 NOPS so branch is in ex stage when mispredict occurs
+        nop
+    .endr
 A_branch:
     beq   x0, x0, A_taken     # always TAKEN -> initial prediction (NT) is wrong
     addi  x31, x0, 1          # WRONG-PATH: if this commits, recovery is broken
+    nop
+    nop
 A_taken:
     addi  x5, x0, 1           # harmless
 
@@ -25,7 +30,10 @@ A_taken:
     # - First encounter => predict NOT-TAKEN (WNT)
     # - Actual outcome = NOT-TAKEN => CORRECT
     ############################################################
-    .align 6
+    .align 5
+    .rept 6
+        nop
+    .endr
 B_branch:
     bne   x0, x0, B_taken     # always NOT-TAKEN -> predicted NT is correct
     addi  x5, x5, 1           # fall-through executes on the correct path
@@ -41,7 +49,10 @@ B_cont:
     # - Then place a NEW branch (first encounter) within same block
     # - Predict NOT-TAKEN (WNT), but make it TAKEN => MIS-PREDICT
     ############################################################
-    .align 6
+    .align 5
+    .rept 8
+        nop
+    .endr
 C_warm:
     addi  x6, x0, 0           # first instr in this block -> fills I$ (miss here)
 C_branch:
@@ -56,7 +67,10 @@ C_taken:
     # - Then NEW branch (first encounter) within same block
     # - Predict NOT-TAKEN (WNT) and make it NOT-TAKEN => CORRECT
     ############################################################
-    .align 6
+    .align 5
+    .rept 6
+        nop
+    .endr
 D_warm:
     addi  x7, x0, 0           # warms this block -> branch fetch will be a hit
 D_branch:

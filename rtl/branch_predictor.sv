@@ -38,7 +38,7 @@ module branch_predictor (
 
     // ---- Control signal ----
     logic [1:0] local_src;
-    
+
     ghr u_ghr (
         // Clock & reset_i
         .clk_i                          (clk_i),
@@ -52,7 +52,7 @@ module branch_predictor (
         // Control output
         .local_src_o                    (local_src)
     );
-                
+
 
     branching_buffer u_branching_buffer (
         // Clock & reset_i

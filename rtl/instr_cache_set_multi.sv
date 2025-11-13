@@ -184,7 +184,7 @@ module instr_cache_set_multi #(
     end
 
     //Output logic
-    always @(*) begin
+    always_comb begin
         if (matched_block != 0) begin
             for (i = 0; i < E; i = i + 1) begin
                 if (matched_block[i]) out_set = i;

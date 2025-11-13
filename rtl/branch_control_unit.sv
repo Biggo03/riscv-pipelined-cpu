@@ -30,17 +30,17 @@ module branch_control_unit (
     // ----- Branch resolution intermediates -----
     logic [1:0] first_stage_out;
     logic [3:0] second_stage_in;
-    
+
     assign second_stage_in = {target_match_e_i, branch_op_e_i[0], pc_src_pred_e_i, pc_src_res_e_i};
-    
+
     //Prediction logic
-    always @(*) begin
+    always_comb begin
         if (op_f_i == 2'b11 & pc_src_pred_f_i) first_stage_out = `PC_SRC_PRED_F;
         else                                   first_stage_out = `PC_SRC_SEQ_F;
     end
-    
+
     //Rollback logic
-    always @(*) begin
+    always_comb begin
         casez (second_stage_in)
             4'b0111: pc_src_o = `PC_SRC_TARGET_E;
             4'b?110: pc_src_o = `PC_SRC_SEQ_E;

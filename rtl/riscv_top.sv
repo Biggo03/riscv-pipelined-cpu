@@ -100,6 +100,7 @@ module riscv_top (
             .reset_i                        (reset_i),
 
             .addr_i                         (pc_f),
+            .ic_repl_permit_i               (ic_repl_permit),
             .cache_hit_i                    (instr_hit_f),
 
             .rep_ready_o                    (l2_repl_ready),

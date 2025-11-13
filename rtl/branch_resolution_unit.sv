@@ -30,8 +30,8 @@ module branch_resolution_unit (
     output logic       pc_src_res_o
 );
 
-    always @(*) begin
-        
+    always_comb begin
+
         case(branch_op_i)
             `NON_BRANCH: pc_src_res_o = 1'b0;
             `JUMP:       pc_src_res_o = 1'b1;
@@ -48,7 +48,7 @@ module branch_resolution_unit (
             end
             default: pc_src_res_o = 1'b0; //Unknown branch_op_i
         endcase
-    
+
     end
 
 endmodule

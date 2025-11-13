@@ -36,7 +36,7 @@ module instr_cache_ctlr #(
     // ----- Delay FSM states -----
     typedef enum logic [0:0] {
         READY_TO_DELAY = 1'b0,
-        DELAYING       = 1'b1
+        DELAY_COMPLETE       = 1'b1
     } delay_state_t;
 
     // ----- State registers -----
@@ -48,7 +48,7 @@ module instr_cache_ctlr #(
     assign instr_hit_f_o = ~miss_array_i[set_i];
 
     // Determines if signal active
-    assign ic_repl_permit_o = ((branch_op_e_i == `NON_BRANCH) | instr_hit_f_o | present_state) & ~pc_src_reg_i[1];
+    assign ic_repl_permit_o = reset_i ? 1'b0 : ((branch_op_e_i == `NON_BRANCH) | instr_hit_f_o | present_state) & ~pc_src_reg_i[1];
 
     // State update logic
     always_ff @(posedge clk_i) begin
@@ -60,8 +60,8 @@ module instr_cache_ctlr #(
     always_comb begin
         next_state = present_state;
         case (present_state)
-            READY_TO_DELAY: if (~ic_repl_permit_o)                  next_state = DELAYING;
-            DELAYING:       if (instr_hit_f_o | pc_src_reg_i[1])    next_state = READY_TO_DELAY;
+            READY_TO_DELAY: if (~ic_repl_permit_o)                  next_state = DELAY_COMPLETE;
+            DELAY_COMPLETE:       if (instr_hit_f_o | pc_src_reg_i[1])    next_state = READY_TO_DELAY;
             default: next_state = READY_TO_DELAY;
         endcase
     end
