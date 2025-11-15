@@ -45,18 +45,18 @@ module instr_cache_set_multi #(
 
     // ----- tag_i + validity -----
     logic [num_tag_bits-1:0] block_tags   [E-1:0];
-    logic [E-1:0]            valid_bits;
+    logic [E-1:0]            valid_bits_d, valid_bits_q;
     logic [E-1:0]            matched_block;
 
     // ----- Replacement policy -----
-    logic [$clog2(E)-1:0]       lru_bits      [E-1:0];
+    logic [$clog2(E)-1:0]       lru_bits_d [E-1:0];
+    logic [$clog2(E)-1:0]       lru_bits_q [E-1:0];
     logic [$clog2(E)-1:0]       last_lru_status;
-    logic [$clog2(E)-1:0]       next_fill;
-    logic [$clog2(E)-1:0]       removed_block;
+    logic [$clog2(E)-1:0]       next_fill_d, next_fill_q;
+    logic [$clog2(E)-1:0]       removal_block_d, removal_block_q;
     logic [$clog2(words)-1:0]   rep_counter;
     logic                       ic_rep_active;
     logic                       rep_complete;
-    logic                       rep_begin;
 
     // ----- data storage -----
     (* ram_style = "distributed" *)
@@ -66,6 +66,15 @@ module instr_cache_set_multi #(
     logic [$clog2(words)-1:0] block_offset;
     logic [$clog2(E)-1:0]     out_set;
 
+    // ----- state machine state type -----
+    typedef enum logic [1:0] {
+        MONITOR     = 2'b01,
+        REPLACE     = 2'b10
+    } icache_state_t;
+
+    icache_state_t icache_state;
+    icache_state_t next_icache_state;
+
     // ----- Looping constructs -----
     integer i;
     genvar n;
@@ -73,7 +82,7 @@ module instr_cache_set_multi #(
     assign ic_rep_active = cache_set_miss_o && active_set_i && ic_repl_grant_i;
 
     //tag_i and valid comparison logic
-    always @(*) begin
+    always_comb begin
 
         matched_block = 0;
         cache_set_miss_o = 1;
@@ -82,9 +91,9 @@ module instr_cache_set_multi #(
         if (active_set_i) begin
              //Determine if a block matches
             for (i = 0; i < E; i = i + 1) begin
-                if (valid_bits[i] == 1 && tag_i == block_tags[i]) begin
+                if (valid_bits_q[i] == 1 && tag_i == block_tags[i]) begin
                     matched_block[i] = 1;
-                    last_lru_status = lru_bits[i];
+                    last_lru_status = lru_bits_q[i];
                 end else begin
                     matched_block[i] = 0;
                 end
@@ -97,72 +106,110 @@ module instr_cache_set_multi #(
         end
     end
 
-    //block_i to remove logic
-    always @(posedge clk_i) begin
-        if (cache_set_miss_o && active_set_i && ~rep_begin) begin
-            if (valid_bits == {E{1'b1}}) begin
-                for (i = 0; i < E; i = i + 1) begin
-                    if (lru_bits[i] == E-1) begin
-                        removed_block <= i;
-                    end
-                end
-            end else begin
-                removed_block <= next_fill;
+
+    always_ff @(posedge clk_i) begin : icache_fsm_seq
+        if (reset_i) begin
+            icache_state    <= MONITOR;
+            valid_bits_q    <= 0;
+            next_fill_q     <= 0;
+            removal_block_q <= 0;
+
+            for (i = 0; i < E; i = i + 1) begin
+                lru_bits_q[i] <= 0;
+            end
+        end else begin
+            icache_state    <= next_icache_state;
+            valid_bits_q    <= valid_bits_d;
+            next_fill_q     <= next_fill_d;
+            removal_block_q <= removal_block_d;
+
+            for (i = 0; i < E; i = i + 1) begin
+                lru_bits_q[i] <= lru_bits_d[i];
             end
         end
     end
 
-    //LRU and ValidBit updates
-    always @(posedge clk_i) begin
+    always_comb begin : icache_fsm_comb
 
-        //reset_i logic
-        if (reset_i) begin
-            valid_bits <= 0;
-            next_fill <= 0;
-            rep_begin <= 0;
-            for (i = 0; i < E; i = i + 1) begin
-                lru_bits[i] <= 0;
-            end
+        unique case (icache_state)
+            MONITOR:
+            begin
+                next_fill_d  = next_fill_q;
+                valid_bits_d = valid_bits_q;
 
-        //Handle block_i Replacement LRU and ValidBit updates
-        end else if (ic_rep_active && ~rep_begin) begin
-            rep_begin <= 1;
+                // No replacement, update LRU bits
+                if (active_set_i && ~cache_set_miss_o) begin
+                    next_icache_state = MONITOR;
 
-            //Replace when sets full of valid data
-            if (valid_bits == {E{1'b1}}) begin
-                for (i = 0; i < E; i = i + 1) begin
-                    if (lru_bits[i] == E-1) begin
-                        lru_bits[removed_block] <= 0;
-                    end else begin
-                        lru_bits[i] <= lru_bits[i] + 1;
+                    for (i = 0; i < E; i = i + 1) begin
+                        if (~matched_block[i] && valid_bits_q[i] && lru_bits_q[i] < last_lru_status) begin
+                            lru_bits_d[i] = lru_bits_q[i] + 1;
+                        end else if (matched_block[i]) begin
+                            lru_bits_d[i] = 0;
+                        end else begin
+                            lru_bits_d[i] = lru_bits_q[i];
+                        end
+                    end
+
+                // update lru bits and replace
+                end else if (ic_rep_active && valid_bits_q == '1) begin
+                    next_icache_state = REPLACE;
+
+                    for (i = 0; i < E; i = i + 1) begin
+                        if (lru_bits_q[i] == E-1) lru_bits_d[i] = 0;
+                        else                      lru_bits_d[i] = lru_bits_q[i] + 1;
+                    end
+
+                // Update LRU bits and fill cache
+                end else if (ic_rep_active) begin
+                    next_icache_state = REPLACE;
+                    next_fill_d = next_fill_q + 1;
+
+                    for (i = 0; i < E; i = i + 1) begin
+                        if      (i == next_fill_q) lru_bits_d[i] = 0;
+                        else if (i < next_fill_q)  lru_bits_d[i] = lru_bits_q[i] + 1;
+                        else                       lru_bits_d[i] = lru_bits_q[i];
+                    end
+
+                end else begin
+                    next_icache_state = MONITOR;
+                    for (i = 0; i < E; i = i + 1) begin
+                        lru_bits_d[i] = lru_bits_q[i];
                     end
                 end
 
-            //Populate cache with data
-            end else begin
-                lru_bits[removed_block] <= 0;
-                valid_bits[removed_block] <= 1;
-                next_fill <= next_fill + 1;
-                for (i = 0; i < E; i = i + 1) begin
-                    if (i < next_fill) begin
-                        lru_bits[i] <= lru_bits[i] + 1;
+                if (valid_bits_q == '1) begin
+                    for (i = 0; i < E; i = i + 1) begin
+                        if (lru_bits_q[i] == E-1) removal_block_d = i;
+                        else                      removal_block_d = removal_block_q;
                     end
+                end else begin
+                    removal_block_d = next_fill_q;
                 end
+
             end
 
-        //Handle LRU updates on non-replacing accesses
-        end else if (active_set_i && ~cache_set_miss_o) begin
-            rep_begin <= 0;
-            for (i = 0; i < E; i = i + 1) begin
-                if (~matched_block[i] && valid_bits[i] && lru_bits[i] < last_lru_status) begin
-                    lru_bits[i] <= lru_bits[i] + 1;
-                end else if (matched_block[i]) begin
-                    lru_bits[i] <= 0;
+            REPLACE:
+            begin
+                next_fill_d     = next_fill_q;
+                removal_block_d = removal_block_q;
+
+                for (i = 0; i < E; i = i + 1) begin
+                    lru_bits_d[i] = lru_bits_q[i];
+                end
+
+                if (rep_complete) begin
+                    next_icache_state = MONITOR;
+                    for (i = 0; i < E; i = i + 1) begin
+                        if (i == removal_block_q) valid_bits_d[i] = 1'b1;
+                        else                      valid_bits_d[i] = valid_bits_q[i];
+                    end
+                end else begin
+                    next_icache_state = REPLACE;
+                    valid_bits_d = valid_bits_q;
                 end
             end
-        end else if (rep_complete) begin
-            rep_begin <= 0;
-        end
+        endcase
     end
 
     assign rep_complete = rep_counter == (words/2)-1;
@@ -170,11 +217,11 @@ module instr_cache_set_multi #(
     //Replacement logic
     always @(posedge clk_i) begin
         if (ic_rep_active) begin
-            set_data[(removed_block*words/2) + rep_counter] <= rep_word_i;
+            set_data[(removal_block_q*words/2) + rep_counter] <= rep_word_i;
             //Replace tag and reset_i counter when replacement complete
             if (rep_complete) begin
                 rep_counter <= 0;
-                block_tags[removed_block] <= tag_i;
+                block_tags[removal_block_q] <= tag_i;
             end else begin
                 rep_counter <= rep_counter + 1;
             end
