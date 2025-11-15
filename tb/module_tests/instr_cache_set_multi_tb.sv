@@ -42,11 +42,11 @@ module instr_cache_set_multi_tb();
         assert(cache_set_miss === 1) else $fatal(1, "Incorrectly indicated cache hit\nData Output: %b", data_o);
     endtask
 
-    //Task for checking lru_bits_q are as expected
+    //Task for checking lru_bits are as expected
     task Assertlru_bits(input string identifier);
         $display("%s", identifier);
         for (integer i = 0; i < E; i = i + 1) begin
-            assert(u_DUT.lru_bits_q[i] === lru_bits_e[i]) else $fatal(1, "Unexpected LRU ordering. Incorrect LRU index: %d\nActual: %d\nExpected: %d", i, u_DUT.lru_bits_q[i], lru_bits_e[i]);
+            assert(u_DUT.lru_bits[i] === lru_bits_e[i]) else $fatal(1, "Unexpected LRU ordering. Incorrect LRU index: %d\nActual: %d\nExpected: %d", i, u_DUT.lru_bits[i], lru_bits_e[i]);
         end
 
     endtask
@@ -61,8 +61,7 @@ module instr_cache_set_multi_tb();
         dump_setup;
 
         for (int i = 0; i < 4; i++) begin
-            $dumpvars(0, u_DUT.lru_bits_q[i]);
-            $dumpvars(0, u_DUT.lru_bits_d[i]);
+            $dumpvars(0, u_DUT.lru_bits[i]);
         end
 
         //Initialization
@@ -171,7 +170,7 @@ module instr_cache_set_multi_tb();
         Assertlru_bits("Replacement policy check");
         assert(data_o === RepBlock[(block*8) +: 32] && cache_set_miss === 0) else $fatal(1, "Incorrectly reading data on hit (test 2)\nData:          %h\nExpected data: %h", data_o, RepBlock[(block*8) +: 32]);
 
-        //Check that lru_bits_q update properly when a stored tag is accessed
+        //Check that lru_bits update properly when a stored tag is accessed
         ic_repl_grant_i = 0; tag = block_tags_e[1]; //block 1's tag
         for (int i = 0; i < E; i = i + 1) begin
             if (block_tags_e[i] == tag) lru_bits_e[i] = 0;
