@@ -49,31 +49,48 @@ module decode_stage (
     output logic        valid_d_o
 );
 
-    // ----- Pipeline data type -----
+    // ----- Pipeline data types -----
     typedef struct packed {
-        logic        valid;
-        logic [31:0] instr;
         logic [31:0] pc;
+        logic [31:0] instr;
+        logic        valid;
+    } de_meta_t;
+
+    typedef struct packed {
+        logic        pc_src_pred;
+    } de_control_t;
+
+    typedef struct packed {
         logic [31:0] pc_plus4;
         logic [31:0] pred_pc_target;
-        logic        pc_src_pred;
-    } decode_signals_t;
+    } de_data_t;
+
+    typedef struct packed {
+        de_meta_t    meta;
+        de_control_t control;
+        de_data_t    data;
+    } de_bundle_t;
 
 
     // ----- Parameters -----
-    localparam REG_WIDTH = $bits(decode_signals_t);
+    localparam REG_WIDTH = $bits(de_bundle_t);
 
     // ----- Decode pipeline register -----
-    decode_signals_t  inputs_d;
-    decode_signals_t  outputs_d;
+    de_bundle_t  inputs_d;
+    de_bundle_t  outputs_d;
 
     assign inputs_d = {
-        1'b1,
-        instr_f_i,
+        // Meta Signals
         pc_f_i,
+        instr_f_i,
+        1'b1,
+
+        // Control Signals
+        pc_src_pred_f_i,
+
+        // Data Signals
         pc_plus4_f_i,
-        pred_pc_target_f_i,
-        pc_src_pred_f_i
+        pred_pc_target_f_i
     };
 
     flop #(
@@ -92,12 +109,17 @@ module decode_stage (
     );
 
     assign {
-        valid_d_o,
-        instr_d_o,
+        // Meta Signals
         pc_d_o,
+        instr_d_o,
+        valid_d_o,
+
+        // Control Signals
+        pc_src_pred_d_o,
+
+        // Data Signals
         pc_plus4_d_o,
-        pred_pc_target_d_o,
-        pc_src_pred_d_o
+        pred_pc_target_d_o
     } = outputs_d;
 
     // decode instruction fields

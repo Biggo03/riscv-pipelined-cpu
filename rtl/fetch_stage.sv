@@ -35,7 +35,7 @@ module fetch_stage (
 
     // ---- Intermediate signal ----
     logic [31:0] pc_next_f;
-    
+
     //pc Register logic
     always_comb begin
         case(pc_src_i)
@@ -46,7 +46,7 @@ module fetch_stage (
             default:          pc_next_f = '0;
         endcase
     end
-        
+
     flop u_pc_reg (
         // Clock & reset_i
         .clk_i                          (clk_i),

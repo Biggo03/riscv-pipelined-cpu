@@ -51,31 +51,42 @@ module writeback_stage (
     output logic        reg_write_w_o,
     output logic        csr_we_w_o
 );
-
     // ----- Pipeline data type -----
     typedef struct packed {
         logic [31:0] instr;
         logic        valid;
+    } wb_meta_t;
+
+    typedef struct packed {
+        logic [2:0]  result_src;
+        logic        reg_write;
+        logic        csr_we;
+    } wb_control_t;
+
+    typedef struct packed {
+        logic [4:0]  rd;
         logic [31:0] alu_result;
         logic [31:0] reduced_data;
         logic [31:0] pc_target;
         logic [31:0] pc_plus4;
         logic [31:0] imm_ext;
         logic [31:0] csr_result;
-        logic [31:0] csr_data;
         logic [11:0] csr_addr;
-        logic [4:0]  rd;
-        logic [2:0]  result_src;
-        logic        reg_write;
-        logic        csr_we;
-    } writeback_signals_t;
+        logic [31:0] csr_data;
+    } wb_data_t;
+
+    typedef struct packed {
+        wb_meta_t    meta;
+        wb_control_t control;
+        wb_data_t    data;
+    } wb_bundle_t;
 
     // ----- Parameters -----
-    localparam REG_WIDTH = $bits(writeback_signals_t);
+    localparam REG_WIDTH = $bits(wb_bundle_t);
 
     // ----- Writeback pipeline register -----
-    writeback_signals_t inputs_w;
-    writeback_signals_t outputs_w;
+    wb_bundle_t inputs_w;
+    wb_bundle_t outputs_w;
 
     // ----- Writeback stage outputs -----
     logic [31:0] imm_ext_w;
@@ -87,20 +98,25 @@ module writeback_stage (
     logic [2:0]  result_src_w;
 
     assign inputs_w = {
+        // Meta Signals
         instr_m_i,
         valid_m_i,
+
+        // Control Signals
+        result_src_m_i,
+        reg_write_m_i,
+        csr_we_m_i,
+
+        // Data Signals
+        rd_m_i,
         alu_result_m_i,
         reduced_data_m_i,
         pc_target_m_i,
         pc_plus4_m_i,
         imm_ext_m_i,
         csr_result_m_i,
-        csr_data_m_i,
         csr_addr_m_i,
-        rd_m_i,
-        result_src_m_i,
-        reg_write_m_i,
-        csr_we_m_i
+        csr_data_m_i
     };
 
     flop #(
@@ -119,20 +135,25 @@ module writeback_stage (
     );
 
     assign {
+        // Meta Signals
         instr_w_o,
         valid_w_o,
+
+        // Control Signals
+        result_src_w,
+        reg_write_w_o,
+        csr_we_w_o,
+
+        // Data Signals
+        rd_w_o,
         alu_result_w,
         reduced_data_w,
         pc_target_w,
         pc_plus4_w,
         imm_ext_w,
         csr_result_w_o,
-        csr_data_w,
         csr_addr_w_o,
-        rd_w_o,
-        result_src_w,
-        reg_write_w_o,
-        csr_we_w_o
+        csr_data_w
     } = outputs_w;
 
     // result mux

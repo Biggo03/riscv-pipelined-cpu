@@ -239,8 +239,8 @@ def gen_run_cmd(test_name, test_info, dir_paths, defines):
         if (data_match):
             data_path = data_match.resolve()
             defines.append(f"DATA_HEX_FILE=\"{data_path}\"")
-        else:
-            test_logger.info(f"No data file for: {test_name}")
+        elif ("c_program" in test_info["tag"]):
+            test_logger.warning(f"Could not find data file for : {test_name}")
 
     # --- Flags ---
     iverilog_flags = [

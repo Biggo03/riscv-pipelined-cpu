@@ -90,42 +90,54 @@ module execute_stage (
     output logic        target_match_e_o
 );
 
-    // ----- Pipeline data type -----
+    // ----- Pipeline data types -----
     typedef struct packed {
+        logic [31:0] pc;
         logic [31:0] instr;
         logic        valid;
-        logic [1:0]  branch_op;
-        logic [2:0]  width_src;
-        logic [2:0]  result_src;
-        logic        mem_write;
+    } ex_meta_t;
+
+    typedef struct packed {
+        logic [2:0]  funct3;
         logic [3:0]  alu_control;
-        logic        pc_base_src;
         logic        alu_src;
+        logic [2:0]  result_src;
+        logic [2:0]  width_src;
+        logic [1:0]  branch_op;
+        logic        pc_base_src;
+        logic        pc_src_pred;
+        logic        mem_write;
         logic        reg_write;
-        logic        csr_we;
         logic [1:0]  csr_control;
+        logic        csr_we;
         logic        csr_src;
-        logic [11:0] csr_addr;
-        logic [31:0] csr_data;
+    } ex_control_t;
+
+    typedef struct packed {
         logic [4:0]  rd;
         logic [4:0]  rs1;
         logic [4:0]  rs2;
-        logic [2:0]  funct3;
         logic [31:0] reg_data_1;
         logic [31:0] reg_data_2;
         logic [31:0] imm_ext;
-        logic [31:0] pc;
         logic [31:0] pc_plus4;
         logic [31:0] pred_pc_target;
-        logic        pc_src_pred;
-    } execution_signals_t;
+        logic [11:0] csr_addr;
+        logic [31:0] csr_data;
+    } ex_data_t;
+
+    typedef struct packed {
+        ex_meta_t    meta;
+        ex_control_t control;
+        ex_data_t    data;
+    } ex_bundle_t;
 
     // ----- Parameters -----
-    localparam REG_WIDTH = $bits(execution_signals_t);
+    localparam REG_WIDTH = $bits(ex_bundle_t);
 
     // ----- Execute pipeline register -----
-    execution_signals_t inputs_e;
-    execution_signals_t outputs_e;
+    ex_bundle_t inputs_e;
+    ex_bundle_t outputs_e;
 
     // ----- Execute stage outputs -----
     logic [31:0] reg_data_1_e;
@@ -145,32 +157,37 @@ module execute_stage (
     logic [31:0] csr_rdata_e;
 
     assign inputs_e = {
+        // Meta Signals
+        pc_d_i,
         instr_d_i,
         valid_d_i,
-        branch_op_d_i,
-        width_src_d_i,
-        result_src_d_i,
-        mem_write_d_i,
+
+        // Control Signals
+        funct3_d_i,
         alu_control_d_i,
-        pc_base_src_d_i,
         alu_src_d_i,
+        result_src_d_i,
+        width_src_d_i,
+        branch_op_d_i,
+        pc_base_src_d_i,
+        pc_src_pred_d_i,
+        mem_write_d_i,
         reg_write_d_i,
-        csr_we_d_i,
         csr_control_d_i,
+        csr_we_d_i,
         csr_src_d_i,
-        csr_addr_d_i,
-        csr_rdata_d_i,
+
+        // Data Signals
         rd_d_i,
         rs1_d_i,
         rs2_d_i,
-        funct3_d_i,
         reg_data_1_d_i,
         reg_data_2_d_i,
         imm_ext_d_i,
-        pc_d_i,
         pc_plus4_d_i,
         pred_pc_target_d_i,
-        pc_src_pred_d_i
+        csr_addr_d_i,
+        csr_rdata_d_i
     };
 
     flop #(
@@ -189,32 +206,37 @@ module execute_stage (
     );
 
     assign {
+        // Meta Signals
+        pc_e_o,
         instr_e_o,
         valid_e_o,
-        branch_op_e_o,
-        width_src_e_o,
-        result_src_e_o,
-        mem_write_e_o,
+
+        // Control Signals
+        funct3_e_o,
         alu_control_e,
-        pc_base_src_e,
         alu_src_e,
+        result_src_e_o,
+        width_src_e_o,
+        branch_op_e_o,
+        pc_base_src_e,
+        pc_src_pred_e_o,
+        mem_write_e_o,
         reg_write_e_o,
-        csr_we_e_o,
         csr_control_e,
+        csr_we_e_o,
         csr_src_e,
-        csr_addr_e_o,
-        csr_rdata_e,
+
+        // Data Signals
         rd_e_o,
         rs1_e_o,
         rs2_e_o,
-        funct3_e_o,
         reg_data_1_e,
         reg_data_2_e,
         imm_ext_e_o,
-        pc_e_o,
         pc_plus4_e_o,
         pred_pc_target_e,
-        pc_src_pred_e_o
+        csr_addr_e_o,
+        csr_rdata_e
     } = outputs_e;
 
    // Check Branch Prediction
