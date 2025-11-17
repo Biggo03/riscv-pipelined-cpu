@@ -19,34 +19,34 @@ module decode_stage (
     input  logic        reset_i,
 
     // Data inputs
-    input  logic [31:0] instr_f_i,
-    input  logic [31:0] pc_f_i,
-    input  logic [31:0] pc_plus4_f_i,
-    input  logic [31:0] pred_pc_target_f_i,
-    input  logic        pc_src_pred_f_i,
+    input  logic [31:0] instr_fi_i,
+    input  logic [31:0] pc_fi_i,
+    input  logic [31:0] pc_plus4_fi_i,
+    input  logic [31:0] pred_pc_target_fi_i,
+    input  logic        pc_src_pred_fi_i,
 
     // Control inputs
-    input  logic [2:0]  imm_src_d_i,
-    input  logic        stall_d_i,
-    input  logic        flush_d_i,
+    input  logic [2:0]  imm_src_de_i,
+    input  logic        stall_de_i,
+    input  logic        flush_de_i,
 
     // Data outputs
-    output logic [31:0] instr_d_o,
-    output logic [31:0] imm_ext_d_o,
-    output logic [31:0] pc_d_o,
-    output logic [31:0] pc_plus4_d_o,
-    output logic [31:0] pred_pc_target_d_o,
-    output logic [11:0] csr_addr_d_o,
-    output logic [4:0]  rd_d_o,
-    output logic [4:0]  rs1_d_o,
-    output logic [4:0]  rs2_d_o,
-    output logic [6:0]  op_d_o,
-    output logic [2:0]  funct3_d_o,
-    output logic [6:0]  funct7_d_o,
-    output logic        pc_src_pred_d_o,
+    output logic [31:0] instr_de_o,
+    output logic [31:0] imm_ext_de_o,
+    output logic [31:0] pc_de_o,
+    output logic [31:0] pc_plus4_de_o,
+    output logic [31:0] pred_pc_target_de_o,
+    output logic [11:0] csr_addr_de_o,
+    output logic [4:0]  rd_de_o,
+    output logic [4:0]  rs1_de_o,
+    output logic [4:0]  rs2_de_o,
+    output logic [6:0]  op_de_o,
+    output logic [2:0]  funct3_de_o,
+    output logic [6:0]  funct7_de_o,
+    output logic        pc_src_pred_de_o,
 
     // Control outputs
-    output logic        valid_d_o
+    output logic        valid_de_o
 );
 
     // ----- Pipeline data types -----
@@ -76,21 +76,21 @@ module decode_stage (
     localparam REG_WIDTH = $bits(de_bundle_t);
 
     // ----- Decode pipeline register -----
-    de_bundle_t  inputs_d;
-    de_bundle_t  outputs_d;
+    de_bundle_t  inputs_de;
+    de_bundle_t  outputs_de;
 
-    assign inputs_d = {
+    assign inputs_de = {
         // Meta Signals
-        pc_f_i,
-        instr_f_i,
+        pc_fi_i,
+        instr_fi_i,
         1'b1,
 
         // Control Signals
-        pc_src_pred_f_i,
+        pc_src_pred_fi_i,
 
         // Data Signals
-        pc_plus4_f_i,
-        pred_pc_target_f_i
+        pc_plus4_fi_i,
+        pred_pc_target_fi_i
     };
 
     flop #(
@@ -98,49 +98,49 @@ module decode_stage (
     ) u_flop_decode_reg (
         // Clock & reset_i
         .clk_i                          (clk_i),
-        .reset                          (reset_i | flush_d_i),
-        .en                             (~stall_d_i),
+        .reset                          (reset_i | flush_de_i),
+        .en                             (~stall_de_i),
 
         // data input
-        .D                              (inputs_d),
+        .D                              (inputs_de),
 
         // data output
-        .Q                              (outputs_d)
+        .Q                              (outputs_de)
     );
 
     assign {
         // Meta Signals
-        pc_d_o,
-        instr_d_o,
-        valid_d_o,
+        pc_de_o,
+        instr_de_o,
+        valid_de_o,
 
         // Control Signals
-        pc_src_pred_d_o,
+        pc_src_pred_de_o,
 
         // Data Signals
-        pc_plus4_d_o,
-        pred_pc_target_d_o
-    } = outputs_d;
+        pc_plus4_de_o,
+        pred_pc_target_de_o
+    } = outputs_de;
 
     // decode instruction fields
-    assign rd_d_o = instr_d_o[11:7];
-    assign rs1_d_o = instr_d_o[19:15];
-    assign rs2_d_o = instr_d_o[24:20];
-    assign csr_addr_d_o = instr_d_o[31:20];
+    assign rd_de_o = instr_de_o[11:7];
+    assign rs1_de_o = instr_de_o[19:15];
+    assign rs2_de_o = instr_de_o[24:20];
+    assign csr_addr_de_o = instr_de_o[31:20];
 
-    assign op_d_o = instr_d_o[6:0];
-    assign funct3_d_o = instr_d_o[14:12];
-    assign funct7_d_o[5] = instr_d_o[30];
+    assign op_de_o = instr_de_o[6:0];
+    assign funct3_de_o = instr_de_o[14:12];
+    assign funct7_de_o[5] = instr_de_o[30];
 
     imm_extend u_imm_extend (
         // Instruction input
-        .instr_i                        (instr_d_o[31:7]),
+        .instr_i                        (instr_de_o[31:7]),
 
         // Control input
-        .imm_src_i                      (imm_src_d_i),
+        .imm_src_i                      (imm_src_de_i),
 
         // data output
-        .imm_ext_o                      (imm_ext_d_o)
+        .imm_ext_o                      (imm_ext_de_o)
     );
 
 endmodule

@@ -21,29 +21,29 @@ module fetch_stage (
 
     // Control inputs
     input  logic [1:0]  pc_src_i,
-    input  logic        stall_f_i,
+    input  logic        stall_fi_i,
 
     // pc inputs
-    input  logic [31:0] pc_target_e_i,
-    input  logic [31:0] pc_plus4_e_i,
-    input  logic [31:0] pred_pc_target_f_i,
+    input  logic [31:0] pc_target_ex_i,
+    input  logic [31:0] pc_plus4_ex_i,
+    input  logic [31:0] pred_pc_target_fi_i,
 
     // pc outputs
-    output logic [31:0] pc_f_o,
-    output logic [31:0] pc_plus4_f_o
+    output logic [31:0] pc_fi_o,
+    output logic [31:0] pc_plus4_fi_o
 );
 
     // ---- Intermediate signal ----
-    logic [31:0] pc_next_f;
+    logic [31:0] pc_next_fi;
 
     //pc Register logic
     always_comb begin
         case(pc_src_i)
-            `PC_SRC_SEQ_F:    pc_next_f = pc_plus4_f_o;
-            `PC_SRC_PRED_F:   pc_next_f = pred_pc_target_f_i;
-            `PC_SRC_SEQ_E:    pc_next_f = pc_plus4_e_i;
-            `PC_SRC_TARGET_E: pc_next_f = pc_target_e_i;
-            default:          pc_next_f = '0;
+            `PC_SRC_SEQ_F:    pc_next_fi = pc_plus4_fi_o;
+            `PC_SRC_PRED_F:   pc_next_fi = pred_pc_target_fi_i;
+            `PC_SRC_SEQ_E:    pc_next_fi = pc_plus4_ex_i;
+            `PC_SRC_TARGET_E: pc_next_fi = pc_target_ex_i;
+            default:          pc_next_fi = '0;
         endcase
     end
 
@@ -51,22 +51,22 @@ module fetch_stage (
         // Clock & reset_i
         .clk_i                          (clk_i),
         .reset                          (reset_i),
-        .en                             (~stall_f_i),
+        .en                             (~stall_fi_i),
 
         // data_i input
-        .D                              (pc_next_f),
+        .D                              (pc_next_fi),
 
         // data_i output
-        .Q                              (pc_f_o)
+        .Q                              (pc_fi_o)
     );
 
     adder u_adder_pc_plus4 (
         // data_i inputs
-        .a                              (pc_f_o),
+        .a                              (pc_fi_o),
         .b                              (4),
 
         // data_i output
-        .y                              (pc_plus4_f_o)
+        .y                              (pc_plus4_fi_o)
     );
 
 endmodule

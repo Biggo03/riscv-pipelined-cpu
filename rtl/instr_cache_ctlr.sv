@@ -25,11 +25,11 @@ module instr_cache_ctlr #(
     input  logic [$clog2(S)-1:0]  set_i,
     input  logic [S-1:0]          miss_array_i,
     input  logic [1:0]            pc_src_reg_i,
-    input  logic [1:0]            branch_op_e_i,
+    input  logic [1:0]            branch_op_ex_i,
 
     // Control outputs
     output logic [S-1:0]          active_array_o,
-    output logic                  instr_hit_f_o,
+    output logic                  instr_hit_fi_o,
     output logic                  ic_repl_permit_o
 );
 
@@ -45,10 +45,10 @@ module instr_cache_ctlr #(
 
     // Decode input set
     assign active_array_o = 1'b1 << set_i;
-    assign instr_hit_f_o = ~miss_array_i[set_i];
+    assign instr_hit_fi_o = ~miss_array_i[set_i];
 
     // Determines if signal active
-    assign ic_repl_permit_o = reset_i ? 1'b0 : ((branch_op_e_i == `NON_BRANCH) | instr_hit_f_o | present_state) & ~pc_src_reg_i[1];
+    assign ic_repl_permit_o = reset_i ? 1'b0 : ((branch_op_ex_i == `NON_BRANCH) | instr_hit_fi_o | present_state) & ~pc_src_reg_i[1];
 
     // State update logic
     always_ff @(posedge clk_i) begin
@@ -61,7 +61,7 @@ module instr_cache_ctlr #(
         next_state = present_state;
         case (present_state)
             READY_TO_DELAY: if (~ic_repl_permit_o)                  next_state = DELAY_COMPLETE;
-            DELAY_COMPLETE:       if (instr_hit_f_o | pc_src_reg_i[1])    next_state = READY_TO_DELAY;
+            DELAY_COMPLETE:       if (instr_hit_fi_o | pc_src_reg_i[1])    next_state = READY_TO_DELAY;
             default: next_state = READY_TO_DELAY;
         endcase
     end

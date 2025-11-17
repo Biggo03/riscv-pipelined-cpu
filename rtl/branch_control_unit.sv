@@ -16,12 +16,12 @@
 
 module branch_control_unit (
     // Control inputs
-    input  logic [1:0] op_f_i,
-    input  logic       pc_src_pred_f_i,
-    input  logic       pc_src_pred_e_i,
-    input  logic [1:0] branch_op_e_i,
-    input  logic       target_match_e_i,
-    input  logic       pc_src_res_e_i,
+    input  logic [1:0] op_fi_i,
+    input  logic       pc_src_pred_fi_i,
+    input  logic       pc_src_pred_ex_i,
+    input  logic [1:0] branch_op_ex_i,
+    input  logic       target_match_ex_i,
+    input  logic       pc_src_res_ex_i,
 
     // Control outputs
     output logic [1:0] pc_src_o
@@ -31,11 +31,11 @@ module branch_control_unit (
     logic [1:0] first_stage_out;
     logic [3:0] second_stage_in;
 
-    assign second_stage_in = {target_match_e_i, branch_op_e_i[0], pc_src_pred_e_i, pc_src_res_e_i};
+    assign second_stage_in = {target_match_ex_i, branch_op_ex_i[0], pc_src_pred_ex_i, pc_src_res_ex_i};
 
     //Prediction logic
     always_comb begin
-        if (op_f_i == 2'b11 & pc_src_pred_f_i) first_stage_out = `PC_SRC_PRED_F;
+        if (op_fi_i == 2'b11 & pc_src_pred_fi_i) first_stage_out = `PC_SRC_PRED_F;
         else                                   first_stage_out = `PC_SRC_SEQ_F;
     end
 

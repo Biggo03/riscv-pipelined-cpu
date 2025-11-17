@@ -26,17 +26,17 @@ module icache_l1 #(
     // Control inputs
     input  logic        l2_repl_ready_i,
     input  logic [1:0]  pc_src_reg_i,
-    input  logic [1:0]  branch_op_e_i,
+    input  logic [1:0]  branch_op_ex_i,
 
     // Address & data inputs
-    input  logic [31:0] pc_f_i,
+    input  logic [31:0] pc_fi_i,
     input  logic [63:0] rep_word_i,
 
     // data outputs
-    output logic [31:0] instr_f_o,
+    output logic [31:0] instr_fi_o,
 
     // Status outputs
-    output logic        instr_hit_f_o,
+    output logic        instr_hit_fi_o,
     output logic        ic_repl_permit_o
 );
 
@@ -58,9 +58,9 @@ module icache_l1 #(
     // ----- Replacement control -----
     logic ic_repl_grant;
 
-    assign block = pc_f_i[b-1:0];
-    assign set = pc_f_i[s+b-1:b];
-    assign tag = pc_f_i[31:s+b];
+    assign block = pc_fi_i[b-1:0];
+    assign set = pc_fi_i[s+b-1:b];
+    assign tag = pc_fi_i[31:s+b];
 
     assign ic_repl_grant = ic_repl_permit_o & l2_repl_ready_i;
 
@@ -109,15 +109,15 @@ module icache_l1 #(
         .set_i                          (set),
         .miss_array_i                   (miss_array),
         .pc_src_reg_i                   (pc_src_reg_i),
-        .branch_op_e_i                  (branch_op_e_i),
+        .branch_op_ex_i                  (branch_op_ex_i),
 
         // Control outputs
         .active_array_o                 (active_array),
-        .instr_hit_f_o                  (instr_hit_f_o),
+        .instr_hit_fi_o                  (instr_hit_fi_o),
         .ic_repl_permit_o               (ic_repl_permit_o)
     );
 
     //Assign output
-    assign instr_f_o = data_array[set];
+    assign instr_fi_o = data_array[set];
 
 endmodule

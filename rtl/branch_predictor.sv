@@ -19,21 +19,21 @@ module branch_predictor (
     input  logic        reset_i,
 
     // Pipeline control inputs
-    input  logic        stall_e_i,
+    input  logic        stall_ex_i,
 
     // pc inputs
-    input  logic [9:0]  pc_f_i,
-    input  logic [9:0]  pc_e_i,
-    input  logic [31:0] pc_target_e_i,
+    input  logic [9:0]  pc_fi_i,
+    input  logic [9:0]  pc_ex_i,
+    input  logic [31:0] pc_target_ex_i,
 
     // Branch resolution inputs
-    input  logic        pc_src_res_e_i,
-    input  logic        target_match_e_i,
-    input  logic [1:0]  branch_op_e_i,
+    input  logic        pc_src_res_ex_i,
+    input  logic        target_match_ex_i,
+    input  logic [1:0]  branch_op_ex_i,
 
     // Predictor outputs
-    output logic        pc_src_pred_f_o,
-    output logic [31:0] pred_pc_target_f_o
+    output logic        pc_src_pred_fi_o,
+    output logic [31:0] pred_pc_target_fi_o
 );
 
     // ---- Control signal ----
@@ -45,9 +45,9 @@ module branch_predictor (
         .reset_i                        (reset_i),
 
         // Control inputs
-        .stall_e_i                      (stall_e_i),
-        .branch_op_e_i                  (branch_op_e_i),
-        .pc_src_res_e_i                 (pc_src_res_e_i),
+        .stall_ex_i                      (stall_ex_i),
+        .branch_op_ex_i                  (branch_op_ex_i),
+        .pc_src_res_ex_i                 (pc_src_res_ex_i),
 
         // Control output
         .local_src_o                    (local_src)
@@ -60,17 +60,17 @@ module branch_predictor (
         .reset_i                        (reset_i),
 
         // pc & control inputs
-        .pc_target_e_i                  (pc_target_e_i),
-        .pc_f_i                         (pc_f_i),
-        .pc_e                           (pc_e_i),
+        .pc_target_ex_i                  (pc_target_ex_i),
+        .pc_fi_i                         (pc_fi_i),
+        .pc_ex                           (pc_ex_i),
         .local_src_i                    (local_src),
-        .pc_src_res_e_i                 (pc_src_res_e_i),
-        .target_match_i                 (target_match_e_i),
-        .branch_op_e_i                  (branch_op_e_i),
+        .pc_src_res_ex_i                 (pc_src_res_ex_i),
+        .target_match_i                 (target_match_ex_i),
+        .branch_op_ex_i                  (branch_op_ex_i),
 
         // Control outputs
-        .pc_src_pred_f_o                (pc_src_pred_f_o),
-        .pred_pc_target_f_o             (pred_pc_target_f_o)
+        .pc_src_pred_fi_o                (pc_src_pred_fi_o),
+        .pred_pc_target_fi_o             (pred_pc_target_fi_o)
     );
 
 endmodule

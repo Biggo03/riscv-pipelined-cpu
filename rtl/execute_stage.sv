@@ -20,74 +20,74 @@ module execute_stage (
     input  logic        reset_i,
 
     // Data inputs
-    input  logic [31:0] instr_d_i,
-    input  logic [31:0] reg_data_1_d_i,
-    input  logic [31:0] reg_data_2_d_i,
-    input  logic [31:0] csr_result_m_i,
-    input  logic [31:0] csr_result_w_i,
-    input  logic [31:0] result_w_i,
-    input  logic [31:0] forward_data_m_i,
-    input  logic [31:0] pc_d_i,
-    input  logic [31:0] pc_plus4_d_i,
-    input  logic [31:0] imm_ext_d_i,
-    input  logic [31:0] pred_pc_target_d_i,
-    input  logic [31:0] csr_rdata_d_i,
-    input  logic [11:0] csr_addr_d_i,
-    input  logic [4:0]  rd_d_i,
-    input  logic [4:0]  rs1_d_i,
-    input  logic [4:0]  rs2_d_i,
+    input  logic [31:0] instr_de_i,
+    input  logic [31:0] reg_data_1_de_i,
+    input  logic [31:0] reg_data_2_de_i,
+    input  logic [31:0] csr_result_mem_i,
+    input  logic [31:0] csr_result_wb_i,
+    input  logic [31:0] result_wb_i,
+    input  logic [31:0] forward_data_mem_i,
+    input  logic [31:0] pc_de_i,
+    input  logic [31:0] pc_plus4_de_i,
+    input  logic [31:0] imm_ext_de_i,
+    input  logic [31:0] pred_pc_target_de_i,
+    input  logic [31:0] csr_rdata_de_i,
+    input  logic [11:0] csr_addr_de_i,
+    input  logic [4:0]  rd_de_i,
+    input  logic [4:0]  rs1_de_i,
+    input  logic [4:0]  rs2_de_i,
 
     // Control inputs
-    input  logic        valid_d_i,
-    input  logic [2:0]  funct3_d_i,
-    input  logic [2:0]  result_src_d_i,
-    input  logic [1:0]  branch_op_d_i,
-    input  logic        alu_src_d_i,
-    input  logic        pc_base_src_d_i,
-    input  logic        reg_write_d_i,
-    input  logic        mem_write_d_i,
-    input  logic        csr_we_d_i,
-    input  logic [3:0]  alu_control_d_i,
-    input  logic [2:0]  width_src_d_i,
-    input  logic [1:0]  csr_control_d_i,
-    input  logic        csr_src_d_i,
-    input  logic [1:0]  forward_a_e_i,
-    input  logic [1:0]  forward_b_e_i,
-    input  logic [1:0]  forward_csr_e_i,
-    input  logic        flush_e_i,
-    input  logic        stall_e_i,
-    input  logic        pc_src_pred_d_i,
+    input  logic        valid_de_i,
+    input  logic [2:0]  funct3_de_i,
+    input  logic [2:0]  result_src_de_i,
+    input  logic [1:0]  branch_op_de_i,
+    input  logic        alu_src_de_i,
+    input  logic        pc_base_src_de_i,
+    input  logic        reg_write_de_i,
+    input  logic        mem_write_de_i,
+    input  logic        csr_we_de_i,
+    input  logic [3:0]  alu_control_de_i,
+    input  logic [2:0]  width_src_de_i,
+    input  logic [1:0]  csr_control_de_i,
+    input  logic        csr_src_de_i,
+    input  logic [1:0]  forward_a_ex_i,
+    input  logic [1:0]  forward_b_ex_i,
+    input  logic [1:0]  forward_csr_ex_i,
+    input  logic        flush_ex_i,
+    input  logic        stall_ex_i,
+    input  logic        pc_src_pred_de_i,
 
     // Data outputs
-    output logic [31:0] instr_e_o,
-    output logic [31:0] alu_result_e_o,
-    output logic [31:0] write_data_e_o,
-    output logic [31:0] pc_target_e_o,
-    output logic [31:0] pc_plus4_e_o,
-    output logic [31:0] imm_ext_e_o,
-    output logic [31:0] pc_e_o,
-    output logic [31:0] csr_result_e_o,
-    output logic [31:0] csr_data_e_o,
-    output logic [11:0] csr_addr_e_o,
-    output logic [4:0]  rs1_e_o,
-    output logic [4:0]  rs2_e_o,
-    output logic [4:0]  rd_e_o,
-    output logic [2:0]  funct3_e_o,
+    output logic [31:0] instr_ex_o,
+    output logic [31:0] alu_result_ex_o,
+    output logic [31:0] write_data_ex_o,
+    output logic [31:0] pc_target_ex_o,
+    output logic [31:0] pc_plus4_ex_o,
+    output logic [31:0] imm_ext_ex_o,
+    output logic [31:0] pc_ex_o,
+    output logic [31:0] csr_result_ex_o,
+    output logic [31:0] csr_data_ex_o,
+    output logic [11:0] csr_addr_ex_o,
+    output logic [4:0]  rs1_ex_o,
+    output logic [4:0]  rs2_ex_o,
+    output logic [4:0]  rd_ex_o,
+    output logic [2:0]  funct3_ex_o,
     output logic        neg_flag_o,
     output logic        zero_flag_o,
     output logic        carry_flag_o,
     output logic        v_flag_o,
 
     // Control outputs
-    output logic        valid_e_o,
-    output logic [2:0]  width_src_e_o,
-    output logic [2:0]  result_src_e_o,
-    output logic [1:0]  branch_op_e_o,
-    output logic        mem_write_e_o,
-    output logic        reg_write_e_o,
-    output logic        csr_we_e_o,
-    output logic        pc_src_pred_e_o,
-    output logic        target_match_e_o
+    output logic        valid_ex_o,
+    output logic [2:0]  width_src_ex_o,
+    output logic [2:0]  result_src_ex_o,
+    output logic [1:0]  branch_op_ex_o,
+    output logic        mem_write_ex_o,
+    output logic        reg_write_ex_o,
+    output logic        csr_we_ex_o,
+    output logic        pc_src_pred_ex_o,
+    output logic        target_match_ex_o
 );
 
     // ----- Pipeline data types -----
@@ -136,58 +136,58 @@ module execute_stage (
     localparam REG_WIDTH = $bits(ex_bundle_t);
 
     // ----- Execute pipeline register -----
-    ex_bundle_t inputs_e;
-    ex_bundle_t outputs_e;
+    ex_bundle_t inputs_ex;
+    ex_bundle_t outputs_ex;
 
     // ----- Execute stage outputs -----
-    logic [31:0] reg_data_1_e;
-    logic [31:0] reg_data_2_e;
-    logic [31:0] pred_pc_target_e;
-    logic [3:0]  alu_control_e;
-    logic [1:0]  csr_control_e;
-    logic        csr_src_e;
-    logic        pc_base_src_e;
-    logic        alu_src_e;
+    logic [31:0] reg_data_1_ex;
+    logic [31:0] reg_data_2_ex;
+    logic [31:0] pred_pc_target_ex;
+    logic [3:0]  alu_control_ex;
+    logic [1:0]  csr_control_ex;
+    logic        csr_src_ex;
+    logic        pc_base_src_ex;
+    logic        alu_src_ex;
 
     // ----- Execute stage intermediates -----
-    logic [31:0] src_a_e;
-    logic [31:0] src_b_e;
-    logic [31:0] pc_base_e;
-    logic [31:0] csr_op_a_e;
-    logic [31:0] csr_rdata_e;
+    logic [31:0] src_a_ex;
+    logic [31:0] src_b_ex;
+    logic [31:0] pc_base_ex;
+    logic [31:0] csr_op_a_ex;
+    logic [31:0] csr_rdata_ex;
 
-    assign inputs_e = {
+    assign inputs_ex = {
         // Meta Signals
-        pc_d_i,
-        instr_d_i,
-        valid_d_i,
+        pc_de_i,
+        instr_de_i,
+        valid_de_i,
 
         // Control Signals
-        funct3_d_i,
-        alu_control_d_i,
-        alu_src_d_i,
-        result_src_d_i,
-        width_src_d_i,
-        branch_op_d_i,
-        pc_base_src_d_i,
-        pc_src_pred_d_i,
-        mem_write_d_i,
-        reg_write_d_i,
-        csr_control_d_i,
-        csr_we_d_i,
-        csr_src_d_i,
+        funct3_de_i,
+        alu_control_de_i,
+        alu_src_de_i,
+        result_src_de_i,
+        width_src_de_i,
+        branch_op_de_i,
+        pc_base_src_de_i,
+        pc_src_pred_de_i,
+        mem_write_de_i,
+        reg_write_de_i,
+        csr_control_de_i,
+        csr_we_de_i,
+        csr_src_de_i,
 
         // Data Signals
-        rd_d_i,
-        rs1_d_i,
-        rs2_d_i,
-        reg_data_1_d_i,
-        reg_data_2_d_i,
-        imm_ext_d_i,
-        pc_plus4_d_i,
-        pred_pc_target_d_i,
-        csr_addr_d_i,
-        csr_rdata_d_i
+        rd_de_i,
+        rs1_de_i,
+        rs2_de_i,
+        reg_data_1_de_i,
+        reg_data_2_de_i,
+        imm_ext_de_i,
+        pc_plus4_de_i,
+        pred_pc_target_de_i,
+        csr_addr_de_i,
+        csr_rdata_de_i
     };
 
     flop #(
@@ -195,115 +195,115 @@ module execute_stage (
     ) u_execute_reg (
         // Clock & reset_i
         .clk_i                          (clk_i),
-        .en                             (~stall_e_i),
-        .reset                          (reset_i | flush_e_i),
+        .en                             (~stall_ex_i),
+        .reset                          (reset_i | flush_ex_i),
 
         // data input
-        .D                              (inputs_e),
+        .D                              (inputs_ex),
 
         // data output
-        .Q                              (outputs_e)
+        .Q                              (outputs_ex)
     );
 
     assign {
         // Meta Signals
-        pc_e_o,
-        instr_e_o,
-        valid_e_o,
+        pc_ex_o,
+        instr_ex_o,
+        valid_ex_o,
 
         // Control Signals
-        funct3_e_o,
-        alu_control_e,
-        alu_src_e,
-        result_src_e_o,
-        width_src_e_o,
-        branch_op_e_o,
-        pc_base_src_e,
-        pc_src_pred_e_o,
-        mem_write_e_o,
-        reg_write_e_o,
-        csr_control_e,
-        csr_we_e_o,
-        csr_src_e,
+        funct3_ex_o,
+        alu_control_ex,
+        alu_src_ex,
+        result_src_ex_o,
+        width_src_ex_o,
+        branch_op_ex_o,
+        pc_base_src_ex,
+        pc_src_pred_ex_o,
+        mem_write_ex_o,
+        reg_write_ex_o,
+        csr_control_ex,
+        csr_we_ex_o,
+        csr_src_ex,
 
         // Data Signals
-        rd_e_o,
-        rs1_e_o,
-        rs2_e_o,
-        reg_data_1_e,
-        reg_data_2_e,
-        imm_ext_e_o,
-        pc_plus4_e_o,
-        pred_pc_target_e,
-        csr_addr_e_o,
-        csr_rdata_e
-    } = outputs_e;
+        rd_ex_o,
+        rs1_ex_o,
+        rs2_ex_o,
+        reg_data_1_ex,
+        reg_data_2_ex,
+        imm_ext_ex_o,
+        pc_plus4_ex_o,
+        pred_pc_target_ex,
+        csr_addr_ex_o,
+        csr_rdata_ex
+    } = outputs_ex;
 
    // Check Branch Prediction
     always_comb begin
-        if (pc_target_e_o == pred_pc_target_e) target_match_e_o = 1;
-        else                                   target_match_e_o = 0;
+        if (pc_target_ex_o == pred_pc_target_ex) target_match_ex_o = 1;
+        else                                   target_match_ex_o = 0;
     end
 
     // Multiplexer Logic
     always_comb begin : ex_multiplexers
         // a forward mux
-        case (forward_a_e_i)
-            `NO_FORWARD:     src_a_e = reg_data_1_e;
-            `WB_FORWARD:     src_a_e = result_w_i;
-            `MEM_FORWARD:    src_a_e = forward_data_m_i;
-            default:         src_a_e = 0;
+        case (forward_a_ex_i)
+            `NO_FORWARD:     src_a_ex = reg_data_1_ex;
+            `WB_FORWARD:     src_a_ex = result_wb_i;
+            `MEM_FORWARD:    src_a_ex = forward_data_mem_i;
+            default:         src_a_ex = 0;
         endcase
 
         // b forward mux
-        case (forward_b_e_i)
-            `NO_FORWARD:     write_data_e_o = reg_data_2_e;
-            `WB_FORWARD:     write_data_e_o = result_w_i;
-            `MEM_FORWARD:    write_data_e_o = forward_data_m_i;
-            default:         write_data_e_o = 0;
+        case (forward_b_ex_i)
+            `NO_FORWARD:     write_data_ex_o = reg_data_2_ex;
+            `WB_FORWARD:     write_data_ex_o = result_wb_i;
+            `MEM_FORWARD:    write_data_ex_o = forward_data_mem_i;
+            default:         write_data_ex_o = 0;
         endcase
 
         // csr_forward_mux
-        case (forward_csr_e_i)
-            `NO_FORWARD:     csr_data_e_o = csr_rdata_d_i;
-            `WB_FORWARD:     csr_data_e_o = csr_result_w_i;
-            `MEM_FORWARD:    csr_data_e_o = csr_result_m_i;
-            default:         csr_data_e_o = 0;
+        case (forward_csr_ex_i)
+            `NO_FORWARD:     csr_data_ex_o = csr_rdata_de_i;
+            `WB_FORWARD:     csr_data_ex_o = csr_result_wb_i;
+            `MEM_FORWARD:    csr_data_ex_o = csr_result_mem_i;
+            default:         csr_data_ex_o = 0;
         endcase
 
         // csr mux
-        case (csr_src_e)
-            `CSR_SRC_REG: csr_op_a_e = src_a_e;
-            `CSR_SRC_IMM: csr_op_a_e = imm_ext_e_o;
-            default:      csr_op_a_e = 0;
+        case (csr_src_ex)
+            `CSR_SRC_REG: csr_op_a_ex = src_a_ex;
+            `CSR_SRC_IMM: csr_op_a_ex = imm_ext_ex_o;
+            default:      csr_op_a_ex = 0;
         endcase
 
         //src b mux
-        case (alu_src_e)
-            `ALU_SRC_WD:     src_b_e = write_data_e_o;
-            `ALU_SRC_IMM:    src_b_e = imm_ext_e_o;
-            default:         src_b_e = 0;
+        case (alu_src_ex)
+            `ALU_SRC_WD:     src_b_ex = write_data_ex_o;
+            `ALU_SRC_IMM:    src_b_ex = imm_ext_ex_o;
+            default:         src_b_ex = 0;
         endcase
 
         // pc_target mux
-        case (pc_base_src_e)
-            `PC_BASE_PC:     pc_base_e = pc_e_o;
-            `PC_BASE_SRCA:   pc_base_e = src_a_e;
-            default:         pc_base_e = 0;
+        case (pc_base_src_ex)
+            `PC_BASE_PC:     pc_base_ex = pc_ex_o;
+            `PC_BASE_SRCA:   pc_base_ex = src_a_ex;
+            default:         pc_base_ex = 0;
         endcase
     end
 
     //Arithmetic units:
     alu u_alu (
         // Control inputs
-        .alu_control_i                  (alu_control_e),
+        .alu_control_i                  (alu_control_ex),
 
         // data inputs
-        .A                              (src_a_e),
-        .B                              (src_b_e),
+        .A                              (src_a_ex),
+        .B                              (src_b_ex),
 
         // data outputs
-        .alu_result_o                   (alu_result_e_o),
+        .alu_result_o                   (alu_result_ex_o),
 
         // Status flag outputs
         .neg_flag_o                     (neg_flag_o),
@@ -313,21 +313,21 @@ module execute_stage (
     );
 
     csr_alu u_csr_alu (
-        .csr_control_i                  (csr_control_e),
+        .csr_control_i                  (csr_control_ex),
 
-        .csr_op_a_i                     (csr_op_a_e),
-        .csr_data_i                     (csr_data_e_o),
+        .csr_op_a_i                     (csr_op_a_ex),
+        .csr_data_i                     (csr_data_ex_o),
 
-        .csr_result_o                   (csr_result_e_o)
+        .csr_result_o                   (csr_result_ex_o)
     );
 
     adder u_pc_target_adder (
         // data inputs
-        .a                              (pc_base_e),
-        .b                              (imm_ext_e_o),
+        .a                              (pc_base_ex),
+        .b                              (imm_ext_ex_o),
 
         // data output
-        .y                              (pc_target_e_o)
+        .y                              (pc_target_ex_o)
     );
 
 endmodule

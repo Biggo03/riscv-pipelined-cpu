@@ -20,36 +20,36 @@ module writeback_stage (
     input  logic        reset_i,
 
     // data inputs
-    input  logic [31:0] instr_m_i,
-    input  logic [31:0] alu_result_m_i,
-    input  logic [31:0] reduced_data_m_i,
-    input  logic [31:0] pc_target_m_i,
-    input  logic [31:0] pc_plus4_m_i,
-    input  logic [31:0] imm_ext_m_i,
-    input  logic [31:0] csr_result_m_i,
-    input  logic [31:0] csr_data_m_i,
-    input  logic [11:0] csr_addr_m_i,
-    input  logic [4:0]  rd_m_i,
+    input  logic [31:0] instr_mem_i,
+    input  logic [31:0] alu_result_mem_i,
+    input  logic [31:0] reduced_data_mem_i,
+    input  logic [31:0] pc_target_mem_i,
+    input  logic [31:0] pc_plus4_mem_i,
+    input  logic [31:0] imm_ext_mem_i,
+    input  logic [31:0] csr_result_mem_i,
+    input  logic [31:0] csr_data_mem_i,
+    input  logic [11:0] csr_addr_mem_i,
+    input  logic [4:0]  rd_mem_i,
 
     // Control inputs
-    input  logic        valid_m_i,
-    input  logic [2:0]  result_src_m_i,
-    input  logic        reg_write_m_i,
-    input  logic        csr_we_m_i,
-    input  logic        stall_w_i,
+    input  logic        valid_mem_i,
+    input  logic [2:0]  result_src_mem_i,
+    input  logic        reg_write_mem_i,
+    input  logic        csr_we_mem_i,
+    input  logic        stall_wb_i,
 
     // data outputs
-    output logic [31:0] instr_w_o,
-    output logic [31:0] result_w_o,
-    output logic [31:0] csr_result_w_o,
-    output logic [11:0] csr_addr_w_o,
-    output logic [4:0]  rd_w_o,
+    output logic [31:0] instr_wb_o,
+    output logic [31:0] result_wb_o,
+    output logic [31:0] csr_result_wb_o,
+    output logic [11:0] csr_addr_wb_o,
+    output logic [4:0]  rd_wb_o,
 
     // Control outputs
-    output logic        valid_w_o,
-    output logic        retire_w_o,
-    output logic        reg_write_w_o,
-    output logic        csr_we_w_o
+    output logic        valid_wb_o,
+    output logic        retire_wb_o,
+    output logic        reg_write_wb_o,
+    output logic        csr_we_wb_o
 );
     // ----- Pipeline data type -----
     typedef struct packed {
@@ -85,38 +85,38 @@ module writeback_stage (
     localparam REG_WIDTH = $bits(wb_bundle_t);
 
     // ----- Writeback pipeline register -----
-    wb_bundle_t inputs_w;
-    wb_bundle_t outputs_w;
+    wb_bundle_t inputs_wb;
+    wb_bundle_t outputs_wb;
 
     // ----- Writeback stage outputs -----
-    logic [31:0] imm_ext_w;
-    logic [31:0] pc_plus4_w;
-    logic [31:0] pc_target_w;
-    logic [31:0] reduced_data_w;
-    logic [31:0] alu_result_w;
-    logic [31:0] csr_data_w;
-    logic [2:0]  result_src_w;
+    logic [31:0] imm_ext_wb;
+    logic [31:0] pc_plus4_wb;
+    logic [31:0] pc_target_wb;
+    logic [31:0] reduced_data_wb;
+    logic [31:0] alu_result_wb;
+    logic [31:0] csr_data_wb;
+    logic [2:0]  result_src_wb;
 
-    assign inputs_w = {
+    assign inputs_wb = {
         // Meta Signals
-        instr_m_i,
-        valid_m_i,
+        instr_mem_i,
+        valid_mem_i,
 
         // Control Signals
-        result_src_m_i,
-        reg_write_m_i,
-        csr_we_m_i,
+        result_src_mem_i,
+        reg_write_mem_i,
+        csr_we_mem_i,
 
         // Data Signals
-        rd_m_i,
-        alu_result_m_i,
-        reduced_data_m_i,
-        pc_target_m_i,
-        pc_plus4_m_i,
-        imm_ext_m_i,
-        csr_result_m_i,
-        csr_addr_m_i,
-        csr_data_m_i
+        rd_mem_i,
+        alu_result_mem_i,
+        reduced_data_mem_i,
+        pc_target_mem_i,
+        pc_plus4_mem_i,
+        imm_ext_mem_i,
+        csr_result_mem_i,
+        csr_addr_mem_i,
+        csr_data_mem_i
     };
 
     flop #(
@@ -125,50 +125,50 @@ module writeback_stage (
         // Clock & reset_i
         .clk_i                          (clk_i),
         .reset                          (reset_i),
-        .en                             (~stall_w_i),
+        .en                             (~stall_wb_i),
 
         // data input
-        .D                              (inputs_w),
+        .D                              (inputs_wb),
 
         // data output
-        .Q                              (outputs_w)
+        .Q                              (outputs_wb)
     );
 
     assign {
         // Meta Signals
-        instr_w_o,
-        valid_w_o,
+        instr_wb_o,
+        valid_wb_o,
 
         // Control Signals
-        result_src_w,
-        reg_write_w_o,
-        csr_we_w_o,
+        result_src_wb,
+        reg_write_wb_o,
+        csr_we_wb_o,
 
         // Data Signals
-        rd_w_o,
-        alu_result_w,
-        reduced_data_w,
-        pc_target_w,
-        pc_plus4_w,
-        imm_ext_w,
-        csr_result_w_o,
-        csr_addr_w_o,
-        csr_data_w
-    } = outputs_w;
+        rd_wb_o,
+        alu_result_wb,
+        reduced_data_wb,
+        pc_target_wb,
+        pc_plus4_wb,
+        imm_ext_wb,
+        csr_result_wb_o,
+        csr_addr_wb_o,
+        csr_data_wb
+    } = outputs_wb;
 
     // result mux
     always_comb begin
-        case (result_src_w)
-            `RESULT_ALU:      result_w_o = alu_result_w;
-            `RESULT_PCTARGET: result_w_o = pc_target_w;
-            `RESULT_PCPLUS4:  result_w_o = pc_plus4_w;
-            `RESULT_IMM_EXT:  result_w_o = imm_ext_w;
-            `RESULT_MEM_DATA: result_w_o = reduced_data_w;
-            `RESULT_CSR:      result_w_o = csr_data_w;
-            default:          result_w_o = '0;
+        case (result_src_wb)
+            `RESULT_ALU:      result_wb_o = alu_result_wb;
+            `RESULT_PCTARGET: result_wb_o = pc_target_wb;
+            `RESULT_PCPLUS4:  result_wb_o = pc_plus4_wb;
+            `RESULT_IMM_EXT:  result_wb_o = imm_ext_wb;
+            `RESULT_MEM_DATA: result_wb_o = reduced_data_wb;
+            `RESULT_CSR:      result_wb_o = csr_data_wb;
+            default:          result_wb_o = '0;
         endcase
     end
 
-    assign retire_w_o = valid_w_o & ~stall_w_i;
+    assign retire_wb_o = valid_wb_o & ~stall_wb_i;
 
 endmodule

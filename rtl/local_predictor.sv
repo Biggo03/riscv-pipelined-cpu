@@ -18,7 +18,7 @@ module local_predictor (
     input  logic reset_i,
 
     // Control inputs
-    input  logic pc_src_res_e_i,
+    input  logic pc_src_res_ex_i,
     input  logic enable_i,
 
     // Predictor output
@@ -47,19 +47,19 @@ module local_predictor (
     always_comb begin : next_state_logic
         unique case (present_state)
             ST: begin
-                if (pc_src_res_e_i) next_state = ST;
+                if (pc_src_res_ex_i) next_state = ST;
                 else                next_state = WT;
             end
             WT: begin
-                if (pc_src_res_e_i) next_state = ST;
+                if (pc_src_res_ex_i) next_state = ST;
                 else                next_state = WU;
             end
             WU: begin
-                if (pc_src_res_e_i) next_state = WT;
+                if (pc_src_res_ex_i) next_state = WT;
                 else                next_state = SU;
             end
             SU: begin
-                if (pc_src_res_e_i) next_state = WU;
+                if (pc_src_res_ex_i) next_state = WU;
                 else                next_state = SU;
             end
             default: next_state = present_state; // Should never hit

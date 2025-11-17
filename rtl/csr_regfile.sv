@@ -38,7 +38,7 @@ module csr_regfile (
     output logic [31:0] csr_rdata_o,
 
     // -- Other --
-    input logic         retire_w_i
+    input logic         retire_wb_i
 );
 
     // csr signal definitions
@@ -120,14 +120,14 @@ module csr_regfile (
 
         // minstret handelling
         if (~csr_we_i || csr_waddr_i != `MINSTRET_ADDR) begin
-            minstret_next = (retire_w_i) ? minstret_q + 1 : minstret_q;
+            minstret_next = (retire_wb_i) ? minstret_q + 1 : minstret_q;
         end else begin
             minstret_next = csr_wdata_i;
         end
 
         // minstreth handelling
         if (~csr_we_i || csr_waddr_i != `MINSTRETH_ADDR) begin
-            minstreth_next = (retire_w_i) ? minstreth_q + (minstret_q == 32'hFFFF_FFFF) : minstret_q;
+            minstreth_next = (retire_wb_i) ? minstreth_q + (minstret_q == 32'hFFFF_FFFF) : minstret_q;
         end else begin
             minstreth_next = csr_wdata_i;
         end

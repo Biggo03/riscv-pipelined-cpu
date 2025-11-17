@@ -1,0 +1,12 @@
+de:
+  module: decode_stage.sv
+  hierarchy: "`DATA_PATH_HIER.u_decode_stage"
+ex:
+  module: execute_stage.sv
+  hierarchy: "`DATA_PATH_HIER.u_execute_stage"
+mem:
+  module: memory_stage.sv
+  hierarchy: "`DATA_PATH_HIER.u_memory_stage"
+wb:
+  module: writeback_stage.sv
+  hierarchy: "`DATA_PATH_HIER.u_writeback_stage"

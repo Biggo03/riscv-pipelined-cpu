@@ -26,12 +26,11 @@
     logic        clk;
     logic        reset;
 
-    logic [31:0] write_data_m;
-    logic [31:0] alu_result_m;
-    logic        mem_write_m;
+    logic [31:0] write_data_mem;
+    logic [31:0] alu_result_mem;
+    logic        mem_write_mem;
 
     int cycle_cnt;
-
 
     riscv_top u_riscv_top (
         // Clock & reset
@@ -39,9 +38,9 @@
         .reset_i                        (reset),
 
         // Memory outputs
-        .write_data_m_o                 (write_data_m),
-        .alu_result_m_o                 (alu_result_m),
-        .mem_write_m_o                  (mem_write_m)
+        .write_data_mem_o                 (write_data_mem),
+        .alu_result_mem_o                 (alu_result_mem),
+        .mem_write_mem_o                  (mem_write_mem)
     );
 
     cycle_monitor u_cycle_monitor (
@@ -49,9 +48,9 @@
         .clk_i          (clk),
         .reset_i        (reset),
 
-        .valid_w_i      (`DATA_PATH_HIER.valid_w),
-        .stall_w_i      (`DATA_PATH_HIER.stall_w_i),
-        .instr_w_i      (`DATA_PATH_HIER.instr_w)
+        .valid_wb_i      (`DATA_PATH_HIER.valid_wb),
+        .stall_wb_i      (`DATA_PATH_HIER.stall_wb_i),
+        .instr_wb_i      (`DATA_PATH_HIER.instr_wb)
     );
 
     initial begin
@@ -72,11 +71,11 @@
         if (u_cycle_monitor.cycle_cnt > 1000000) $finish;
 
         `ifndef C_PROGRAMS
-            if (`DATA_PATH_HIER.csr_we_w_o && `DATA_PATH_HIER.csr_addr_w_o == `MTEST_STATUS_ADDR) begin
-                if (`DATA_PATH_HIER.csr_result_w == `TEST_PASS) begin
+            if (`DATA_PATH_HIER.csr_we_wb_o && `DATA_PATH_HIER.csr_addr_wb_o == `MTEST_STATUS_ADDR) begin
+                if (`DATA_PATH_HIER.csr_result_wb == `TEST_PASS) begin
                     $display("TEST PASSED");
                     $finish;
-                end else if (`DATA_PATH_HIER.csr_result_w == `TEST_FAIL) begin
+                end else if (`DATA_PATH_HIER.csr_result_wb == `TEST_FAIL) begin
                     $display("TEST FAILED");
                     $finish;
                 end
@@ -84,5 +83,7 @@
         `endif
 
     end
+
+    `include "pipeline_monitor.sv"
 
 endmodule

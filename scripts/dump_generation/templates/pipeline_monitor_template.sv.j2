@@ -1,0 +1,41 @@
+//==============================================================//
+//  Module:       pipeline_monitor
+//  File:         pipeline_monitor.sv
+//  Description:  Top-level pipeline monitoring module. This module
+//                aggregates all per-stage dump tasks and writes
+//                YAML-formatted snapshots of each pipeline stage
+//                to the output path specified by `DUMP_PATH`.
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   N/A
+//
+//  Notes:        This file is auto-generated. Any modifications
+//                should be made in the generator scripts or the
+//                associated Jinja template.
+//==============================================================//
+{%- for stage in stages %}
+`include "{{ stage }}_dump_tasks.sv"
+{%- endfor %}
+
+int reg_dump_handle;
+
+initial begin
+    reg_dump_handle = $fopen({`DUMP_PATH, "/register_dump.yml"}, "w");
+    if (reg_dump_handle == 0) begin
+        $fatal(1, "ERROR: Could not open register_dump.yml");
+    end
+end
+
+always @(negedge clk) begin
+    if (~reset) begin
+        $fdisplay(reg_dump_handle, "%0d:", riscv_top_tb.u_cycle_monitor.cycle_cnt);
+
+{%- for stage in stages %}
+        dump_{{ stage }}(reg_dump_handle);
+{%- endfor %}
+    end
+end
+

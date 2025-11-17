@@ -16,51 +16,51 @@
 
 module hazard_unit (
     // Fetch stage inputs
-    input  logic        instr_hit_f_i,
+    input  logic        instr_hit_fi_i,
 
     // Decode stage inputs
-    input  logic [4:0]  rs1_d_i,
-    input  logic [4:0]  rs2_d_i,
+    input  logic [4:0]  rs1_de_i,
+    input  logic [4:0]  rs2_de_i,
 
     // Execute stage inputs
-    input  logic [4:0]  rs1_e_i,
-    input  logic [4:0]  rs2_e_i,
-    input  logic [4:0]  rd_e_i,
-    input  logic [11:0] csr_addr_e_i,
-    input  logic [2:0]  result_src_e_i,
+    input  logic [4:0]  rs1_ex_i,
+    input  logic [4:0]  rs2_ex_i,
+    input  logic [4:0]  rd_ex_i,
+    input  logic [11:0] csr_addr_ex_i,
+    input  logic [2:0]  result_src_ex_i,
     input  logic [1:0]  pc_src_i,
 
     // Memory stage inputs
-    input  logic [4:0]  rd_m_i,
-    input  logic        reg_write_m_i,
-    input  logic [11:0] csr_addr_m_i,
-    input  logic        csr_we_m_i,
+    input  logic [4:0]  rd_mem_i,
+    input  logic        reg_write_mem_i,
+    input  logic [11:0] csr_addr_mem_i,
+    input  logic        csr_we_mem_i,
 
     // Writeback stage inputs
-    input  logic [4:0]  rd_w_i,
-    input  logic        reg_write_w_i,
-    input  logic [11:0] csr_addr_w_i,
-    input  logic        csr_we_w_i,
+    input  logic [4:0]  rd_wb_i,
+    input  logic        reg_write_wb_i,
+    input  logic [11:0] csr_addr_wb_i,
+    input  logic        csr_we_wb_i,
 
     // Branch predictor / cache inputs
     input  logic [1:0]  pc_src_reg_i,
     input  logic        ic_repl_permit_i,
 
     // stall outputs
-    output logic        stall_f_o,
-    output logic        stall_d_o,
-    output logic        stall_e_o,
-    output logic        stall_m_o,
-    output logic        stall_w_o,
+    output logic        stall_fi_o,
+    output logic        stall_de_o,
+    output logic        stall_ex_o,
+    output logic        stall_mem_o,
+    output logic        stall_wb_o,
 
     // flush outputs
-    output logic        flush_d_o,
-    output logic        flush_e_o,
+    output logic        flush_de_o,
+    output logic        flush_ex_o,
 
     // Forwarding outputs
-    output logic [1:0]  forward_a_e_o,
-    output logic [1:0]  forward_b_e_o,
-    output logic [1:0]  forward_csr_e_o
+    output logic [1:0]  forward_a_ex_o,
+    output logic [1:0]  forward_b_ex_o,
+    output logic [1:0]  forward_csr_ex_o
 );
 
     // ----- Forwarding control -----
@@ -74,34 +74,34 @@ module hazard_unit (
     //Forward logic
     always_comb begin
 
-        //forward_a_e_o
-        if (((rs1_e_i == rd_m_i) & reg_write_m_i) & (rs1_e_i != 0)) forward_a_e_o = MEM_FORWARD;
-        else if (((rs1_e_i == rd_w_i) & reg_write_w_i) & (rs1_e_i != 0)) forward_a_e_o = WB_FORWARD;
-        else forward_a_e_o = NO_FORWARD;
+        //forward_a_ex_o
+        if (((rs1_ex_i == rd_mem_i) & reg_write_mem_i) & (rs1_ex_i != 0)) forward_a_ex_o = MEM_FORWARD;
+        else if (((rs1_ex_i == rd_wb_i) & reg_write_wb_i) & (rs1_ex_i != 0)) forward_a_ex_o = WB_FORWARD;
+        else forward_a_ex_o = NO_FORWARD;
 
-        //forward_b_e_o
-        if (((rs2_e_i == rd_m_i) & reg_write_m_i) & (rs2_e_i != 0)) forward_b_e_o = MEM_FORWARD;
-        else if (((rs2_e_i == rd_w_i) & reg_write_w_i) & (rs2_e_i != 0)) forward_b_e_o = WB_FORWARD;
-        else forward_b_e_o = NO_FORWARD;
+        //forward_b_ex_o
+        if (((rs2_ex_i == rd_mem_i) & reg_write_mem_i) & (rs2_ex_i != 0)) forward_b_ex_o = MEM_FORWARD;
+        else if (((rs2_ex_i == rd_wb_i) & reg_write_wb_i) & (rs2_ex_i != 0)) forward_b_ex_o = WB_FORWARD;
+        else forward_b_ex_o = NO_FORWARD;
 
         //forward_csr
-        if ((csr_addr_e_i == csr_addr_m_i) & csr_we_m_i) forward_csr_e_o = MEM_FORWARD;
-        else if ((csr_addr_e_i == csr_addr_w_i) & csr_we_w_i) forward_csr_e_o = WB_FORWARD;
-        else forward_csr_e_o = NO_FORWARD;
+        if ((csr_addr_ex_i == csr_addr_mem_i) & csr_we_mem_i) forward_csr_ex_o = MEM_FORWARD;
+        else if ((csr_addr_ex_i == csr_addr_wb_i) & csr_we_wb_i) forward_csr_ex_o = WB_FORWARD;
+        else forward_csr_ex_o = NO_FORWARD;
     end
 
     //stall and flush logic
-    assign LoadStall = (result_src_e_i == `RESULT_MEM_DATA) & ((rs1_d_i == rd_e_i) | (rs2_d_i == rd_e_i));
+    assign LoadStall = (result_src_ex_i == `RESULT_MEM_DATA) & ((rs1_de_i == rd_ex_i) | (rs2_de_i == rd_ex_i));
 
     //Stalls
-    assign stall_f_o = (LoadStall | ~instr_hit_f_i) & ~pc_src_reg_i[1];
-    assign stall_d_o = LoadStall | ~instr_hit_f_i;
-    assign stall_e_o = ~instr_hit_f_i;
-    assign stall_m_o = ~instr_hit_f_i;
-    assign stall_w_o = ~instr_hit_f_i;
+    assign stall_fi_o = (LoadStall | ~instr_hit_fi_i) & ~pc_src_reg_i[1];
+    assign stall_de_o = LoadStall | ~instr_hit_fi_i;
+    assign stall_ex_o = ~instr_hit_fi_i;
+    assign stall_mem_o = ~instr_hit_fi_i;
+    assign stall_wb_o = ~instr_hit_fi_i;
 
     //Flushes
-    assign flush_e_o = (pc_src_i[1] & (ic_repl_permit_i | pc_src_reg_i[1])) | LoadStall;
-    assign flush_d_o = pc_src_i[1];
+    assign flush_ex_o = (pc_src_i[1] & (ic_repl_permit_i | pc_src_reg_i[1])) | LoadStall;
+    assign flush_de_o = pc_src_i[1];
 
 endmodule

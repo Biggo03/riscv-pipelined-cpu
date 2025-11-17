@@ -10,7 +10,7 @@
 //
 //  Parameters:   N/A
 //
-//  Notes:        Uses pc_e for corrections, and local predictor updates, uses pc_f_i for fetching predictions
+//  Notes:        Uses pc_ex for corrections, and local predictor updates, uses pc_fi_i for fetching predictions
 //==============================================================//
 `include "control_macros.sv"
 
@@ -20,19 +20,19 @@ module branching_buffer (
     input  logic        reset_i,
 
     // pc inputs
-    input  logic [31:0] pc_target_e_i,
-    input  logic [9:0]  pc_f_i,
-    input  logic [9:0]  pc_e,
+    input  logic [31:0] pc_target_ex_i,
+    input  logic [9:0]  pc_fi_i,
+    input  logic [9:0]  pc_ex,
 
     // Control inputs
     input  logic [1:0]  local_src_i,
-    input  logic        pc_src_res_e_i,
+    input  logic        pc_src_res_ex_i,
     input  logic        target_match_i,
-    input  logic [1:0]  branch_op_e_i,
+    input  logic [1:0]  branch_op_ex_i,
 
     // Branch predictor outputs
-    output logic        pc_src_pred_f_o,
-    output logic [31:0] pred_pc_target_f_o
+    output logic        pc_src_pred_fi_o,
+    output logic [31:0] pred_pc_target_fi_o
 );
 
     // ----- Memories -----
@@ -46,8 +46,8 @@ module branching_buffer (
     // ----- Generate indices -----
     genvar i;
 
-    //Every group of 4 bits corrosponds to a given pc_e index
-    assign enable = (branch_op_e_i != `NON_BRANCH) ? 1'b1 << {pc_e, local_src_i} : 0;
+    //Every group of 4 bits corrosponds to a given pc_ex index
+    assign enable = (branch_op_ex_i != `NON_BRANCH) ? 1'b1 << {pc_ex, local_src_i} : 0;
 
     generate
         for (i = 0; i < 4096; i = i + 1) begin : g_local_predictors
@@ -59,7 +59,7 @@ module branching_buffer (
                 .reset_i                        (local_reset[i/4]),
 
                 // Control inputs
-                .pc_src_res_e_i                 (pc_src_res_e_i),
+                .pc_src_res_ex_i                 (pc_src_res_ex_i),
                 .enable_i                       (enable[i]),
 
                 // Predictor output
@@ -72,17 +72,17 @@ module branching_buffer (
     always @(posedge clk_i) begin
         if (reset_i) begin
             local_reset <= {4096{1'b1}};
-        end else if (~target_match_i && (branch_op_e_i != `NON_BRANCH)) begin
-            buffer_entry[pc_e][31:0] <= pc_target_e_i;
+        end else if (~target_match_i && (branch_op_ex_i != `NON_BRANCH)) begin
+            buffer_entry[pc_ex][31:0] <= pc_target_ex_i;
             local_reset <= 0; //Initilize to 0 to ensure only current branch stays reset_i
-            local_reset[pc_e] <= 1'b1;
+            local_reset[pc_ex] <= 1'b1;
         end else begin
             local_reset <= 0; //Ensures all local predictors are ready after a reset_i
         end
     end
 
     //Fetch stage logic
-    assign pc_src_pred_f_o = lp_outputs[pc_f_i][local_src_i];
-    assign pred_pc_target_f_o = buffer_entry[pc_f_i][31:0];
+    assign pc_src_pred_fi_o = lp_outputs[pc_fi_i][local_src_i];
+    assign pred_pc_target_fi_o = buffer_entry[pc_fi_i][31:0];
 
 endmodule

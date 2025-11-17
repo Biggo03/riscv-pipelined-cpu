@@ -4,10 +4,10 @@ module cycle_monitor (
     input logic       clk_i,
     input logic       reset_i,
 
-    input logic       valid_w_i,
-    input logic       stall_w_i,
+    input logic       valid_wb_i,
+    input logic       stall_wb_i,
 
-    input logic [31:0] instr_w_i
+    input logic [31:0] instr_wb_i
 );
 
     int cycle_cnt;
@@ -18,7 +18,7 @@ module cycle_monitor (
     int store_op_cnt;
     int branch_op_cnt;
 
-    logic retire_w;
+    logic retire_wb;
 
     always_ff @(posedge clk_i) begin
         if (reset_i) cycle_cnt <= 0;
@@ -36,10 +36,10 @@ module cycle_monitor (
             load_op_cnt   <= 0;
             store_op_cnt  <= 0;
             branch_op_cnt <= 0;
-        end else if (retire_w & (instr_w_i != `NOP_INSTR)) begin
+        end else if (retire_wb & (instr_wb_i != `NOP_INSTR)) begin
             retire_cnt    <= retire_cnt + 1;
 
-            case (instr_w_i[6:0])
+            case (instr_wb_i[6:0])
                 `R_TYPE_OP:         alu_op_cnt <= alu_op_cnt + 1;
                 `I_TYPE_ALU_OP:     alu_op_cnt <= alu_op_cnt + 1;
                 `AUIPC_OP:          alu_op_cnt <= alu_op_cnt + 1;
@@ -57,6 +57,6 @@ module cycle_monitor (
         end
     end
 
-    assign retire_w = valid_w_i & ~stall_w_i;
+    assign retire_wb = valid_wb_i & ~stall_wb_i;
 
 endmodule

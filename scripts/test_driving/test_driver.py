@@ -199,6 +199,28 @@ def get_module_paths(rtl_dir, module_path, module_paths=None):
 
     return module_paths
 
+def setup_paths(test_name, tb_file, top_out_dir):
+
+    dir_paths = {}
+
+    dir_paths["proj_dir"]        = Path(__file__).resolve().parent.parent.parent
+    dir_paths["rtl_dir"]         = dir_paths["proj_dir"] / "rtl"
+    dir_paths["include_dir"]     = dir_paths["proj_dir"] / "common" / "includes"
+    dir_paths["filelist_dir"]    = dir_paths["proj_dir"] / "filelists"
+    dir_paths["tb_path"]         = dir_paths["proj_dir"] / "tb" / tb_file
+    dir_paths["tb_include_dir"]  = dir_paths["proj_dir"].joinpath("tb", "common")
+    dir_paths["common_tb"]       = dir_paths["proj_dir"].joinpath("tb", "common")
+    dir_paths["hex_path"]        = dir_paths["proj_dir"] / "test_inputs" / "compiled_programs"
+    dir_paths["tb_top"]          = os.path.dirname(dir_paths["tb_path"])
+
+    dir_paths["test_out_dir"]    = top_out_dir / test_name
+
+    os.makedirs(dir_paths["test_out_dir"], exist_ok=True)
+    os.makedirs(dir_paths["filelist_dir"], exist_ok=True)
+    subprocess.run(f"rm -rf {dir_paths['test_out_dir']}/*", shell=True)
+
+    return dir_paths
+
 def gen_run_cmd(test_name, test_info, dir_paths, defines):
 
     test_logger = logging.getLogger("test_logger")
@@ -212,17 +234,23 @@ def gen_run_cmd(test_name, test_info, dir_paths, defines):
         str(dir_paths["tb_include_dir"])
     ]
 
+    if ("system" in test_info["tags"]):
+        inc_dirs.append(f"{dir_paths['tb_top']}/tasks")
+        inc_dirs.append(f"{dir_paths['tb_top']}/monitors")
+
     # -- Module Libraries ---
     module_libs = [dir_paths["common_tb"]]
 
     if ("system" in test_info["tags"]):
-        module_libs.append(os.path.dirname(dir_paths["tb_path"]))
+        module_libs.append(dir_paths['tb_top'])
+        module_libs.append(f"{dir_paths['tb_top']}/monitors")
     # --- Source files ---
     src_files = [dir_paths["tb_path"]]
 
 
     # --- Defines ---
-    defines.append(f'DUMP_PATH="{dir_paths["test_out_dir"]}/{test_name}.vcd"')
+    defines.append(f'DUMP_FILE="{dir_paths["test_out_dir"]}/{test_name}.vcd"')
+    defines.append(f'DUMP_PATH="{dir_paths["test_out_dir"]}"')
     defines.append(f'SIM')
 
     # System specific defines
@@ -239,7 +267,7 @@ def gen_run_cmd(test_name, test_info, dir_paths, defines):
         if (data_match):
             data_path = data_match.resolve()
             defines.append(f"DATA_HEX_FILE=\"{data_path}\"")
-        elif ("c_program" in test_info["tag"]):
+        elif ("c_program" in test_info["tags"]):
             test_logger.warning(f"Could not find data file for : {test_name}")
 
     # --- Flags ---
@@ -299,27 +327,6 @@ def gen_run_cmd(test_name, test_info, dir_paths, defines):
         run_cmd[i] = str(run_cmd[i])
 
     return run_cmd
-
-def setup_paths(test_name, tb_file, top_out_dir):
-
-    dir_paths = {}
-
-    dir_paths["proj_dir"]        = Path(__file__).resolve().parent.parent.parent
-    dir_paths["rtl_dir"]         = dir_paths["proj_dir"] / "rtl"
-    dir_paths["include_dir"]     = dir_paths["proj_dir"] / "common" / "includes"
-    dir_paths["filelist_dir"]    = dir_paths["proj_dir"] / "filelists"
-    dir_paths["tb_path"]         = dir_paths["proj_dir"] / "tb" / tb_file
-    dir_paths["tb_include_dir"]  = dir_paths["proj_dir"].joinpath("tb", "common")
-    dir_paths["common_tb"]       = dir_paths["proj_dir"].joinpath("tb", "common")
-    dir_paths["hex_path"]        = dir_paths["proj_dir"] / "test_inputs" / "compiled_programs"
-
-    dir_paths["test_out_dir"]    = top_out_dir / test_name
-
-    os.makedirs(dir_paths["test_out_dir"], exist_ok=True)
-    os.makedirs(dir_paths["filelist_dir"], exist_ok=True)
-    subprocess.run(f"rm -rf {dir_paths['test_out_dir']}/*", shell=True)
-
-    return dir_paths
 
 def run_test(test_name, test_info, defines, top_out_dir, result_info):
     """

@@ -19,9 +19,9 @@ module ghr (
     input  logic       reset_i,
 
     // Control inputs
-    input  logic       stall_e_i,
-    input  logic [1:0] branch_op_e_i,
-    input  logic       pc_src_res_e_i,
+    input  logic       stall_ex_i,
+    input  logic [1:0] branch_op_ex_i,
+    input  logic       pc_src_res_ex_i,
 
     // Control outputs
     output logic [1:0] local_src_o
@@ -52,22 +52,22 @@ module ghr (
     always_comb begin : next_state_logic
         next_state = present_state;
 
-        if (branch_op_e_i[0] & ~stall_e_i) begin
+        if (branch_op_ex_i[0] & ~stall_ex_i) begin
             unique case (present_state)
                 UU: begin
-                    if (pc_src_res_e_i) next_state = UT;
+                    if (pc_src_res_ex_i) next_state = UT;
                     else                next_state = UU;
                 end
                 UT: begin
-                    if (pc_src_res_e_i) next_state = TT;
+                    if (pc_src_res_ex_i) next_state = TT;
                     else                next_state = TU;
                 end
                 TU: begin
-                    if (pc_src_res_e_i) next_state = UT;
+                    if (pc_src_res_ex_i) next_state = UT;
                     else                next_state = UU;
                 end
                 TT: begin
-                    if (pc_src_res_e_i) next_state = TT;
+                    if (pc_src_res_ex_i) next_state = TT;
                     else                next_state = TU;
                 end
                 default: next_state = UT; // Should never hit
