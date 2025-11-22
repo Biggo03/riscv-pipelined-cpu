@@ -6,6 +6,9 @@ import os
 from jinja2 import Environment, FileSystemLoader
 import re
 
+###################################################
+#                General Functions                #
+###################################################
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Generate dumping tasks, and a pipeline monitor file"
@@ -37,6 +40,9 @@ def load_yaml(yaml_path):
 
     return yaml_data
 
+###################################################
+#               Pipeline Stage Parsing            #
+###################################################
 def parse_stage_structs(module_path, stage_name):
     """
     Extracts field names from the pipeline register structs (meta, data, control)
@@ -83,6 +89,42 @@ def parse_all_stages(rtl_dir, stage_metadata):
 
     return stage_metadata
 
+###################################################
+#               Hazard Unit Parsing               #
+###################################################
+def parse_hazard_unit(hazard_unit_path):
+
+    hazard_unit_info = {}
+    valid_sections = ["stall", "flush", "forward"]
+
+    for section in valid_sections:
+        hazard_unit_info[section] = []
+
+    section = ""
+
+    with open(hazard_unit_path, "r") as f:
+        for line in f:
+            if ("Stall outputs" in line):
+                section = "stall"
+                continue
+            elif ("Flush outputs" in line):
+                section = "flush"
+                continue
+            elif ("Forwarding outputs" in line):
+                section = "forward"
+                continue
+
+            if (section in valid_sections and "output" in line):
+                line = line.strip().replace("_o,\n", "").replace("_o\n", "").split()
+                hazard_unit_info[section].append(line[-1])
+            elif (section == "forward" and ");" in line):
+                break
+
+    return hazard_unit_info
+
+###################################################
+#               Output Generation                 #
+###################################################
 def gen_stage_dump_tasks(output_dir, stage_metadata, indent_levels):
 
     env = Environment(loader=FileSystemLoader("templates"))
@@ -108,6 +150,18 @@ def gen_pipeline_monitor(output_dir, stage_metadata):
     with open(f"{output_dir}/pipeline_monitor.sv", "w") as f:
         f.write(monitor_output)
 
+def gen_hazard_unit_dump_task(output_dir, hazard_unit_info, indent_levels):
+    env = Environment(loader=FileSystemLoader("templates"))
+    hazard_dump_template = env.get_template("hazard_dump_template.sv.j2")
+
+    hazard_dump_output = hazard_dump_template.render(hazard_info=hazard_unit_info,
+                                                     indent_levels=indent_levels)
+
+    with open(f"{output_dir}/hazard_dump_tasks.sv", "w") as f:
+        f.write(hazard_dump_output)
+
+    return
+
 def main():
 
     # Parse args
@@ -132,13 +186,16 @@ def main():
     stage_metadata = load_yaml("./stage_metadata.yml")
     stage_metadata = parse_all_stages(rtl_dir, stage_metadata)
 
+    hazard_unit_info = parse_hazard_unit(f"{rtl_dir}/hazard_unit.sv")
+
     # Generate outputs
     indent_levels = {"stage": "  ",
                      "category": "    ",
                      "signal": "      "}
-    gen_stage_dump_tasks(f"{output_dir}/tasks", stage_metadata, indent_levels)
 
+    gen_stage_dump_tasks(f"{output_dir}/tasks", stage_metadata, indent_levels)
     gen_pipeline_monitor(f"{output_dir}/monitors", stage_metadata)
+    gen_hazard_unit_dump_task(f"{output_dir}/tasks", hazard_unit_info, indent_levels)
 
 if __name__ == "__main__":
     main()

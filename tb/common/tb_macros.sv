@@ -16,4 +16,6 @@
 //////////////////////////////////////////////
 //             HIERARCHY MACROS             //
 //////////////////////////////////////////////
-`define DATA_PATH_HIER u_riscv_top.u_pipelined_riscv_core.u_data_path
+`define DATA_PATH_HIER riscv_top_tb.u_riscv_top.u_pipelined_riscv_core.u_data_path
+`define HAZARD_UNIT_HIER riscv_top_tb.u_riscv_top.u_pipelined_riscv_core.u_hazard_unit
+`define CONTROL_UNIT_HIER riscv_top_tb.u_riscv_top.u_pipelined_riscv_core.u_control_unit

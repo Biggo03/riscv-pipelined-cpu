@@ -20,6 +20,7 @@
 `include "ex_dump_tasks.sv"
 `include "mem_dump_tasks.sv"
 `include "wb_dump_tasks.sv"
+`include "hazard_dump_tasks.sv"
 
 int reg_dump_handle;
 
@@ -37,5 +38,6 @@ always @(negedge clk) begin
         dump_ex(reg_dump_handle);
         dump_mem(reg_dump_handle);
         dump_wb(reg_dump_handle);
+        dump_hazard_unit(reg_dump_handle);
     end
 end

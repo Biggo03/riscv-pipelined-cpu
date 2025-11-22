@@ -58,7 +58,7 @@
 `define ALU_OP_ADD      2'b00
 `define ALU_OP_SUB      2'b01
 `define ALU_OP_PROCESS  2'b10
-`define ALU_OP_NA       2'b00
+`define ALU_OP_NA       2'b00 // fallback
 
 //////////////////////////////////////////////
 //               alu_control                //
@@ -117,11 +117,11 @@
 `define CSR_PASS        2'b01
 `define CSR_SET         2'b10
 `define CSR_CLEAR       2'b11
-`define CSR_NA          2'b01
+`define CSR_NA          2'b01 // fallback
 
 //////////////////////////////////////////////
 //                  csr_src                 //
 //////////////////////////////////////////////
 `define CSR_SRC_REG         1'b0
 `define CSR_SRC_IMM         1'b1
-`define CSR_SRC_NA          1'b1
+`define CSR_SRC_NA          1'b1 // fallback

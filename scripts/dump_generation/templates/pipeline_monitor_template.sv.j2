@@ -19,6 +19,7 @@
 {%- for stage in stages %}
 `include "{{ stage }}_dump_tasks.sv"
 {%- endfor %}
+`include "hazard_dump_tasks.sv"
 
 int reg_dump_handle;
 
@@ -36,6 +37,7 @@ always @(negedge clk) begin
 {%- for stage in stages %}
         dump_{{ stage }}(reg_dump_handle);
 {%- endfor %}
+        dump_hazard_unit(reg_dump_handle);
     end
 end
 

@@ -46,14 +46,14 @@ module hazard_unit (
     input  logic [1:0]  pc_src_reg_i,
     input  logic        ic_repl_permit_i,
 
-    // stall outputs
+    // Stall outputs
     output logic        stall_fi_o,
     output logic        stall_de_o,
     output logic        stall_ex_o,
     output logic        stall_mem_o,
     output logic        stall_wb_o,
 
-    // flush outputs
+    // Flush outputs
     output logic        flush_de_o,
     output logic        flush_ex_o,
 
@@ -63,11 +63,6 @@ module hazard_unit (
     output logic [1:0]  forward_csr_ex_o
 );
 
-    // ----- Forwarding control -----
-    localparam [1:0] NO_FORWARD  = 2'b00;
-    localparam [1:0] WB_FORWARD  = 2'b01;
-    localparam [1:0] MEM_FORWARD = 2'b10;
-
     // ----- Hazard detection -----
     logic LoadStall;
 
@@ -75,19 +70,19 @@ module hazard_unit (
     always_comb begin
 
         //forward_a_ex_o
-        if (((rs1_ex_i == rd_mem_i) & reg_write_mem_i) & (rs1_ex_i != 0)) forward_a_ex_o = MEM_FORWARD;
-        else if (((rs1_ex_i == rd_wb_i) & reg_write_wb_i) & (rs1_ex_i != 0)) forward_a_ex_o = WB_FORWARD;
-        else forward_a_ex_o = NO_FORWARD;
+        if (((rs1_ex_i == rd_mem_i) & reg_write_mem_i) & (rs1_ex_i != 0)) forward_a_ex_o = `MEM_FORWARD;
+        else if (((rs1_ex_i == rd_wb_i) & reg_write_wb_i) & (rs1_ex_i != 0)) forward_a_ex_o = `WB_FORWARD;
+        else forward_a_ex_o = `NO_FORWARD;
 
         //forward_b_ex_o
-        if (((rs2_ex_i == rd_mem_i) & reg_write_mem_i) & (rs2_ex_i != 0)) forward_b_ex_o = MEM_FORWARD;
-        else if (((rs2_ex_i == rd_wb_i) & reg_write_wb_i) & (rs2_ex_i != 0)) forward_b_ex_o = WB_FORWARD;
-        else forward_b_ex_o = NO_FORWARD;
+        if (((rs2_ex_i == rd_mem_i) & reg_write_mem_i) & (rs2_ex_i != 0)) forward_b_ex_o = `MEM_FORWARD;
+        else if (((rs2_ex_i == rd_wb_i) & reg_write_wb_i) & (rs2_ex_i != 0)) forward_b_ex_o = `WB_FORWARD;
+        else forward_b_ex_o = `NO_FORWARD;
 
         //forward_csr
-        if ((csr_addr_ex_i == csr_addr_mem_i) & csr_we_mem_i) forward_csr_ex_o = MEM_FORWARD;
-        else if ((csr_addr_ex_i == csr_addr_wb_i) & csr_we_wb_i) forward_csr_ex_o = WB_FORWARD;
-        else forward_csr_ex_o = NO_FORWARD;
+        if ((csr_addr_ex_i == csr_addr_mem_i) & csr_we_mem_i) forward_csr_ex_o = `MEM_FORWARD;
+        else if ((csr_addr_ex_i == csr_addr_wb_i) & csr_we_wb_i) forward_csr_ex_o = `WB_FORWARD;
+        else forward_csr_ex_o = `NO_FORWARD;
     end
 
     //stall and flush logic

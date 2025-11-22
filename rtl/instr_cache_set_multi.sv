@@ -105,7 +105,7 @@ module instr_cache_set_multi #(
         end
     end
 
-    always_ff @(posedge clk_i) begin : icache_fsm_comb
+    always_ff @(posedge clk_i) begin : icache_fsm
         if (reset_i) begin
             icache_state  <= MONITOR;
             valid_bits    <= 0;

@@ -141,7 +141,7 @@ module pipelined_riscv_core (
         .rd_ex_i                         (rd_ex),
         .csr_addr_ex_i                   (csr_addr_ex),
         .result_src_ex_i                 (result_src_ex),
-        .pc_src_i                       (pc_src),
+        .pc_src_i                        (pc_src),
 
         // Memory stage inputs
         .rd_mem_i                         (rd_mem),
@@ -156,14 +156,14 @@ module pipelined_riscv_core (
         .csr_we_wb_i                     (csr_we_wb),
 
         // Branch predictor / cache inputs
-        .pc_src_reg_i                   (pc_src_reg_o),
-        .ic_repl_permit_i               (ic_repl_permit_i),
+        .pc_src_reg_i                    (pc_src_reg_o),
+        .ic_repl_permit_i                (ic_repl_permit_i),
 
         // stall outputs
         .stall_fi_o                      (stall_fi),
         .stall_de_o                      (stall_de),
         .stall_ex_o                      (stall_ex),
-        .stall_mem_o                      (stall_mem),
+        .stall_mem_o                     (stall_mem),
         .stall_wb_o                      (stall_wb),
 
         // flush outputs
@@ -178,14 +178,14 @@ module pipelined_riscv_core (
 
     branch_processing_unit u_branch_processing_unit (
         // Clock & reset_i
-        .clk_i                          (clk_i),
-        .reset_i                        (reset_i),
+        .clk_i                           (clk_i),
+        .reset_i                         (reset_i),
 
         // Status flag inputs
-        .neg_flag_i                     (neg_flag),
-        .zero_flag_i                    (zero_flag),
-        .carry_flag_i                   (carry_flag),
-        .v_flag_i                       (v_flag),
+        .neg_flag_i                      (neg_flag),
+        .zero_flag_i                     (zero_flag),
+        .carry_flag_i                    (carry_flag),
+        .v_flag_i                        (v_flag),
 
         // Pipeline control inputs
         .stall_ex_i                      (stall_ex),
@@ -206,8 +206,8 @@ module pipelined_riscv_core (
         .pc_src_pred_ex_i                (pc_src_pred_ex),
 
         // Control outputs
-        .pc_src_o                       (pc_src),
-        .pc_src_reg_o                   (pc_src_reg_o),
+        .pc_src_o                        (pc_src),
+        .pc_src_reg_o                    (pc_src_reg_o),
 
         // Predictor outputs
         .pred_pc_target_fi_o             (pred_pc_target_fi),
@@ -216,17 +216,17 @@ module pipelined_riscv_core (
 
     data_path u_data_path (
         // Clock & reset_i
-        .clk_i                          (clk_i),
-        .reset_i                        (reset_i),
+        .clk_i                           (clk_i),
+        .reset_i                         (reset_i),
 
         // Instruction fetch inputs
         .instr_fi_i                      (instr_fi_i),
         .pred_pc_target_fi_i             (pred_pc_target_fi),
-        .pc_src_i                       (pc_src),
+        .pc_src_i                        (pc_src),
         .pc_src_pred_fi_i                (pc_src_pred_fi),
 
         // Memory inputs
-        .read_data_mem_i                  (read_data_mem_i),
+        .read_data_mem_i                 (read_data_mem_i),
 
         // Control inputs
         .imm_src_de_i                    (imm_src_de),
@@ -249,13 +249,13 @@ module pipelined_riscv_core (
         .stall_de_i                      (stall_de),
         .stall_fi_i                      (stall_fi),
         .stall_ex_i                      (stall_ex),
-        .stall_mem_i                      (stall_mem),
+        .stall_mem_i                     (stall_mem),
         .stall_wb_i                      (stall_wb),
 
         // data outputs
         .alu_result_mem_o                 (alu_result_mem_o),
         .write_data_mem_o                 (write_data_mem_o),
-        .pc_fi_o                         (pc_fi_o),
+        .pc_fi_o                          (pc_fi_o),
         .width_src_mem_o                  (width_src_mem_o),
         .mem_write_mem_o                  (mem_write_mem_o),
 
@@ -265,10 +265,10 @@ module pipelined_riscv_core (
         .funct3_ex_o                     (funct3_ex),
         .funct7_de_o                     (funct7_de),
         .branch_op_ex_o                  (branch_op_ex_o),
-        .neg_flag_o                     (neg_flag),
-        .zero_flag_o                    (zero_flag),
-        .carry_flag_o                   (carry_flag),
-        .v_flag_o                       (v_flag),
+        .neg_flag_o                      (neg_flag),
+        .zero_flag_o                     (zero_flag),
+        .carry_flag_o                    (carry_flag),
+        .v_flag_o                        (v_flag),
         .pc_ex_o                         (pc_ex),
         .pc_target_ex_o                  (pc_target_ex),
         .pc_src_pred_ex_o                (pc_src_pred_ex),
@@ -280,13 +280,13 @@ module pipelined_riscv_core (
         .rs2_ex_o                        (rs2_ex),
         .rd_ex_o                         (rd_ex),
         .result_src_ex_o                 (result_src_ex),
-        .csr_addr_mem_o                   (csr_addr_mem),
-        .rd_mem_o                         (rd_mem),
+        .csr_addr_mem_o                  (csr_addr_mem),
+        .rd_mem_o                        (rd_mem),
         .csr_addr_wb_o                   (csr_addr_wb),
         .rd_wb_o                         (rd_wb),
-        .reg_write_mem_o                  (reg_write_mem),
+        .reg_write_mem_o                 (reg_write_mem),
         .reg_write_wb_o                  (reg_write_wb),
-        .csr_we_mem_o                     (csr_we_mem),
+        .csr_we_mem_o                    (csr_we_mem),
         .csr_we_wb_o                     (csr_we_wb)
     );
 
