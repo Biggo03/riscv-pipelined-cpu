@@ -22,22 +22,25 @@
 `include "wb_dump_tasks.sv"
 `include "hazard_dump_tasks.sv"
 
-int reg_dump_handle;
+`ifdef PIPELINE_DUMP
+    int reg_dump_handle;
 
-initial begin
-    reg_dump_handle = $fopen({`DUMP_PATH, "/register_dump.yml"}, "w");
-    if (reg_dump_handle == 0) begin
-        $fatal(1, "ERROR: Could not open register_dump.yml");
+    initial begin
+        reg_dump_handle = $fopen({`DUMP_PATH, "/raw_pipeline_dump.yml"}, "w");
+        if (reg_dump_handle == 0) begin
+            $fatal(1, "ERROR: Could not open raw_pipeline_dump.yml");
+        end
     end
-end
 
-always @(negedge clk) begin
-    if (~reset) begin
-        $fdisplay(reg_dump_handle, "%0d:", riscv_top_tb.u_cycle_monitor.cycle_cnt);
-        dump_de(reg_dump_handle);
-        dump_ex(reg_dump_handle);
-        dump_mem(reg_dump_handle);
-        dump_wb(reg_dump_handle);
-        dump_hazard_unit(reg_dump_handle);
+    always @(negedge clk) begin
+        if (~reset) begin
+            $fdisplay(reg_dump_handle, "%0d:", riscv_top_tb.u_cycle_monitor.cycle_cnt);
+            dump_de(reg_dump_handle);
+            dump_ex(reg_dump_handle);
+            dump_mem(reg_dump_handle);
+            dump_wb(reg_dump_handle);
+            dump_hazard_unit(reg_dump_handle);
+        end
     end
-end
+
+`endif

@@ -26,23 +26,23 @@ endtask
 task automatic dump_de_meta(int reg_dump_handle);
 begin
     $fdisplay(reg_dump_handle, "    meta:");
-    $fdisplay(reg_dump_handle, "      pc: 0x%h", `DATA_PATH_HIER.u_decode_stage.outputs_de.meta.pc);
-    $fdisplay(reg_dump_handle, "      instr: 0x%h", `DATA_PATH_HIER.u_decode_stage.outputs_de.meta.instr);
-    $fdisplay(reg_dump_handle, "      valid: 0x%h", `DATA_PATH_HIER.u_decode_stage.outputs_de.meta.valid);
+    $fdisplay(reg_dump_handle, "      pc: \"0x%h\"", `DATA_PATH_HIER.u_decode_stage.outputs_de.meta.pc);
+    $fdisplay(reg_dump_handle, "      instr: \"0x%h\"", `DATA_PATH_HIER.u_decode_stage.outputs_de.meta.instr);
+    $fdisplay(reg_dump_handle, "      valid: \"0x%h\"", `DATA_PATH_HIER.u_decode_stage.outputs_de.meta.valid);
 end
 endtask;
 
 task automatic dump_de_control(int reg_dump_handle);
 begin
     $fdisplay(reg_dump_handle, "    control:");
-    $fdisplay(reg_dump_handle, "      pc_src_pred: 0x%h", `DATA_PATH_HIER.u_decode_stage.outputs_de.control.pc_src_pred);
+    $fdisplay(reg_dump_handle, "      pc_src_pred: \"0b%b\"", `DATA_PATH_HIER.u_decode_stage.outputs_de.control.pc_src_pred);
 end
 endtask;
 
 task automatic dump_de_data(int reg_dump_handle);
 begin
     $fdisplay(reg_dump_handle, "    data:");
-    $fdisplay(reg_dump_handle, "      pc_plus4: 0x%h", `DATA_PATH_HIER.u_decode_stage.outputs_de.data.pc_plus4);
-    $fdisplay(reg_dump_handle, "      pred_pc_target: 0x%h", `DATA_PATH_HIER.u_decode_stage.outputs_de.data.pred_pc_target);
+    $fdisplay(reg_dump_handle, "      pc_plus4: \"0x%h\"", `DATA_PATH_HIER.u_decode_stage.outputs_de.data.pc_plus4);
+    $fdisplay(reg_dump_handle, "      pred_pc_target: \"0x%h\"", `DATA_PATH_HIER.u_decode_stage.outputs_de.data.pred_pc_target);
 end
 endtask;
