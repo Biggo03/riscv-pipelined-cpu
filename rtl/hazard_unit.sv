@@ -64,7 +64,7 @@ module hazard_unit (
 );
 
     // ----- Hazard detection -----
-    logic LoadStall;
+    logic load_stall;
 
     //Forward logic
     always_comb begin
@@ -86,17 +86,17 @@ module hazard_unit (
     end
 
     //stall and flush logic
-    assign LoadStall = (result_src_ex_i == `RESULT_MEM_DATA) & ((rs1_de_i == rd_ex_i) | (rs2_de_i == rd_ex_i));
+    assign load_stall = (result_src_ex_i == `RESULT_MEM_DATA) & ((rs1_de_i == rd_ex_i) | (rs2_de_i == rd_ex_i));
 
     //Stalls
-    assign stall_fi_o = (LoadStall | ~instr_hit_fi_i) & ~pc_src_reg_i[1];
-    assign stall_de_o = LoadStall | ~instr_hit_fi_i;
+    assign stall_fi_o = (load_stall | ~instr_hit_fi_i) & ~pc_src_reg_i[1];
+    assign stall_de_o = load_stall | ~instr_hit_fi_i;
     assign stall_ex_o = ~instr_hit_fi_i;
     assign stall_mem_o = ~instr_hit_fi_i;
     assign stall_wb_o = ~instr_hit_fi_i;
 
     //Flushes
-    assign flush_ex_o = (pc_src_i[1] & (ic_repl_permit_i | pc_src_reg_i[1])) | LoadStall;
+    assign flush_ex_o = (pc_src_i[1] & (ic_repl_permit_i | pc_src_reg_i[1])) | load_stall;
     assign flush_de_o = pc_src_i[1];
 
 endmodule

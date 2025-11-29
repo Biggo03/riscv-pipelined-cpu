@@ -34,7 +34,7 @@
 
     always @(negedge clk) begin
         if (~reset) begin
-            $fdisplay(reg_dump_handle, "%0d:", riscv_top_tb.u_cycle_monitor.cycle_cnt);
+            $fdisplay(reg_dump_handle, "%0d:", riscv_top_tb.u_performance_monitor.cycle_cnt);
             dump_de(reg_dump_handle);
             dump_ex(reg_dump_handle);
             dump_mem(reg_dump_handle);

@@ -46,25 +46,25 @@ module riscv_top (
         .reset_i                        (reset_i),
 
         // Instruction fetch inputs
-        .instr_fi_i                      (instr_fi),
-        .instr_hit_fi_i                  (instr_hit_fi),
+        .instr_fi_i                     (instr_fi),
+        .instr_hit_fi_i                 (instr_hit_fi),
         .ic_repl_permit_i               (ic_repl_permit),
 
         // Memory inputs
-        .read_data_mem_i                  (read_data_mem),
+        .read_data_mem_i                (read_data_mem),
 
         // pc outputs
-        .pc_fi_o                         (pc_fi),
+        .pc_fi_o                        (pc_fi),
 
         // ALU & memory outputs
-        .alu_result_mem_o                 (alu_result_mem_o),
-        .write_data_mem_o                 (write_data_mem_o),
+        .alu_result_mem_o                (alu_result_mem_o),
+        .write_data_mem_o                (write_data_mem_o),
 
         // Control outputs
-        .width_src_mem_o                  (width_src_mem),
+        .width_src_mem_o                 (width_src_mem),
         .branch_op_ex_o                  (branch_op_ex),
-        .pc_src_reg_o                   (pc_src_reg),
-        .mem_write_mem_o                  (mem_write_mem_o)
+        .pc_src_reg_o                    (pc_src_reg),
+        .mem_write_mem_o                 (mem_write_mem_o)
     );
 
 `ifndef NO_ICACHE
