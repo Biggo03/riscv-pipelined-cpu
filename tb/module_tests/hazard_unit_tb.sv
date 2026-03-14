@@ -37,16 +37,21 @@ module hazard_unit_tb();
     logic [4:0] rs1_e;
     logic [4:0] rs2_e;
     logic [4:0] rd_e;
+    logic [11:0] csr_addr_e;
     logic [2:0] result_src_e;
     logic [1:0] pc_src;
 
     // Memory stage inputs
     logic [4:0] rd_m;
     logic       reg_write_m;
+    logic [11:0] csr_addr_m;
+    logic       csr_we_m;
 
     // Writeback stage inputs
     logic [4:0] rd_w;
     logic       reg_write_w;
+    logic [11:0] csr_addr_w;
+    logic       csr_we_w;
 
     // Branch predictor / cache inputs
     logic [1:0]  pc_src_reg;
@@ -66,6 +71,7 @@ module hazard_unit_tb();
     // Forwarding outputs
     logic [1:0] forward_a_e;
     logic [1:0] forward_b_e;
+    logic [1:0] forward_csr_e;
 
     // ---------------------------------------------------
     // Expected results
@@ -80,45 +86,51 @@ module hazard_unit_tb();
     // ---------------------------------------------------
     hazard_unit u_DUT (
         // Fetch stage inputs
-        .instr_hit_f_i                 (instr_hit_f),
+        .instr_hit_fi_i                 (instr_hit_f),
 
         // Decode stage inputs
-        .rs1_d_i                        (rs1_d),
-        .rs2_d_i                        (rs2_d),
+        .rs1_de_i                       (rs1_d),
+        .rs2_de_i                       (rs2_d),
 
         // Execute stage inputs
-        .rs1_e_i                        (rs1_e),
-        .rs2_e_i                        (rs2_e),
-        .rd_e_i                         (rd_e),
-        .result_src_e_i                 (result_src_e),
+        .rs1_ex_i                       (rs1_e),
+        .rs2_ex_i                       (rs2_e),
+        .rd_ex_i                        (rd_e),
+        .csr_addr_ex_i                  (csr_addr_e),
+        .result_src_ex_i                (result_src_e),
         .pc_src_i                       (pc_src),
 
         // Memory stage inputs
-        .rd_m_i                         (rd_m),
-        .reg_write_m_i                  (reg_write_m),
+        .rd_mem_i                       (rd_m),
+        .reg_write_mem_i                (reg_write_m),
+        .csr_addr_mem_i                 (csr_addr_m),
+        .csr_we_mem_i                   (csr_we_m),
 
         // Writeback stage inputs
-        .rd_w_i                         (rd_w),
-        .reg_write_w_i                  (reg_write_w),
+        .rd_wb_i                        (rd_w),
+        .reg_write_wb_i                 (reg_write_w),
+        .csr_addr_wb_i                  (csr_addr_w),
+        .csr_we_wb_i                    (csr_we_w),
 
         // Branch predictor / cache inputs
         .pc_src_reg_i                   (pc_src_reg),
         .ic_repl_permit_i               (ic_repl_permit),
 
         // stall outputs
-        .stall_f_o                      (stall_f),
-        .stall_d_o                      (stall_d),
-        .stall_e_o                      (stall_e),
-        .stall_m_o                      (stall_m),
-        .stall_w_o                      (stall_w),
+        .stall_fi_o                     (stall_f),
+        .stall_de_o                     (stall_d),
+        .stall_ex_o                     (stall_e),
+        .stall_mem_o                    (stall_m),
+        .stall_wb_o                     (stall_w),
 
         // flush outputs
-        .flush_d_o                      (flush_d),
-        .flush_e_o                      (flush_e),
+        .flush_de_o                     (flush_d),
+        .flush_ex_o                     (flush_e),
 
         // Forwarding outputs
-        .forward_a_e_o                  (forward_a_e),
-        .forward_b_e_o                  (forward_b_e)
+        .forward_a_ex_o                 (forward_a_e),
+        .forward_b_ex_o                 (forward_b_e),
+        .forward_csr_ex_o               (forward_csr_e)
     );
 
     //Parameters to consolidate signal values
@@ -152,10 +164,17 @@ module hazard_unit_tb();
         rs1_e = 0;
         rs2_e = 0;
         rd_e = 0;
+        csr_addr_e = 0;
         result_src_e = 0;
         pc_src = 0;
         rd_m = 0;
         reg_write_m = 0;
+        csr_addr_m = 0;
+        csr_we_m = 0;
+        rd_w = 0;
+        reg_write_w = 0;
+        csr_addr_w = 0;
+        csr_we_w = 0;
         pc_src_reg = 0;
         ic_repl_permit = 0;
 
@@ -248,6 +267,13 @@ module hazard_unit_tb();
         rs1_d = 0;
         rs2_d = 0;
         rd_e = 1;
+        csr_addr_e = 0;
+        csr_addr_m = 0;
+        csr_we_m = 0;
+        rd_w = 0;
+        reg_write_w = 0;
+        csr_addr_w = 0;
+        csr_we_w = 0;
 
         instr_hit_f = 1;
         pc_src = 0;
@@ -415,5 +441,4 @@ module hazard_unit_tb();
     endtask
 
 endmodule
-
 

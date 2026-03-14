@@ -45,7 +45,7 @@ module csr_reg_file_tb;
     logic [11:0]  csr_raddr_i;
     logic [31:0]  csr_rdata_o;
 
-    logic         retire_w_i;
+    logic         retire_wb_i;
 
     // ------------------------------------------------------------
     //  Testbench Signals
@@ -78,7 +78,7 @@ module csr_reg_file_tb;
         csr_waddr_i  = '0;
         csr_wdata_i  = '0;
         csr_raddr_i  = '0;
-        retire_w_i   = 1'b1; //Active from start
+        retire_wb_i   = 1'b1; //Active from start
         repeat (5) @(posedge clk_i);
         reset_i = 1'b0;
     end
@@ -143,7 +143,7 @@ module csr_reg_file_tb;
     always_ff @(posedge clk_i) begin : counter_logic
         if (~reset_i) begin
             clk_counter = clk_counter + 1;
-            retire_counter = retire_w_i ? retire_counter + 1 : retire_counter;
+            retire_counter = retire_wb_i ? retire_counter + 1 : retire_counter;
         end else begin
             clk_counter = 0;
             retire_counter = 0;
@@ -168,7 +168,7 @@ module csr_reg_file_tb;
       .csr_rdata_o (csr_rdata_o),
 
       // -- Other --
-      .retire_w_i  (retire_w_i)
+      .retire_wb_i  (retire_wb_i)
     );
 
     // ------------------------------------------------------------
@@ -188,19 +188,19 @@ module csr_reg_file_tb;
         `CHECK(u_dut.minstret_q === 32'h0, "minstret reset value incorrect");
         `CHECK(u_dut.minstreth_q === 32'h0, "minstreth reset value incorrect");
         `CHECK(u_dut.mstatus_q === 32'h0, "mstatus reset value incorrect");
-        `CHECK(u_dut.mtest_status_q === 32'h0, "mtest_status reset value incorrect");
         `CHECK(u_dut.mdbg_q === 32'h0, "mdbg reset value incorrect");
+        `CHECK(u_dut.mtest_status_q === 32'h0, "mtest_status reset value incorrect");
 
         //Readcheck for standard registers
         $display("[%t] Beginning read check for standard registers...", $realtime);
         read_register(`MSTATUS_ADDR, tb_rdata);
         `CHECK(csr_rdata_o === 32'h0, "Reset check for mstatus failed");
         
-        read_register(`MTEST_STATUS_ADDR, tb_rdata);
-        `CHECK(csr_rdata_o === 32'h0, "Reset check for mtest_status failed");
-        
         read_register(`MDBG_ADDR, tb_rdata);
         `CHECK(csr_rdata_o === 32'h0, "Reset check for mdbg failed");
+        
+        read_register(`MTEST_STATUS_ADDR, tb_rdata);
+        `CHECK(csr_rdata_o === 32'h0, "Reset check for mtest_status failed");
         
 
         // Readcheck for special registers
@@ -245,14 +245,14 @@ module csr_reg_file_tb;
         `CHECK(tb_rdata === tb_wdata, "Write check for mstatus failed");
         
         tb_wdata = $urandom();
-        write_register(`MTEST_STATUS_ADDR, tb_wdata);
-        read_register(`MTEST_STATUS_ADDR, tb_rdata);
-        `CHECK(tb_rdata === tb_wdata, "Write check for mtest_status failed");
-        
-        tb_wdata = $urandom();
         write_register(`MDBG_ADDR, tb_wdata);
         read_register(`MDBG_ADDR, tb_rdata);
         `CHECK(tb_rdata === tb_wdata, "Write check for mdbg failed");
+        
+        tb_wdata = $urandom();
+        write_register(`MTEST_STATUS_ADDR, tb_wdata);
+        read_register(`MTEST_STATUS_ADDR, tb_rdata);
+        `CHECK(tb_rdata === tb_wdata, "Write check for mtest_status failed");
         
 
         // Writethrough check
@@ -273,10 +273,10 @@ module csr_reg_file_tb;
         write_through(`MSTATUS_ADDR, tb_wdata);
         
         tb_wdata = $urandom();
-        write_through(`MTEST_STATUS_ADDR, tb_wdata);
+        write_through(`MDBG_ADDR, tb_wdata);
         
         tb_wdata = $urandom();
-        write_through(`MDBG_ADDR, tb_wdata);
+        write_through(`MTEST_STATUS_ADDR, tb_wdata);
         
 
         // reset all special registers
@@ -298,12 +298,12 @@ module csr_reg_file_tb;
         read_register(`MINSTRETH_ADDR, tb_rdata);
         `CHECK(tb_rdata === 1'b1, "minstreth increment failed");
 
-        retire_w_i = 0;
+        retire_wb_i = 0;
         read_register(`MINSTRET_ADDR, intermediate_data);
         repeat (20) @(posedge clk_i);
 
         read_register(`MINSTRET_ADDR, tb_rdata);
-        `CHECK(tb_rdata === intermediate_data, "minstret incrementing when retire_w_i low");
+        `CHECK(tb_rdata === intermediate_data, "minstret incrementing when retire_wb_i low");
 
         #100;
         if (error_cnt == 0) $display("TEST PASSED");

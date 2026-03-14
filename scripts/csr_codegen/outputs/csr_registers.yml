@@ -38,19 +38,19 @@ MSTATUS:
   BEHAV: standard
   DESCRIPTION: machine status register (currently only used for testing)
   ADDR_MACRO: MSTATUS_ADDR
-MTEST_STATUS:
-  ADDRESS: 7C0
-  PRIVILEGE: M
-  ACCESS: R/W
-  RESET_VAL: 0
-  BEHAV: standard
-  DESCRIPTION: Custom Register for handelling test success/failure in simulation
-  ADDR_MACRO: MTEST_STATUS_ADDR
 MDBG:
-  ADDRESS: 7C2
+  ADDRESS: 7A0
   PRIVILEGE: M
   ACCESS: R/W
   RESET_VAL: 0
   BEHAV: standard
   DESCRIPTION: Custom register for holding debug info during testing
   ADDR_MACRO: MDBG_ADDR
+MTEST_STATUS:
+  ADDRESS: 7C0
+  PRIVILEGE: M
+  ACCESS: R/W
+  RESET_VAL: 0
+  BEHAV: standard
+  DESCRIPTION: Custom register for handling test success/failure in simulation
+  ADDR_MACRO: MTEST_STATUS_ADDR

@@ -227,6 +227,8 @@ def gen_run_cmd(test_name, test_info, dir_paths, defines):
 
     defines = list(defines)
     defines.extend(test_info["defines"])
+    if ("c_program" in test_info["tags"]):
+        defines.append("C_PROGRAM")
 
     # -- Included directories ---
     inc_dirs = [

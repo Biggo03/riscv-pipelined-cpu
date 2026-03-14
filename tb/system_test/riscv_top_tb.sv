@@ -73,6 +73,7 @@
     //------------------------------------------------------
     int reg_dump_handle;
     int perf_dump_handle;
+    int c_program_op_handle;
     initial begin : file_handle_init
         `ifdef PIPELINE_DUMP
             reg_dump_handle = $fopen({`DUMP_PATH, "/raw_pipeline_dump.yml"}, "w");
@@ -80,6 +81,13 @@
                 $fatal(1, "ERROR: Could not open raw_pipeline_dump.yml");
             end
         `endif
+
+        // `ifdef C_PROGRAM
+        //     c_program_op_handle = $fopen({`DUMP_PATH, "/c_output.log"}, "w");
+        //     if (c_program_op_handle == 0) begin
+        //         $fatal(1, "ERROR: Could not open c_output.log");
+        //     end
+        // `endif
 
         perf_dump_handle = $fopen({`DUMP_PATH, "/performance_dump.log"}, "w");
         if (perf_dump_handle == 0) begin
@@ -106,6 +114,17 @@
             end
         end
     end
+
+    //------------------------------------------------------
+    // printf handelling for C programs
+    //------------------------------------------------------
+    // `ifdef C_PROGRAM
+    //     always @(posedge clk) begin : printf_handle
+    //         if (`DATA_PATH_HIER.csr_we_wb_o && `DATA_PATH_HIER.csr_addr_wb_o == `MPRINT_CHAR_ADDR && ~`HAZARD_UNIT_HIER.stall_wb_o) begin
+    //             $fwrite(c_program_op_handle, "%c", `DATA_PATH_HIER.csr_result_wb[7:0]);
+    //         end
+    //     end
+    // `endif
 
     // ------------------------------------------------------------
     //  End-of-test

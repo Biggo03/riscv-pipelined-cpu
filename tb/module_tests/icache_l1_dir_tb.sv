@@ -66,12 +66,12 @@ module icache_l1_dir_tb();
         .clk_i                          (clk),
         .reset_i                        (reset),
         .l2_repl_ready_i                (l2_repl_ready),
-        .pc_f_i                         (pc_f),
+        .pc_fi_i                        (pc_f),
         .rep_word_i                     (rep_word),
         .pc_src_reg_i                   (pc_src_reg),
-        .branch_op_e_i                  (branch_op_e),
-        .instr_f_o                      (instr_f),
-        .instr_hit_f_o                  (instr_hit_f),
+        .branch_op_ex_i                 (branch_op_e),
+        .instr_fi_o                     (instr_f),
+        .instr_hit_fi_o                 (instr_hit_f),
         .ic_repl_permit_o               (ic_repl_permit)
     );
 

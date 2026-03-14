@@ -45,7 +45,7 @@ module csr_reg_file_tb;
     logic [11:0]  csr_raddr_i;
     logic [31:0]  csr_rdata_o;
 
-    logic         retire_w_i;
+    logic         retire_wb_i;
 
     // ------------------------------------------------------------
     //  Testbench Signals
@@ -78,7 +78,7 @@ module csr_reg_file_tb;
         csr_waddr_i  = '0;
         csr_wdata_i  = '0;
         csr_raddr_i  = '0;
-        retire_w_i   = 1'b1; //Active from start
+        retire_wb_i   = 1'b1; //Active from start
         repeat (5) @(posedge clk_i);
         reset_i = 1'b0;
     end
@@ -143,7 +143,7 @@ module csr_reg_file_tb;
     always_ff @(posedge clk_i) begin : counter_logic
         if (~reset_i) begin
             clk_counter = clk_counter + 1;
-            retire_counter = retire_w_i ? retire_counter + 1 : retire_counter;
+            retire_counter = retire_wb_i ? retire_counter + 1 : retire_counter;
         end else begin
             clk_counter = 0;
             retire_counter = 0;
@@ -168,7 +168,7 @@ module csr_reg_file_tb;
       .csr_rdata_o (csr_rdata_o),
 
       // -- Other --
-      .retire_w_i  (retire_w_i)
+      .retire_wb_i  (retire_wb_i)
     );
 
     // ------------------------------------------------------------
@@ -249,12 +249,12 @@ module csr_reg_file_tb;
         read_register(`MINSTRETH_ADDR, tb_rdata);
         `CHECK(tb_rdata === 1'b1, "minstreth increment failed");
 
-        retire_w_i = 0;
+        retire_wb_i = 0;
         read_register(`MINSTRET_ADDR, intermediate_data);
         repeat (20) @(posedge clk_i);
 
         read_register(`MINSTRET_ADDR, tb_rdata);
-        `CHECK(tb_rdata === intermediate_data, "minstret incrementing when retire_w_i low");
+        `CHECK(tb_rdata === intermediate_data, "minstret incrementing when retire_wb_i low");
 
         #100;
         if (error_cnt == 0) $display("TEST PASSED");

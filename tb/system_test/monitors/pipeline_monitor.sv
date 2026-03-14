@@ -23,15 +23,6 @@
 `include "hazard_dump_tasks.sv"
 
 `ifdef PIPELINE_DUMP
-    int reg_dump_handle;
-
-    initial begin
-        reg_dump_handle = $fopen({`DUMP_PATH, "/raw_pipeline_dump.yml"}, "w");
-        if (reg_dump_handle == 0) begin
-            $fatal(1, "ERROR: Could not open raw_pipeline_dump.yml");
-        end
-    end
-
     always @(negedge clk) begin
         if (~reset) begin
             $fdisplay(reg_dump_handle, "%0d:", riscv_top_tb.u_performance_monitor.cycle_cnt);

@@ -41,9 +41,9 @@ module instr_cache_ctlr_tb();
         .set_i                          (set),
         .miss_array_i                   (miss_array),
         .pc_src_reg_i                   (pc_src_reg),
-        .branch_op_e_i                  (branch_op_e),
+        .branch_op_ex_i                 (branch_op_e),
         .active_array_o                 (active_array),
-        .instr_hit_f_o                  (instr_hit_f),
+        .instr_hit_fi_o                 (instr_hit_f),
         .ic_repl_permit_o               (ic_repl_permit)
     );
 
@@ -74,7 +74,7 @@ module instr_cache_ctlr_tb();
 
         //Normal operation hit
         branch_op_e = `NON_BRANCH; miss_array = 0; pc_src_reg[1] = 0;
-        #10;
+        #11;
         assert(u_DUT.present_state == 0 & ic_repl_permit == 1) else $fatal(1, "Normal operation hit fail");
 
         //Normal operation miss

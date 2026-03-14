@@ -12,7 +12,7 @@ STARTUP_OBJ = $(STARTUP:.s=.o)
 ARCH = rv32i_zicsr
 ABI  = ilp32
 
-CC_FLAGS  = -march=$(ARCH) -mabi=$(ABI) -O2 -std=gnu11 -Icommon -msmall-data-limit=8
+CC_FLAGS  = -march=$(ARCH) -mabi=$(ABI) -O2 -std=gnu11 -Icommon -msmall-data-limit=8 -fno-builtin-printf -fno-builtin
 
 # List of program directories
 C_DIRS  := $(wildcard c_programs/*)

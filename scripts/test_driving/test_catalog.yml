@@ -42,7 +42,6 @@ regressions:
       - global_array
       - combined_check
 
-
 tests:
     ####################################
     #          basic asm tests         #
@@ -150,6 +149,15 @@ tests:
       defines: []
       tags: [system, slow, c_program]
 
+    printf_check:
+      tb: riscv_top_tb.sv
+      defines: []
+      tags: [system, slow, c_program]
+
+    printf_stress:
+      tb: riscv_top_tb.sv
+      defines: []
+      tags: [system, slow, c_program]
     ####################################
     #      benchmark programs          #
     ####################################

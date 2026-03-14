@@ -10,8 +10,8 @@
 #define CSR_MINSTRET       0xB02u //Bottom 32-bits storing number of instructions retired
 #define CSR_MINSTRETH      0xB82u //Top 32-bits storing number of instructions retired
 #define CSR_MSTATUS        0x300u //machine status register (currently only used for testing)
-#define CSR_MTEST_STATUS   0x7C0u //Custom Register for handelling test success/failure in simulation
-#define CSR_MDBG           0x7C2u //Custom register for holding debug info during testing
+#define CSR_MDBG           0x7A0u //Custom register for holding debug info during testing
+#define CSR_MTEST_STATUS   0x7C0u //Custom register for handling test success/failure in simulation
 
 // ------------------------------------------------------------
 //  inline access helpers (generic)
