@@ -1,27 +1,25 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
 `include "tb_macros.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 01/19/2025 11:17:37 AM
-// Design Name:
-// Module Name: LocalPredictor_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       local_predictor_tb
+//  File:         local_predictor_tb.sv
+//  Description:  Testbench for the local_predictor module.
+//
+//                 This testbench verifies:
+//                   - Initial predictor state
+//                   - Saturating counter updates on branch outcomes
+//                   - Enable gating and reset behavior
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Tracks expected predictor state explicitly in localparams.
+//==============================================================//
 module local_predictor_tb();
 
     localparam ST = 2'b11;

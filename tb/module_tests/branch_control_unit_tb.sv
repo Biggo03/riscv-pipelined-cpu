@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 01/23/2025 08:01:25 PM
-// Design Name:
-// Module Name: BranchControlUnit_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       branch_control_unit_tb
+//  File:         branch_control_unit_tb.sv
+//  Description:  Testbench for the branch_control_unit module.
+//
+//                 This testbench verifies:
+//                   - Rollback behavior for predicted versus resolved PC sources
+//                   - Non-branch prediction handling
+//                   - Taken and untaken branch control cases
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Exhaustively sweeps the key rollback input combinations.
+//==============================================================//
 module branch_control_unit_tb();
 
     logic [1:0] op;

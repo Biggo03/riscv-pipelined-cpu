@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/10/2024 10:34:44 AM
-// Design Name:
-// Module Name: ALU_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for ALU module
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       alu_tb
+//  File:         alu_tb.sv
+//  Description:  Testbench for the alu module.
+//
+//                 This testbench verifies:
+//                   - ALU result correctness from regression vectors
+//                   - Negative, zero, carry, and overflow flag behavior
+//                   - Representative coverage across supported ALU operations
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Uses an external test vector file for stimulus and expected outputs.
+//==============================================================//
 module alu_tb();
 
     // Stimulus and expected results

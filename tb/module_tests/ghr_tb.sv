@@ -1,27 +1,25 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
 `include "tb_macros.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 01/18/2025 07:26:21 PM
-// Design Name:
-// Module Name: GHR_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       ghr_tb
+//  File:         ghr_tb.sv
+//  Description:  Testbench for the ghr module.
+//
+//                 This testbench verifies:
+//                   - Initial global-history register state
+//                   - Saturating state transitions on branch outcomes
+//                   - Enable gating and hold behavior
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Predictor states are named with localparams for readability.
+//==============================================================//
 module ghr_tb();
 
     // Local parameters for state bits. Output matches state bits

@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/12/2024 03:55:16 PM
-// Design Name:
-// Module Name: ALUdecoder_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for ALUdecoder
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       alu_decoder_tb
+//  File:         alu_decoder_tb.sv
+//  Description:  Testbench for the alu_decoder module.
+//
+//                 This testbench verifies:
+//                   - Load/store ALU decode behavior
+//                   - Branch comparison decode cases
+//                   - R-type and I-type funct3/funct7 decode paths
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Iterates across funct3, op[5], and funct7[5] combinations.
+//==============================================================//
 module alu_decoder_tb();
 
     // Stimulus and expected output

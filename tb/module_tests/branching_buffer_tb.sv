@@ -1,26 +1,25 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
 `include "tb_macros.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 01/19/2025 04:24:58 PM
-// Design Name:
-// Module Name: BranchingBuffer_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
+//==============================================================//
+//  Module:       branching_buffer_tb
+//  File:         branching_buffer_tb.sv
+//  Description:  Testbench for the branching_buffer module.
+//
+//                 This testbench verifies:
+//                   - Branch target buffer initialization and indexed readback
+//                   - Local predictor update and reset behavior
+//                   - Combined target and prediction updates after branch changes
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Exercises entries across the full 1024-entry buffer space.
+//==============================================================//
 module branching_buffer_tb();
 
 

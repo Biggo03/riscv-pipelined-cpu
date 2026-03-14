@@ -1,6 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
 
+//==============================================================//
+//  Module:       adder_tb
+//  File:         adder_tb.sv
+//  Description:  Testbench for the adder module.
+//
+//                 This testbench verifies:
+//                   - Small and large operand addition cases
+//                   - Zero-operand and mixed-sign additions
+//                   - Representative signed-result checks
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Combinational checks are performed with direct assertions.
+//==============================================================//
 module adder_tb();
 
     logic [31:0] a;

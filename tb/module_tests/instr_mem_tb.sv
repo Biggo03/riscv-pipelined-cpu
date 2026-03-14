@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/14/2024 01:55:15 PM
-// Design Name:
-// Module Name: imem_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for instrmem module
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       instr_mem_tb
+//  File:         instr_mem_tb.sv
+//  Description:  Testbench for the instr_mem module.
+//
+//                 This testbench verifies:
+//                   - Instruction readback against a reference memory image
+//                   - Instruction-hit status behavior
+//                   - Replacement-permit status behavior
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Loads the same program image into the testbench for comparison.
+//==============================================================//
 module instr_mem_tb();
 
     // Stimulus, output

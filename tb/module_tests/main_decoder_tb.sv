@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/11/2024 10:28:25 AM
-// Design Name:
-// Module Name: maindecoder_tb
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for maindecoder module
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       main_decoder_tb
+//  File:         main_decoder_tb.sv
+//  Description:  Testbench for the main_decoder module.
+//
+//                 This testbench verifies:
+//                   - Control decode for representative instruction opcodes
+//                   - Branch, result-source, and ALU-source outputs
+//                   - Width and PC-base decode behavior
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Expected control bundles are checked through a shared assertion task.
+//==============================================================//
 module main_decoder_tb();
 
     //Stimulus signals

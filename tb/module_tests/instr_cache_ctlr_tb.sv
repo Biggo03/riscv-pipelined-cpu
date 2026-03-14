@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 03/02/2025 09:35:35 PM
-// Design Name:
-// Module Name: InstrCacheController_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       instr_cache_ctlr_tb
+//  File:         instr_cache_ctlr_tb.sv
+//  Description:  Testbench for the instr_cache_ctlr module.
+//
+//                 This testbench verifies:
+//                   - Active-set decode from the selected set index
+//                   - Instruction hit indication from miss-array inputs
+//                   - FSM behavior for branch hit, miss, and misprediction cases
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Checks the DUT FSM state through the internal present_state signal.
+//==============================================================//
 module instr_cache_ctlr_tb();
 
     logic [5:0]  set;

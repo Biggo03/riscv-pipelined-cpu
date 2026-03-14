@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/12/2024 03:15:43 PM
-// Design Name:
-// Module Name: widthdecoder_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for widthdecoder
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       width_decoder_tb
+//  File:         width_decoder_tb.sv
+//  Description:  Testbench for the width_decoder module.
+//
+//                 This testbench verifies:
+//                   - Default width decode when width_op is disabled
+//                   - funct3-based width decode for memory operations
+//                   - Supported signed and unsigned width encodings
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Separates opcode-independent and funct3-driven checks.
+//==============================================================//
 module width_decoder_tb();
 
     // stimulus, outputs and expected outputs

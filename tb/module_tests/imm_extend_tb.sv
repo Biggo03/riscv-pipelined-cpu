@@ -2,27 +2,25 @@
 `include "misc_tasks.sv"
 `include "control_macros.sv"
 `include "tb_macros.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/08/2024 02:48:27 PM
-// Design Name:
-// Module Name: extend_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for the extend module
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       imm_extend_tb
+//  File:         imm_extend_tb.sv
+//  Description:  Testbench for the imm_extend module.
+//
+//                 This testbench verifies:
+//                   - Immediate extension from regression vectors
+//                   - Sign and zero extension behavior by immediate source
+//                   - CSR immediate expansion behavior
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Uses vector-driven checks plus a direct CSR-immediate case.
+//==============================================================//
 module imm_extend_tb();
 
     logic [31:7] instr;

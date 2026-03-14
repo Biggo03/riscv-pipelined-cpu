@@ -2,29 +2,25 @@
 `include "misc_tasks.sv"
 `include "csr_macros.sv"
 `include "tb_macros.sv"
+
 //==============================================================//
 //  Module:       csr_reg_file_tb
-//  File:         csr_reg_file_tb.sv
-//  Description:  Testbench for CSR register file.
+//  File:         csr_regfile_tb.sv
+//  Description:  Testbench for the csr_reg_file module.
 //
-//                 This testbench verifies the functionality of the
-//                 csr_reg_file module, including:
-//                   - Reset value correctness
-//                   - Read/write access behavior
-//                   - Write-through behavior
-//                   - Auto-increment register tracking (if applicable)
+//                 This testbench verifies:
+//                   - Reset value correctness for architectural CSR state
+//                   - Read and write behavior for standard and special CSRs
+//                   - Write-through and auto-increment counter behavior
 //
 //  Author:       Viggo Wozniak
 //  Project:      RISC-V Processor
 //  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
 //
-//  Parameters:   CLK_PERIOD — simulation clock period
+//  Parameters:   CLK_PERIOD - simulation clock period.
 //
-//  Notes:        - This file may be partially auto-generated using Jinja.
-//                - Manual sections (e.g., monitors or scoreboards) are
-//                  safe to modify and extend.
+//  Notes:        Uses hierarchical references to inspect internal CSR state directly.
 //==============================================================//
-
 module csr_reg_file_tb;
 
     // ------------------------------------------------------------

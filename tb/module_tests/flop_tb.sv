@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/07/2024 09:56:32 PM
-// Design Name:
-// Module Name: flop_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for the flop module
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       flop_tb
+//  File:         flop_tb.sv
+//  Description:  Testbench for the flop module.
+//
+//                 This testbench verifies:
+//                   - Registered propagation on clock edges
+//                   - Enable-controlled hold behavior
+//                   - Reset clearing behavior
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Sequential behavior is checked with simple timed stimulus.
+//==============================================================//
 module flop_tb();
 
     logic        clk;

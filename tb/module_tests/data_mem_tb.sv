@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/13/2024 07:37:50 PM
-// Design Name:
-// Module Name: datamem_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for datamem module
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       data_mem_tb
+//  File:         data_mem_tb.sv
+//  Description:  Testbench for the data_mem module.
+//
+//                 This testbench verifies:
+//                   - Word read and write behavior
+//                   - Halfword read and write behavior
+//                   - Byte read and write behavior
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Checks subword accesses against precomputed expected-value arrays.
+//==============================================================//
 module data_mem_tb();
 
     // Stimulus and device outputs

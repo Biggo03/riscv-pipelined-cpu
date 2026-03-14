@@ -3,6 +3,24 @@
 `include "control_macros.sv"
 `include "tb_macros.sv"
 
+//==============================================================//
+//  Module:       csr_alu_tb
+//  File:         csr_alu_tb.sv
+//  Description:  Testbench for the csr_alu module.
+//
+//                 This testbench verifies:
+//                   - CSR set-operation behavior
+//                   - CSR clear-operation behavior
+//                   - CSR pass-through/write behavior
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   WIDTH - CSR datapath width used by the test.
+//
+//  Notes:        This is a focused smoke test for combinational CSR ALU behavior.
+//==============================================================//
 module csr_alu_tb();
 
     localparam int WIDTH = 32;

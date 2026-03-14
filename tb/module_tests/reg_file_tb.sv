@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/10/2024 09:34:13 PM
-// Design Name:
-// Module Name: rf_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for rf (register file) module
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       reg_file_tb
+//  File:         reg_file_tb.sv
+//  Description:  Testbench for the reg_file module.
+//
+//                 This testbench verifies:
+//                   - Reset and initial zero contents across the register file
+//                   - Write-enable behavior for all register indices
+//                   - Hardwired x0 protection
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Reads both ports while sweeping writes across the full register file.
+//==============================================================//
 module reg_file_tb();
 
     // Stimulus

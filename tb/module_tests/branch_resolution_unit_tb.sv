@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/12/2024 05:46:53 PM
-// Design Name:
-// Module Name: branchdecoder_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description: Testbench for branchdecoder module
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       branch_resolution_unit_tb
+//  File:         branch_resolution_unit_tb.sv
+//  Description:  Testbench for the branch_resolution_unit module.
+//
+//                 This testbench verifies:
+//                   - Branch and jump resolution behavior
+//                   - funct3-based condition evaluation
+//                   - Flag-driven taken versus not-taken decisions
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Sweeps all status-flag combinations for each supported branch mode.
+//==============================================================//
 module branch_resolution_unit_tb();
 
     // Stimulus and expected outputs

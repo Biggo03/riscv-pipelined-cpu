@@ -1,5 +1,23 @@
 `include "misc_tasks.sv"
 
+//==============================================================//
+//  Module:       instr_cache_set_multi_tb
+//  File:         instr_cache_set_multi_tb.sv
+//  Description:  Testbench for the instr_cache_set_multi module.
+//
+//                 This testbench verifies:
+//                   - Initial miss behavior and replacement startup
+//                   - Replacement-data write-in and hit-path readback
+//                   - LRU ordering updates after accesses and evictions
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   B, E - block size and associativity used by the test.
+//
+//  Notes:        Uses hierarchical access to verify the DUT LRU state directly.
+//==============================================================//
 module instr_cache_set_multi_tb();
 
     localparam B          = 64;

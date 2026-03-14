@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/09/2024 03:08:14 PM
-// Design Name:
-// Module Name: reduce_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       reduce_tb
+//  File:         reduce_tb.sv
+//  Description:  Testbench for the reduce module.
+//
+//                 This testbench verifies:
+//                   - Width-based result reduction from regression vectors
+//                   - Truncation behavior across supported widths
+//                   - Representative vector-file regression coverage
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Uses an external test vector file for expected outputs.
+//==============================================================//
 module reduce_tb();
 
     logic [31:0] BaseResult;

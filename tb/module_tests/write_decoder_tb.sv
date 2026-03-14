@@ -1,26 +1,24 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 09/09/2024 03:49:44 PM
-// Design Name:
-// Module Name: writedecoder_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
-
+//==============================================================//
+//  Module:       write_decoder_tb
+//  File:         write_decoder_tb.sv
+//  Description:  Testbench for the write_decoder module.
+//
+//                 This testbench verifies:
+//                   - One-hot enable generation
+//                   - Register-index to enable decode behavior
+//                   - No-spurious-bit behavior across all 32 outputs
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Exhaustively sweeps all 5-bit register indices.
+//==============================================================//
 module write_decoder_tb();
 
     logic [4:0]  A;

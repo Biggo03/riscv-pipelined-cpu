@@ -1,26 +1,25 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
 `include "tb_macros.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 10/02/2024 04:04:23 PM
-// Design Name:
-// Module Name: hazardcontrol_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 
+//==============================================================//
+//  Module:       hazard_unit_tb
+//  File:         hazard_unit_tb.sv
+//  Description:  Testbench for the hazard_unit module.
+//
+//                 This testbench verifies:
+//                   - Execute-stage forwarding decisions
+//                   - Load-use stall and flush behavior
+//                   - Cache-miss and branch-mispredict interaction cases
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   None.
+//
+//  Notes:        Uses drive/expect tasks to stage multi-cycle hazard scenarios.
+//==============================================================//
 module hazard_unit_tb();
 
     // ---------------------------------------------------
@@ -441,4 +440,3 @@ module hazard_unit_tb();
     endtask
 
 endmodule
-

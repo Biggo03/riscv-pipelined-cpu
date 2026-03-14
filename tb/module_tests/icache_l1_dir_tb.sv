@@ -1,26 +1,26 @@
 `timescale 1ns / 1ps
 `include "misc_tasks.sv"
 `include "tb_macros.sv"
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date: 03/19/2025 10:13:14 PM
-// Design Name:
-// Module Name: DirL1InstrCache_TB
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:Already tested more complex functionality at set level, will leave at ensuring basic functions work
-//
-//////////////////////////////////////////////////////////////////////////////////
 
+//==============================================================//
+//  Module:       icache_l1_dir_tb
+//  File:         icache_l1_dir_tb.sv
+//  Description:  Testbench for the icache_l1 module.
+//
+//                 This testbench verifies:
+//                   - Cache refill and replacement behavior across sets and ways
+//                   - Immediate readback after cache population
+//                   - Hit-path reread correctness after initialization
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   S, E, B - cache geometry used by the test.
+//
+//  Notes:        This test focuses on directory-level integration.
+//                Set-level behavior is assumed to be covered by dedicated tests.
+//==============================================================//
 module icache_l1_dir_tb();
 
     // Test cache parameters
