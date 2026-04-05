@@ -11,7 +11,7 @@ It serves as both a learning platform and a demonstration of practical digital d
 - Five-stage pipeline with hazard detection and forwarding  
 - Two-level branch prediction (local and global predictors)  
 - Instruction cache with LRU replacement  
-- Benchmark support (Dhrystone) and cycle-accurate performance measurement  
+- Cycle-accurate performance measurement and benchmarking support  
 - Python-based test framework for regression and benchmark automation  
 
 The design targets FPGA implementation and is developed with synthesis compatibility in mind.
@@ -20,8 +20,15 @@ The design targets FPGA implementation and is developed with synthesis compatibi
 
 ## Current Stage
 
-The project is in a **Consolidation and Alignment** phase, focusing on documentation consistency, CSR implementation, and expanded performance monitoring.  
-See the [project roadmap](docs/roadmap.md) for an up-to-date view of active work and future plans.
+The project is in a transition phase where the verification flow, tooling, and repository structure are more stable than the detailed design documentation.
+
+At the moment:
+
+- the RTL and testbench are the source of truth for detailed behavior
+- the active documentation focuses on navigation, workflows, verification, and program build flow
+- detailed architecture-specification documentation is intentionally limited until the next round of design changes settles
+
+For current priorities, see the [project roadmap](docs/roadmap.md).
 
 ---
 
@@ -30,9 +37,10 @@ See the [project roadmap](docs/roadmap.md) for an up-to-date view of active work
 - **rtl/** – Processor source files (SystemVerilog)  
 - **tb/** – Testbenches and verification infrastructure  
 - **common/** – Global macro definitions used across RTL and testbench code  
-- **docs/** – Comprehensive project documentation and specifications  
-  - **core_docs/** – High-level specifications (architecture, pipeline, memory, etc.)  
-  - **blocks/** – Module-level overviews for major RTL components  
+- **docs/** – Active documentation for workspace navigation, workflows, verification, and project planning  
+  - **workspace_overview.md** – Map of the repository and major entry points  
+  - **getting_started.md** – First commands, common flows, and output locations  
+  - **core_docs/** – Small set of active high-level docs such as verification and supported instructions  
   - **spreadsheets/** – Signal, CSR, and instruction decode reference data  
   - **devlogs/** – Chronological development logs  
   - **roadmap.md** – Current development focus and long-term plans  
@@ -46,7 +54,12 @@ See the [project roadmap](docs/roadmap.md) for an up-to-date view of active work
 - **archive/** – Legacy or deprecated files retained for reference  
 - **README.md** – Repository overview (this file)  
 
-For detailed technical documentation, see the [documentation index](docs/README.md).
+Start with:
+
+1. [docs/workspace_overview.md](/home/wozniak/projects/riscv_pipelined/docs/workspace_overview.md)
+2. [docs/getting_started.md](/home/wozniak/projects/riscv_pipelined/docs/getting_started.md)
+3. [tb/README.md](/home/wozniak/projects/riscv_pipelined/tb/README.md)
+4. [test_inputs/compiled_programs/README.md](/home/wozniak/projects/riscv_pipelined/test_inputs/compiled_programs/README.md)
 
 ---
 
@@ -58,4 +71,3 @@ For detailed technical documentation, see the [documentation index](docs/README.
 ---
 
 *This repository is an ongoing development effort intended to showcase digital design methodology, and continuous architectural improvement.*
-

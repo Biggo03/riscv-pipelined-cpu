@@ -1,90 +1,152 @@
 # Verification
 
-## Overview
-This document describes the verification methodology used to validate the correctness and performance of the processor.  
-Verification focuses on module-level testing, directed assembly tests, and full-system benchmarking.  
-A combination of simulation-based testing and automated regression infrastructure is used to ensure consistent behavior as the design evolves.
+This document describes the verification flow that exists in the repository today. It is intentionally workflow-focused rather than a long-term verification specification.
 
----
+## What The Current Flow Covers
 
-## Verification Objectives
-The verification process aims to:
-- Confirm functional correctness for all implemented instructions.  
-- Verify proper interaction between pipeline stages and control logic.  
-- Ensure caches and branch prediction mechanisms behave as expected under realistic workloads.  
-- Provide cycle-accurate performance measurement across benchmarks.  
+The active verification setup has three main layers:
 
----
+- module-level testbenches for individual RTL blocks
+- full-system tests that run assembly programs and bare-metal C programs on the processor
+- supporting monitors, logs, waveforms, and program-build infrastructure
 
-## Directed Assembly Tests
-Directed assembly programs are used to verify instruction behavior and specific microarchitectural scenarios.  
-Each test focuses on a particular functionality but also includes supporting instructions required for setup and result validation.
+The main goal at this stage is practical regression testing and debug support, not formal coverage closure.
 
-**Examples:**
-- Arithmetic and logical operations (ADD, SUB, AND, OR, etc.)  
-- Load and store behavior, including alignment handling and correct sign or zero extension.  
-- Branch and jump operations, verifying correct PC updates, target calculation, and offset sign-extension.  
-- Pipeline interactions such as forwarding, data hazards, and load-use stall behavior.  
+## Main Entry Points
 
-Each program writes its results to a reserved memory address for automated checking during simulation.  
-Tests are compiled and executed individually to simplify debugging and isolate failures.
+Start with:
 
----
+1. [tb/README.md](/home/wozniak/projects/riscv_pipelined/tb/README.md)
+2. [scripts/test_driving/README.md](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/README.md)
+3. [scripts/test_driving/test_catalog.yml](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/test_catalog.yml)
+4. [scripts/test_driving/test_driver.py](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/test_driver.py)
 
-## Test Framework
-A Python-based test framework automates the execution of both module-level and full-system simulations.  
-It serves as the primary driver for all verification workloads, including directed assembly programs, individual module testbenches, and benchmark runs.  
-The framework provides a consistent environment for running, analyzing, and comparing results across the entire design.
+## Verification Structure
 
-**Key features:**
-- Unified interface for running module, integration, and full-system tests.  
-- Automatic waveform generation for all runs.  
-- Configurable test lists to control scope and coverage.  
-- Pass/fail detection based on module-specific criteria, such as internal signal checks, assertions, or memory-mapped output values.  
+### Module Tests
 
-The framework is used continuously throughout development to verify correctness, monitor performance, and detect regressions as the design evolves.  
-Future plans include adding support for comparing simulation outputs across design revisions to track functional and performance changes.
+Module tests live in `tb/module_tests/`.
 
----
+These are used for:
 
-## Benchmarking
-Full-system benchmarks are used to evaluate overall processor performance, including pipeline efficiency and cache behavior.  
+- focused debugging of single RTL blocks
+- fast smoke testing of foundational modules
+- catching local regressions before moving to full-system runs
 
-**Current benchmarks:**
-- **Dhrystone:** Measures baseline integer performance and provides IPC estimates.  
+Typical covered areas include:
 
-**Planned benchmarks:**
-- **CoreMark:** Tests arithmetic, logical, and control operations with greater diversity.  
-- **Embench:** A modern embedded benchmark suite representing realistic small-program workloads.  
+- ALU and arithmetic helpers
+- decoders
+- register file and immediate extension
+- hazard logic
+- CSR blocks
+- memory and cache support blocks
+- branch-prediction support blocks
 
-Benchmark results are currently gathered manually using cycle and instruction counters.  
-Future work will focus on automating result collection and enabling comparisons across design revisions.
+### System Tests
 
----
+System tests use [tb/system_test/riscv_top_tb.sv](/home/wozniak/projects/riscv_pipelined/tb/system_test/riscv_top_tb.sv).
 
-## Verification Infrastructure
-The following infrastructure supports simulation and testing:  
-- **Cycle and instruction counters:** Measure total cycles, retired instructions, and IPC during program execution.  
-- **Automated build and run scripts:** Compile, assemble, and execute all tests through the unified Python-based framework.  
-- **Automated output checking:** Pass/fail detection is based on module-specific criteria, such as internal signal checks, assertions, or memory-mapped output values.  
+These tests run full programs on the processor and are used for:
 
-All infrastructure is compatible with open-source simulation tools such as Icarus Verilog and GTKWave.  
+- instruction-level end-to-end validation
+- pipeline-control validation in realistic execution
+- startup/linker/runtime validation for C programs
+- performance logging and debug dumps
 
-Future planned enhancements include internal monitors for tracking pipeline state and expanded result checking against reference outputs.
+The system flow depends on program images built under [test_inputs/compiled_programs/](/home/wozniak/projects/riscv_pipelined/test_inputs/compiled_programs).
 
----
+## Test Selection And Execution
 
-## Future Verification Work
-Verification development will continue alongside architectural updates to maintain correctness and reliability as new features are introduced.  
-Planned areas of focus include:
+The normal entry point is [scripts/test_driving/test_driver.py](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/test_driver.py).
 
-- Continuing to expand and refine the test framework as the design evolves.  
-- Extending directed and integration tests to cover new functionality as it is implemented.  
-- Introducing coverage tracking to quantify test completeness once the design stabilizes.  
-- Preparing infrastructure for future interrupt-handling and CSR testing when those features are added.
+The driver:
 
----
+- reads [scripts/test_driving/test_catalog.yml](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/test_catalog.yml)
+- expands named regressions into individual tests
+- chooses the correct testbench
+- generates a compile filelist in `filelists/`
+- compiles with Icarus Verilog
+- runs the produced simulation executable
+- writes logs and artifacts into `sim_results/<test_name>/`
 
-## Summary
-The current verification flow validates instruction-level correctness, pipeline control behavior, and overall processor functionality.  
-It combines directed assembly testing, a unified Python-based test framework, and benchmarking to maintain correctness and stability as the design evolves.
+The test catalog currently groups tests into practical regression buckets such as:
+
+- `component_smoke`
+- `system_smoke`
+- `c_smoke`
+
+## Program Inputs
+
+Full-system tests consume program images produced from:
+
+- hand-written assembly tests in `test_inputs/compiled_programs/basic_asm_tests/`
+- bare-metal C programs in `test_inputs/compiled_programs/c_programs/`
+
+The test driver automatically looks for matching:
+
+- `<test_name>.text.hex`
+- `<test_name>.data.hex`
+
+and passes those paths into simulation through compile-time defines.
+
+## Pass/Fail Behavior
+
+### Module Tests
+
+Module testbenches decide pass/fail locally through their own checking logic and assertions.
+
+### System Tests
+
+System tests determine completion in the top-level testbench.
+
+The main mechanism is:
+
+- the program writes a test-status value through the CSR path
+- `riscv_top_tb.sv` watches writeback for the status CSR address
+- a matching pass/fail value ends the run
+
+There is also a timeout guard for tests that fail to terminate.
+
+Assembly tests usually signal completion through macros in `test_inputs/compiled_programs/common/test_macros.s`, while C programs use the same top-level completion path through the runtime/testbench interface.
+
+## Outputs And Debug Artifacts
+
+The verification flow produces:
+
+- compile-and-run logs
+- `.vvp` simulation executables
+- VCD waveforms
+- performance logs for system tests
+- optional pipeline dump output when enabled
+
+Most of these artifacts are written under `sim_results/`.
+
+## Monitoring Infrastructure
+
+The system testbench includes supporting monitor and dump infrastructure under `tb/system_test/`.
+
+This includes:
+
+- `performance_monitor.sv` for cycle, retire, stall, branch, and cache-related event tracking
+- `pipeline_monitor.sv` for raw pipeline-state dumping
+- dump tasks and post-processing helpers for more readable debug output
+
+This infrastructure is intended to shorten debug time and make end-to-end failures easier to inspect.
+
+## Current Practical Scope
+
+At the current stage, the verification flow is best thought of as:
+
+- a working module-regression setup
+- a working program-driven system-regression setup
+- a set of useful observability tools for debugging and performance inspection
+
+It is not yet a complete formal verification plan or coverage-driven signoff flow.
+
+## Related Documents
+
+- [tb/README.md](/home/wozniak/projects/riscv_pipelined/tb/README.md)
+- [docs/getting_started.md](/home/wozniak/projects/riscv_pipelined/docs/getting_started.md)
+- [scripts/test_driving/README.md](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/README.md)
+- [test_inputs/compiled_programs/README.md](/home/wozniak/projects/riscv_pipelined/test_inputs/compiled_programs/README.md)

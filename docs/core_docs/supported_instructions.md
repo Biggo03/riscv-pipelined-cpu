@@ -3,7 +3,7 @@
 ## Overview
 This document lists all instructions currently supported by the processor, grouped by type.
 Each entry includes a short description of its function and operands.
-The full instruction encodings and decode mappings are maintained in [`spreadsheets/instr_decode_table.xlsx`](spreadsheets/instr_decode_table.xlsx).
+The full instruction encodings and decode mappings are maintained in [`instr_decode_table.xlsx`](../spreadsheets/instr_decode_table.xlsx).
 
 ## Arithmetic and Logical Instructions
 | Mnemonic | Type | Description |

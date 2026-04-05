@@ -1,7 +1,7 @@
 # Overview
 
 This flow automates the generation of **Control and Status Register (CSR)** files from a single spreadsheet source of truth.
-It converts the specification in [`csr_spec.xlsx`](spreadsheets/csr_spec.xlsx) into all required RTL, testbench, and macro files, ensuring consistency between documentation, implementation, and verification.
+It converts the specification in [`csr_spec.xlsx`](../../docs/spreadsheets/csr_spec.xlsx) into all required RTL, testbench, and macro files, ensuring consistency between documentation, implementation, and verification.
 
 The flow is driven by [`csr_codegen.py`](csr_codegen.py), which parses the spreadsheet and produces structured outputs used throughout the project.
 
@@ -56,12 +56,12 @@ These outputs ensure that all CSR-related files remain synchronized, reducing ma
 
 # Shell Script Wrapper
 
-For convenience, the flow includes a shell script (`run_csr_gen.sh`) that automates path setup and file generation for workspaces following the standard Git repository layout.
+For convenience, the flow includes a shell script (`run_csr_codegen.sh`) that automates path setup and file generation for workspaces following the standard Git repository layout.
 This script ensures consistent behavior and file placement without requiring manual argument entry.
 
 To run the flow using the default project structure:
 
-**./run_csr_gen.sh**
+**./run_csr_codegen.sh**
 
 ### Script Behavior
 

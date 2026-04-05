@@ -7,7 +7,7 @@ It emphasizes focus and sequence — completing one area of work before progress
 
 ## Current Stage: Consolidation and Alignment
 
-The processor has exited the refactor phase and now includes greater functionality than before, including a working benchmark flow for Dhrystone and a unified verification framework.
+The processor has exited the refactor phase and now includes greater functionality than before, including a working program-driven verification flow and a unified regression framework.
 The design is stable, synthesizable, and ready for structured enhancement.
 
 The focus of this stage is to ensure **consistency, observability, and correctness** across the project before pursuing new architectural features.

@@ -1,4 +1,19 @@
 `default_nettype none
+
+//==============================================================//
+//  Module:       main_mem_model
+//  File:         main_mem_model.sv
+//  Description:  Simple main-memory replacement model for system tests.
+//
+//  Author:       Viggo Wozniak
+//  Project:      RISC-V Processor
+//  Repository:   https://github.com/Biggo03/RISC-V-Pipelined
+//
+//  Parameters:   BLOCK_WORDS      - number of 32-bit words per refill block
+//                WORDS_PER_CYCLE  - number of words returned each cycle
+//
+//  Notes:        Loads contents from `INSTR_HEX_FILE`.
+//==============================================================//
 module main_mem_model (
 
     input  logic         clk_i,
