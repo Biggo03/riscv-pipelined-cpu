@@ -1,152 +1,109 @@
 # Verification
 
-This document describes the verification flow that exists in the repository today. It is intentionally workflow-focused rather than a long-term verification specification.
+The project uses module-level testbenches and full-system program tests, driven through a common Python regression flow.
 
-## What The Current Flow Covers
-
-The active verification setup has three main layers:
-
-- module-level testbenches for individual RTL blocks
-- full-system tests that run assembly programs and bare-metal C programs on the processor
-- supporting monitors, logs, waveforms, and program-build infrastructure
-
-The main goal at this stage is practical regression testing and debug support, not formal coverage closure.
-
-## Main Entry Points
-
-Start with:
-
-1. [tb/README.md](/home/wozniak/projects/riscv_pipelined/tb/README.md)
-2. [scripts/test_driving/README.md](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/README.md)
-3. [scripts/test_driving/test_catalog.yml](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/test_catalog.yml)
-4. [scripts/test_driving/test_driver.py](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/test_driver.py)
-
-## Verification Structure
+## Test Structure
 
 ### Module Tests
 
-Module tests live in `tb/module_tests/`.
+Module testbenches are located in `tb/module_tests/`.
 
-These are used for:
+They provide focused verification of individual RTL blocks such as:
 
-- focused debugging of single RTL blocks
-- fast smoke testing of foundational modules
-- catching local regressions before moving to full-system runs
-
-Typical covered areas include:
-
-- ALU and arithmetic helpers
-- decoders
-- register file and immediate extension
+- ALU and decoders
+- register file and immediate generation
 - hazard logic
-- CSR blocks
-- memory and cache support blocks
-- branch-prediction support blocks
+- branch-prediction blocks
+- CSR logic
+- cache and memory blocks
 
 ### System Tests
 
-System tests use [tb/system_test/riscv_top_tb.sv](/home/wozniak/projects/riscv_pipelined/tb/system_test/riscv_top_tb.sv).
+Full-system tests use [`tb/system_test/riscv_top_tb.sv`](../../tb/system_test/riscv_top_tb.sv).
 
-These tests run full programs on the processor and are used for:
+These tests execute assembly or bare-metal C programs on the complete processor and verify:
 
-- instruction-level end-to-end validation
-- pipeline-control validation in realistic execution
-- startup/linker/runtime validation for C programs
-- performance logging and debug dumps
+- instruction execution
+- pipeline and hazard behavior
+- branching
+- memory access
+- CSR behavior
+- software startup and linking
+- end-to-end program completion
 
-The system flow depends on program images built under [test_inputs/compiled_programs/](/home/wozniak/projects/riscv_pipelined/test_inputs/compiled_programs).
+## Test Driver
 
-## Test Selection And Execution
+Tests are executed through [`scripts/test_driving/test_driver.py`](../../scripts/test_driving/test_driver.py).
 
-The normal entry point is [scripts/test_driving/test_driver.py](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/test_driver.py).
+Available tests and regressions are defined in [`test_catalog.yml`](../../scripts/test_driving/test_catalog.yml).
 
-The driver:
-
-- reads [scripts/test_driving/test_catalog.yml](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/test_catalog.yml)
-- expands named regressions into individual tests
-- chooses the correct testbench
-- generates a compile filelist in `filelists/`
-- compiles with Icarus Verilog
-- runs the produced simulation executable
-- writes logs and artifacts into `sim_results/<test_name>/`
-
-The test catalog currently groups tests into practical regression buckets such as:
+Common regressions include:
 
 - `component_smoke`
 - `system_smoke`
 - `c_smoke`
 
-## Program Inputs
+Example:
 
-Full-system tests consume program images produced from:
+```bash
+cd scripts/test_driving
 
-- hand-written assembly tests in `test_inputs/compiled_programs/basic_asm_tests/`
-- bare-metal C programs in `test_inputs/compiled_programs/c_programs/`
+./test_driver.py -l
+./test_driver.py -r component_smoke
+./test_driver.py -r system_smoke
+./test_driver.py -r c_smoke
+```
 
-The test driver automatically looks for matching:
+Each test produces its outputs under:
 
-- `<test_name>.text.hex`
-- `<test_name>.data.hex`
+```text
+sim_results/<test_name>/
+```
 
-and passes those paths into simulation through compile-time defines.
+## Program Tests
 
-## Pass/Fail Behavior
+Assembly and C programs are built under `test_inputs/compiled_programs/`.
 
-### Module Tests
+System tests use:
 
-Module testbenches decide pass/fail locally through their own checking logic and assertions.
+```text
+<test_name>.text.hex
+<test_name>.data.hex
+```
 
-### System Tests
+The test driver locates these files and passes them into simulation through compile-time macros.
 
-System tests determine completion in the top-level testbench.
+See the [program build flow](../../test_inputs/compiled_programs/README.md) for software build details.
 
-The main mechanism is:
+## Pass/Fail
 
-- the program writes a test-status value through the CSR path
-- `riscv_top_tb.sv` watches writeback for the status CSR address
-- a matching pass/fail value ends the run
+Module tests handle pass/fail through their local assertions and checking logic.
 
-There is also a timeout guard for tests that fail to terminate.
+System programs signal completion through the `mtest_status` CSR:
 
-Assembly tests usually signal completion through macros in `test_inputs/compiled_programs/common/test_macros.s`, while C programs use the same top-level completion path through the runtime/testbench interface.
+- `0xABCD1234` – pass
+- `0xDEADBEEF` – fail
 
-## Outputs And Debug Artifacts
+The system testbench monitors writes to this CSR and terminates the simulation when either value is observed.
 
-The verification flow produces:
+A cycle timeout is also used to terminate tests that fail to complete.
 
-- compile-and-run logs
-- `.vvp` simulation executables
+## Debug and Performance Output
+
+Verification runs can produce:
+
+- simulation logs
 - VCD waveforms
-- performance logs for system tests
-- optional pipeline dump output when enabled
+- performance summaries
+- optional pipeline dumps
 
-Most of these artifacts are written under `sim_results/`.
+System tests include performance monitoring for:
 
-## Monitoring Infrastructure
+- cycles and retired instructions
+- instruction mix
+- IPC and CPI
+- load stalls
+- branch mispredictions and penalty cycles
+- instruction-cache misses and penalty cycles
 
-The system testbench includes supporting monitor and dump infrastructure under `tb/system_test/`.
-
-This includes:
-
-- `performance_monitor.sv` for cycle, retire, stall, branch, and cache-related event tracking
-- `pipeline_monitor.sv` for raw pipeline-state dumping
-- dump tasks and post-processing helpers for more readable debug output
-
-This infrastructure is intended to shorten debug time and make end-to-end failures easier to inspect.
-
-## Current Practical Scope
-
-At the current stage, the verification flow is best thought of as:
-
-- a working module-regression setup
-- a working program-driven system-regression setup
-- a set of useful observability tools for debugging and performance inspection
-
-It is not yet a complete formal verification plan or coverage-driven signoff flow.
-
-## Related Documents
-
-- [tb/README.md](/home/wozniak/projects/riscv_pipelined/tb/README.md)
-- [docs/getting_started.md](/home/wozniak/projects/riscv_pipelined/docs/getting_started.md)
-- [scripts/test_driving/README.md](/home/wozniak/projects/riscv_pipelined/scripts/test_driving/README.md)
-- [test_inputs/compiled_programs/README.md](/home/wozniak/projects/riscv_pipelined/test_inputs/compiled_programs/README.md)
+Detailed per-cycle pipeline and performance logging can be enabled with the compile-time macros documented in [`docs/macro_overview.md`](../macro_overview.md).

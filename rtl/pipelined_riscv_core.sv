@@ -13,8 +13,7 @@
 //  Notes:        N/A
 //==============================================================//
 
-module pipelined_riscv_core (
-    // Clock & reset_i
+module pipelined_riscv_core ( // Clock & reset_i
     input  logic        clk_i,
     input  logic        reset_i,
 
