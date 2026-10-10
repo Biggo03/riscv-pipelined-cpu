@@ -4,15 +4,15 @@ A from-scratch RISC-V RV32I processor implemented in SystemVerilog, developed to
 ---
 
 ## Overview
-This project implements a five-stage pipelined RISC-V processor with branch prediction, instruction caching, and an extensible verification and benchmarking framework.  
+This project implements a five-stage pipelined RISC-V processor with branch prediction, instruction caching, and an extensible verification and benchmarking framework.
 It serves as both a learning platform and a demonstration of practical digital design.
 
 **Key architectural components include:**
-- Five-stage pipeline with hazard detection and forwarding  
-- Two-level branch prediction (local and global predictors)  
-- Instruction cache with LRU replacement  
-- Cycle-accurate performance measurement and benchmarking support  
-- Python-based test framework for regression and benchmark automation  
+- Five-stage pipeline with hazard detection and forwarding
+- Two-level branch prediction (local and global predictors)
+- Instruction cache with LRU replacement
+- Cycle-accurate performance measurement and benchmarking support
+- Python-based test framework for regression and benchmark automation
 
 The design targets FPGA implementation and is developed with synthesis compatibility in mind.
 
@@ -34,25 +34,25 @@ For current priorities, see the [project roadmap](docs/roadmap.md).
 
 ## Repository Structure
 
-- **rtl/** – Processor source files (SystemVerilog)  
-- **tb/** – Testbenches and verification infrastructure  
-- **common/** – Global macro definitions used across RTL and testbench code  
-- **docs/** – Active documentation for workspace navigation, workflows, verification, and project planning  
-  - **workspace_overview.md** – Map of the repository and major entry points  
-  - **getting_started.md** – First commands, common flows, and output locations  
-  - **core_docs/** – Small set of active high-level docs such as verification and supported instructions  
-  - **spreadsheets/** – Signal, CSR, and instruction decode reference data  
-  - **devlogs/** – Chronological development logs  
-  - **roadmap.md** – Current development focus and long-term plans  
-  - **style_guide.md** – Naming, formatting, and documentation conventions  
-- **scripts/** – Build, simulation, and automation scripts  
-- **test_inputs/** – Software toolchain and test programs for the processor, including:  
+- **rtl/** – Processor source files (SystemVerilog)
+- **tb/** – Testbenches and verification infrastructure
+- **common/** – Global macro definitions used across RTL and testbench code
+- **docs/** – Active documentation for workspace navigation, workflows, verification, and project planning
+  - **workspace_overview.md** – Map of the repository and major entry points
+  - **getting_started.md** – First commands, common flows, and output locations
+  - **core_docs/** – Small set of active high-level docs such as verification and supported instructions
+  - **spreadsheets/** – Signal, CSR, and instruction decode reference data
+  - **devlogs/** – Chronological development logs
+  - **roadmap.md** – Current development focus and long-term plans
+  - **style_guide.md** – Naming, formatting, and documentation conventions
+- **scripts/** – Build, simulation, and automation scripts
+- **test_inputs/** – Software toolchain and test programs for the processor, including:
   - RISC-V C/assembly compilation flow and programs
-  - Custom linker script and startup code  
-  - Makefile for building and running programs  
-  - Compiled binaries, and input/output vectors used for simulation and benchmarking  
-- **archive/** – Legacy or deprecated files retained for reference  
-- **README.md** – Repository overview (this file)  
+  - Custom linker script and startup code
+  - Makefile for building and running programs
+  - Compiled binaries, and input/output vectors used for simulation and benchmarking
+- **archive/** – Legacy or deprecated files retained for reference
+- **README.md** – Repository overview (this file)
 
 Start with:
 
@@ -64,8 +64,8 @@ Start with:
 ---
 
 ## Goals
-- Build a modular, readable RISC-V processor with emphasis on correctness and clarity  
-- Develop a strong verification infrastructure supporting benchmarking and analysis  
+- Build a modular, readable RISC-V processor with emphasis on correctness and clarity
+- Develop a strong verification infrastructure supporting benchmarking and analysis
 - Gradually expand toward realistic architectural features such as caching, CSRs, and I/O peripherals
 
 ---

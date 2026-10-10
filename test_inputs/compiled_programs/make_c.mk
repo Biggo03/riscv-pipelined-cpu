@@ -1,16 +1,6 @@
 # make_c.mk — C programs with object files
-
-CC       = riscv32-unknown-elf-gcc
-OBJCOPY  = riscv32-unknown-elf-objcopy
-OBJDUMP  = riscv32-unknown-elf-objdump
-
-LINKER    = linker.ld
 STARTUP   = _start.s
 STARTUP_OBJ = $(STARTUP:.s=.o)
-
-# Compiler flags (set ISA/ABI etc.)
-ARCH = rv32i_zicsr
-ABI  = ilp32
 
 CC_FLAGS  = -march=$(ARCH) -mabi=$(ABI) -O2 -std=gnu11 -Icommon -msmall-data-limit=8 -fno-builtin-printf -fno-builtin
 

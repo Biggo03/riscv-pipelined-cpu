@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "csr_defs.h"
-#include "stub_helpers.h"
 
 /* ---------------------------------------------------------
  * Stub printf — does nothing for now.

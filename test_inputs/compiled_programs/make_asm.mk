@@ -1,13 +1,3 @@
-# Toolchain
-CC      = riscv32-unknown-elf-gcc
-OBJCOPY = riscv32-unknown-elf-objcopy
-OBJDUMP = riscv32-unknown-elf-objdump
-
-ARCH = rv32i_zicsr
-ABI  = ilp32
-
-LINKER  = linker.ld
-
 # Find all assembly tests (one per subdirectory)
 ASM_DIRS := $(wildcard basic_asm_tests/*)
 ASM_SRCS := $(foreach d,$(ASM_DIRS),$(wildcard $(d)/*.s))
