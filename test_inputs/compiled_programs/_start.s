@@ -2,7 +2,10 @@
     .globl _start
 _start:
     # set global pointer
+    .option push
+    .option norelax
     la gp, __global_pointer$
+    .option pop
 
     # set up stack
     la sp, __stack_top
