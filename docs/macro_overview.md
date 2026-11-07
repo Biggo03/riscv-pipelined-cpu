@@ -13,6 +13,7 @@ Quick reference for compile-time macros that must be provided externally.
 | `PIPELINE_DUMP` | Enables detailed pipeline dumping | System-test monitoring code | Enables per-cycle pipeline state dumps | Optional compile-time define |
 | `PERF_CYCLE_DUMP` | Enables detailed performance-event logging | `tb/system_test/monitors/performance_monitor.sv` | Logs cycle-level stalls, misses, branch mispredicts, and related events | Optional compile-time define |
 | `C_PROGRAM` | Identifies a test as a C program | System-test infrastructure | Enables C-program-specific simulation behavior where supported | Added by the test driver for tests tagged `c_program` |
+| `MAX_CYCLES` | Sets the system-test cycle timeout | `tb/system_test/riscv_top_tb.sv` | Times out when the cycle count exceeds this value; defaults to `500000` | Optional test-catalog or command-line define |
 
 ## Macro Files
 

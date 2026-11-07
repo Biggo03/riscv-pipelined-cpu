@@ -22,6 +22,10 @@
 `include "misc_tasks.sv"
 `include "performance_calcs.sv"
 
+`ifndef MAX_CYCLES
+    `define MAX_CYCLES 500000
+`endif
+
  module riscv_top_tb();
 
     //------------------------------------------------------
@@ -99,7 +103,7 @@
     //  Test Completion Monitor (pass/fail/timeout)
     //------------------------------------------------------
     always @(negedge clk) begin : pass_monitor
-        if (u_performance_monitor.cycle_cnt > 500000) begin
+        if (u_performance_monitor.cycle_cnt > `MAX_CYCLES) begin
             $display("TEST TIMEOUT");
             test_complete = 1'b1;
         end

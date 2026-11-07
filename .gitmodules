@@ -1,0 +1,4 @@
+[submodule "third_party/coremark"]
+	path = test_inputs/compiled_programs/coremark
+	url = git@github.com:Biggo03/coremark.git
+	branch = Biggo03-riscv-port
