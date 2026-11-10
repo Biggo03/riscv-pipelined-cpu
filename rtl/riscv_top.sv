@@ -32,13 +32,17 @@ module riscv_top (
 
     // ----- Cache control -----
     (* keep = "true" *) logic        instr_hit_fi;
+`ifndef NO_ICACHE
+    `ifdef SIM
     (* keep = "true" *) logic        ic_repl_permit;
+    `endif
     (* keep = "true" *) logic        l2_repl_ready;
     (* keep = "true" *) logic [63:0] rep_word;
 
     // ----- Branch/control -----
-    (* keep = "true" *) logic [1:0]  pc_src_reg;
+    (* keep = "true" *) logic        branch_cache_miss;
     (* keep = "true" *) logic [1:0]  branch_op_ex;
+`endif
 
     pipelined_riscv_core u_pipelined_riscv_core (
         // Clock & reset_i
@@ -48,7 +52,6 @@ module riscv_top (
         // Instruction fetch inputs
         .instr_fi_i                     (instr_fi),
         .instr_hit_fi_i                 (instr_hit_fi),
-        .ic_repl_permit_i               (ic_repl_permit),
 
         // Memory inputs
         .read_data_mem_i                (read_data_mem),
@@ -62,8 +65,13 @@ module riscv_top (
 
         // Control outputs
         .width_src_mem_o                 (width_src_mem),
+`ifndef NO_ICACHE
         .branch_op_ex_o                  (branch_op_ex),
-        .pc_src_reg_o                    (pc_src_reg),
+        .branch_cache_miss_o             (branch_cache_miss),
+`else
+        .branch_op_ex_o                  (),
+        .branch_cache_miss_o             (),
+`endif
         .mem_write_mem_o                 (mem_write_mem_o)
     );
 
@@ -79,7 +87,7 @@ module riscv_top (
 
         // Control inputs
         .l2_repl_ready_i                (l2_repl_ready),
-        .pc_src_reg_i                   (pc_src_reg),
+        .branch_cache_miss_i             (branch_cache_miss),
         .branch_op_ex_i                  (branch_op_ex),
 
         // Address & data inputs
@@ -91,7 +99,11 @@ module riscv_top (
 
         // Status outputs
         .instr_hit_fi_o                  (instr_hit_fi),
+        `ifdef SIM
         .ic_repl_permit_o               (ic_repl_permit)
+        `else
+        .ic_repl_permit_o               ()
+        `endif
     );
 
     `ifdef SIM
@@ -118,7 +130,7 @@ module riscv_top (
 
         // Status outputs
         .instr_hit_fi_o                  (instr_hit_fi),
-        .ic_repl_permit_o               (ic_repl_permit)
+        .ic_repl_permit_o               ()
     );
 `endif
 

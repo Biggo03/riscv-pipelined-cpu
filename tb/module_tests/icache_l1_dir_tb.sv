@@ -41,10 +41,9 @@ module icache_l1_dir_tb();
     logic [31:0] pc_f;
     logic [31:0] instr_f;
     logic [63:0] rep_word;
-    logic [1:0]  pc_src_reg;
+    logic        branch_cache_miss;
     logic [1:0]  branch_op_e;
     logic        instr_hit_f;
-    logic        ic_repl_permit;
 
     // Signals to make addressing more intuitive
     logic [b-1:0] ByteAddr;
@@ -68,11 +67,11 @@ module icache_l1_dir_tb();
         .l2_repl_ready_i                (l2_repl_ready),
         .pc_fi_i                        (pc_f),
         .rep_word_i                     (rep_word),
-        .pc_src_reg_i                   (pc_src_reg),
+        .branch_cache_miss_i            (branch_cache_miss),
         .branch_op_ex_i                 (branch_op_e),
         .instr_fi_o                     (instr_f),
         .instr_hit_fi_o                 (instr_hit_f),
-        .ic_repl_permit_o               (ic_repl_permit)
+        .ic_repl_permit_o               ()
     );
 
     always begin
@@ -83,7 +82,7 @@ module icache_l1_dir_tb();
 
         dump_setup;
 
-        reset = 1; clk = 0; branch_op_e = 0; pc_src_reg = 0; #100; reset = 0;
+        reset = 1; clk = 0; branch_op_e = 0; branch_cache_miss = 0; #100; reset = 0;
 
         //Fill up cache and check initial reads
         for (int i = 0; i < S; i = i + 1) begin

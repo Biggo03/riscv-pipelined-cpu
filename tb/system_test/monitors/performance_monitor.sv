@@ -24,13 +24,13 @@ module performance_monitor (
     input int          perf_dump_handle
 );
 
-    int cycle_cnt;
+    longint unsigned cycle_cnt;
 
-    int retire_cnt;
-    int alu_op_cnt;
-    int load_op_cnt;
-    int store_op_cnt;
-    int branch_op_cnt;
+    longint unsigned retire_cnt;
+    longint unsigned alu_op_cnt;
+    longint unsigned load_op_cnt;
+    longint unsigned store_op_cnt;
+    longint unsigned branch_op_cnt;
 
     logic retire_wb;
 
@@ -72,7 +72,7 @@ module performance_monitor (
 
     assign retire_wb = valid_wb_i & ~stall_wb_i;
 
-    int load_stall_cnt;
+    longint unsigned load_stall_cnt;
     always @(negedge clk_i) begin : load_stall_monitor
         if (reset_i) begin
             load_stall_cnt <= 0;
@@ -84,8 +84,8 @@ module performance_monitor (
         end
     end
 
-    int branch_mispredict_cnt;
-    int branch_mispredict_stall_cycles;
+    longint unsigned branch_mispredict_cnt;
+    longint unsigned branch_mispredict_stall_cycles;
     always @(negedge clk_i) begin : branch_monitor
         if (reset_i) begin
             branch_mispredict_cnt <= 0;
@@ -108,8 +108,8 @@ module performance_monitor (
         flush_ex_reg     <= flush_ex_i;
     end
 
-    int icache_miss_cnt;
-    int icache_miss_stall_cycles;
+    longint unsigned icache_miss_cnt;
+    longint unsigned icache_miss_stall_cycles;
     always @(negedge clk_i) begin : icache_monitor
         if (reset_i) begin
             icache_miss_cnt <= 0;

@@ -25,11 +25,10 @@ module instr_cache_ctlr_tb();
     logic [63:0] miss_array;
     logic [63:0] active_array;
     logic        instr_hit_f;
-    logic        stall;
 
     logic        clk;
     logic        reset;
-    logic [1:0]  pc_src_reg;
+    logic        branch_cache_miss;
     logic [1:0]  branch_op_e;
     logic        ic_repl_permit;
 
@@ -38,98 +37,108 @@ module instr_cache_ctlr_tb();
         .reset_i                        (reset),
         .set_i                          (set),
         .miss_array_i                   (miss_array),
-        .pc_src_reg_i                   (pc_src_reg),
+        .branch_cache_miss_i            (branch_cache_miss),
         .branch_op_ex_i                 (branch_op_e),
         .active_array_o                 (active_array),
         .instr_hit_fi_o                 (instr_hit_f),
         .ic_repl_permit_o               (ic_repl_permit)
     );
 
-    always begin
-        clk = ~clk; #5;
-    end
+    always #5 clk = ~clk;
+
+    task tick();
+        @(posedge clk);
+        #1;
+    endtask
 
     initial begin
-
         dump_setup;
+        clk = 0;
+        reset = 1;
+        branch_cache_miss = 0;
+        branch_op_e = `NON_BRANCH;
+        set = 0;
+        miss_array = 64'h0123456789ABCDEF;
 
-        miss_array = 64'h0123456789ABCDEF; clk = 0; reset = 1;
-
-        //Combinational output test
-        for (int i = 0; i < 63; i = i + 1) begin
-
+        // Check every set, including the most significant active-array bit.
+        for (int i = 0; i < 64; i++) begin
             set = i;
-            #5;
-            assert(active_array[i] === 1'b1) else $fatal(1, "Incorrect active array");
-            assert(instr_hit_f === ~miss_array[i]) else $fatal(1, "Incorrect cache miss value");
+            #1;
+            assert(active_array === (64'b1 << i)) else $fatal(1, "Incorrect active array");
+            assert(instr_hit_f === ~miss_array[i]) else $fatal(1, "Incorrect cache hit value");
+            assert(!ic_repl_permit) else $fatal(1, "Replacement allowed during reset");
+        end
+        tick();
+        @(negedge clk);
+        reset = 0;
+        miss_array = 0;
+        #1;
+        assert(ic_repl_permit && u_DUT.present_state == 0)
+            else $fatal(1, "Non-branch hit must permit replacement");
 
+        miss_array = '1;
+        tick();
+        assert(ic_repl_permit && u_DUT.present_state == 0)
+            else $fatal(1, "Non-branch miss must not introduce a delay");
+
+        // Hits no longer grant permission; they also must not start the delay.
+        @(negedge clk);
+        miss_array = 0;
+        branch_op_e = `BRANCH;
+        repeat (3) begin
+            tick();
+            assert(!ic_repl_permit && u_DUT.present_state == 0)
+                else $fatal(1, "Branch hit must remain ready without permission");
         end
 
-        //FSM test
-        reset = 0;
-        branch_op_e = `NON_BRANCH;
-        pc_src_reg[0] = 0; // 0 = correct prediction, 1 = incorrect prediction
-
-        //Normal operation hit
-        branch_op_e = `NON_BRANCH; miss_array = 0; pc_src_reg[1] = 0;
-        #11;
-        assert(u_DUT.present_state == 0 & ic_repl_permit == 1) else $fatal(1, "Normal operation hit fail");
-
-        //Normal operation miss
+        // One blocked cycle, then continuous permission with the branch held.
+        @(negedge clk);
         miss_array = '1;
-        #10;
-        assert(u_DUT.present_state == 0 & ic_repl_permit == 1) else $fatal(1, "Normal operation miss fail");
-
-        //Correct branch hit
-        miss_array = 0; branch_op_e = `BRANCH;
-        #10;
-        assert(u_DUT.present_state == 0 & ic_repl_permit == 1) else $fatal(1, "Correct branch hit step 1 failed");
-
-        branch_op_e = `NON_BRANCH;
-        #10;
-
-        //Correct branch miss
-        miss_array = {64{1'b1}} ; branch_op_e[0] = `BRANCH;
-        #5;
-        //ic_repl_permit goes low
-        assert(ic_repl_permit == 0 && u_DUT.present_state == 0) else $fatal(1, "Correct branch miss ic_repl_permit error");
-        #6;
-        branch_op_e = `NON_BRANCH;
-        //ic_repl_permit goes high based on present_state
-        assert(u_DUT.present_state == 1 && ic_repl_permit == 1) else $fatal(1, "Correct branch miss state transition failed");
-        #9;
-
-        //Misprediction hit
-        miss_array = 0; branch_op_e = `BRANCH;
-        #11;
-        $display("pstate: %b permit: %b", u_DUT.present_state,ic_repl_permit);
-        assert(u_DUT.present_state == 0 && ic_repl_permit == 1) else $fatal(1, "Misprediction hit error");
-        #9;
-
-        //Misprediction miss;
-        miss_array = {64{1'b1}}; branch_op_e = `BRANCH;
-        #5;
-        assert(ic_repl_permit == 0 && u_DUT.present_state == 0) else $fatal(1, "Misprediction miss ic_repl_permit error");
-        #5;
-
-        //At clk edge, indicate a miss
-        pc_src_reg[1] = 1;
         #1;
+        assert(!ic_repl_permit && u_DUT.present_state == 0)
+            else $fatal(1, "Branch miss must initially delay replacement");
+        tick();
+        repeat (10) begin
+            assert(ic_repl_permit && u_DUT.present_state == 1)
+                else $fatal(1, "Completed delay must continuously permit replacement");
+            tick();
+        end
 
-        assert(ic_repl_permit == 0 && u_DUT.present_state == 1) else $fatal(1, "Misprediction miss state transition error");
+        // The redirect pulse overrides completed delay and rearms the FSM.
+        @(negedge clk);
+        branch_cache_miss = 1;
+        #1;
+        assert(!ic_repl_permit) else $fatal(1, "Recovery pulse must block replacement");
+        tick();
+        assert(u_DUT.present_state == 0) else $fatal(1, "Recovery must rearm delay");
+        @(negedge clk);
+        branch_cache_miss = 0;
+        #1;
+        assert(!ic_repl_permit) else $fatal(1, "New address must receive its branch delay");
+        tick();
+        assert(ic_repl_permit && u_DUT.present_state == 1)
+            else $fatal(1, "Replacement must resume after the new delay");
 
-        #9;
+        // A hit rearms a completed delay without relying on recovery.
+        @(negedge clk);
+        miss_array = 0;
+        tick();
+        assert(u_DUT.present_state == 0 && !ic_repl_permit)
+            else $fatal(1, "Hit must rearm delay");
+
+        // A pulse on a hit must not start the delay from READY_TO_DELAY.
+        @(negedge clk);
+        branch_cache_miss = 1;
+        tick();
+        assert(u_DUT.present_state == 0 && !ic_repl_permit)
+            else $fatal(1, "Pulse on a hit must remain ready");
+        @(negedge clk);
+        branch_cache_miss = 0;
         branch_op_e = `NON_BRANCH;
-
-        //Allow pc_src_reg to update appropriately (after clock edge, not before)
         #1;
-        pc_src_reg[1] = 0;
-        #1;
-        assert(ic_repl_permit == 1 && u_DUT.present_state == 0) else $fatal(1, "Misprediction miss state transition error (2)");
+        assert(ic_repl_permit) else $fatal(1, "Permission did not resume after pulse");
 
         $display("TEST PASSED");
         $finish;
-
     end
-
 endmodule

@@ -2,7 +2,7 @@
 //==============================================================//
 //  Module:       hazard_unit
 //  File:         hazard_unit.sv
-//  Description:  Generates signals to control hazard handelling within the pipeline
+//  Description:  Generates hazard controls and branch/cache recovery pulses
 //
 //  Author:       Viggo Wozniak
 //  Project:      RISC-V Processor
@@ -15,6 +15,10 @@
 `include "control_macros.sv"
 
 module hazard_unit (
+    // Clock & reset_i
+    input  logic        clk_i,
+    input  logic        reset_i,
+
     // Fetch stage inputs
     input  logic        instr_hit_fi_i,
 
@@ -42,9 +46,8 @@ module hazard_unit (
     input  logic [11:0] csr_addr_wb_i,
     input  logic        csr_we_wb_i,
 
-    // Branch predictor / cache inputs
-    input  logic [1:0]  pc_src_reg_i,
-    input  logic        ic_repl_permit_i,
+    // Branch recovery outputs
+    output logic        branch_cache_miss_o,
 
     // Stall outputs
     output logic        stall_fi_o,
@@ -65,6 +68,7 @@ module hazard_unit (
 
     // ----- Hazard detection -----
     logic load_stall;
+    logic branch_cache_miss_handled;
 
     //Forward logic
     always_comb begin
@@ -85,18 +89,31 @@ module hazard_unit (
         else forward_csr_ex_o = `NO_FORWARD;
     end
 
-    //stall and flush logic
+    // Pulse once for overlapping branch/cache misses while the branch holds EX.
+    always_ff @(posedge clk_i) begin
+        if (reset_i) begin
+            branch_cache_miss_o       <= 1'b0;
+            branch_cache_miss_handled <= 1'b0;
+        end else begin
+            branch_cache_miss_o <= pc_src_i[1] & ~instr_hit_fi_i & ~branch_cache_miss_handled;
+
+            if (~stall_ex_o)      branch_cache_miss_handled <= 1'b0;
+            else if (pc_src_i[1]) branch_cache_miss_handled <= 1'b1;
+        end
+    end
+
+    // stall and flush logic
     assign load_stall = (result_src_ex_i == `RESULT_MEM_DATA) & ((rs1_de_i == rd_ex_i) | (rs2_de_i == rd_ex_i));
 
-    //Stalls
-    assign stall_fi_o = (load_stall | ~instr_hit_fi_i) & ~pc_src_reg_i[1];
+    // Stalls
+    assign stall_fi_o = (load_stall | ~instr_hit_fi_i) & ~branch_cache_miss_o;
     assign stall_de_o = load_stall | ~instr_hit_fi_i;
     assign stall_ex_o = ~instr_hit_fi_i;
     assign stall_mem_o = ~instr_hit_fi_i;
     assign stall_wb_o = ~instr_hit_fi_i;
 
-    //Flushes
-    assign flush_ex_o = (pc_src_i[1] & (ic_repl_permit_i | pc_src_reg_i[1])) | load_stall;
+    // Flushes
+    assign flush_ex_o = (pc_src_i[1] & instr_hit_fi_i) | load_stall;
     assign flush_de_o = pc_src_i[1];
 
 endmodule

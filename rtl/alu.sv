@@ -42,6 +42,7 @@ module alu #(
 
         //set default value for carry_out
         carry_out = 1'b0;
+        v_control = 1'b0;
 
         //Operation Logic
         case(alu_control_i)
@@ -50,9 +51,9 @@ module alu #(
             `ALU_AND: alu_result_o = A & B;
             `ALU_OR:  alu_result_o = A | B;
             `ALU_XOR: alu_result_o = A ^ B;
-            `ALU_SLL: alu_result_o = A << B;
-            `ALU_SRL: alu_result_o = A >> B;
-            `ALU_SRA: alu_result_o = $signed(A) >>> B;
+            `ALU_SLL: alu_result_o = A << B[4:0];
+            `ALU_SRL: alu_result_o = A >> B[4:0];
+            `ALU_SRA: alu_result_o = $signed(A) >>> B[4:0];
 
             `ALU_SLT: begin
                 alu_result_o = A - B;

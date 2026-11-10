@@ -1,6 +1,6 @@
 task automatic calculate_cycle_metrics(
-    input  int  total_cycles,
-    input  int  retire_cnt,
+    input longint unsigned total_cycles,
+    input longint unsigned retire_cnt,
 
     output real ipc,
     output real cpi
@@ -20,11 +20,11 @@ end
 endtask;
 
 task automatic calculate_op_metrics(
-    input  int  retire_cnt,
-    input  int  alu_op_cnt,
-    input  int  load_op_cnt,
-    input  int  store_op_cnt,
-    input  int  branch_op_cnt,
+    input longint unsigned retire_cnt,
+    input longint unsigned alu_op_cnt,
+    input longint unsigned load_op_cnt,
+    input longint unsigned store_op_cnt,
+    input longint unsigned branch_op_cnt,
 
     output real percent_alu_op,
     output real percent_load_op,
@@ -47,12 +47,12 @@ end
 endtask;
 
 task automatic calculate_stall_metrics(
-    input  int  total_cycles,
-    input  int  load_stall_cnt,
-    input  int  branch_mispredict_stall_cycles,
-    input  int  icache_miss_stall_cycles,
+    input longint unsigned total_cycles,
+    input longint unsigned load_stall_cnt,
+    input longint unsigned branch_mispredict_stall_cycles,
+    input longint unsigned icache_miss_stall_cycles,
 
-    output int  total_stall_cycles,
+    output longint unsigned total_stall_cycles,
     output real total_stall_rate,
     output real percent_load_stall,
     output real percent_branch_stall,
@@ -85,8 +85,8 @@ end
 endtask
 
 task automatic calculate_branch_metrics(
-    input  int  branch_op_cnt,
-    input  int  branch_mispredict_cnt,
+    input longint unsigned branch_op_cnt,
+    input longint unsigned branch_mispredict_cnt,
 
     output real mispredict_rate,
     output real prediction_accuracy
@@ -102,8 +102,8 @@ end
 endtask;
 
 task automatic calculate_icache_metrics(
-    input  int  retire_cnt,
-    input  int  icache_miss_cnt,
+    input longint unsigned retire_cnt,
+    input longint unsigned icache_miss_cnt,
 
     output real hit_rate
 );
@@ -119,20 +119,20 @@ endtask;
 task automatic print_perf_summary(
     input int fd,
 
-    input int total_cycles,
-    input int retire_cnt,
+    input longint unsigned total_cycles,
+    input longint unsigned retire_cnt,
 
-    input int alu_op_cnt,
-    input int load_op_cnt,
-    input int store_op_cnt,
-    input int branch_op_cnt,
+    input longint unsigned alu_op_cnt,
+    input longint unsigned load_op_cnt,
+    input longint unsigned store_op_cnt,
+    input longint unsigned branch_op_cnt,
 
-    input int branch_mispredict_cnt,
+    input longint unsigned branch_mispredict_cnt,
 
-    input int load_stall_cnt,
-    input int branch_mispredict_stall_cycles,
-    input int icache_miss_cnt,
-    input int icache_miss_stall_cycles
+    input longint unsigned load_stall_cnt,
+    input longint unsigned branch_mispredict_stall_cycles,
+    input longint unsigned icache_miss_cnt,
+    input longint unsigned icache_miss_stall_cycles
 );
 
     real ipc;
@@ -143,7 +143,7 @@ task automatic print_perf_summary(
     real percent_store;
     real percent_branch;
 
-    int  total_stalls;
+    longint unsigned total_stalls;
     real stall_rate;
 
     real percent_load_stall;

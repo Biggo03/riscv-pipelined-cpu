@@ -36,7 +36,7 @@ module branch_control_unit (
     //Prediction logic
     always_comb begin
         if (op_fi_i == 2'b11 & pc_src_pred_fi_i) first_stage_out = `PC_SRC_PRED_F;
-        else                                   first_stage_out = `PC_SRC_SEQ_F;
+        else                                     first_stage_out = `PC_SRC_SEQ_F;
     end
 
     //Rollback logic

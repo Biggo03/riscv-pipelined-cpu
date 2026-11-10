@@ -40,6 +40,10 @@
 
     logic        test_complete;
 
+    `ifdef COREMARK_REPORT
+        `include "coremark_report_tasks.sv"
+    `endif
+
     //------------------------------------------------------
     //  DUT Instantiation
     //------------------------------------------------------
@@ -103,18 +107,27 @@
     //  Test Completion Monitor (pass/fail/timeout)
     //------------------------------------------------------
     always @(negedge clk) begin : pass_monitor
-        if (u_performance_monitor.cycle_cnt > `MAX_CYCLES) begin
-            $display("TEST TIMEOUT");
-            test_complete = 1'b1;
-        end
-
-        if (`DATA_PATH_HIER.csr_we_wb_o && `DATA_PATH_HIER.csr_addr_wb_o == `MTEST_STATUS_ADDR) begin
-            if (`DATA_PATH_HIER.csr_result_wb == `TEST_PASS) begin
-                $display("TEST PASSED");
+        if (!test_complete) begin
+            if (u_performance_monitor.cycle_cnt > `MAX_CYCLES) begin
+                `ifdef COREMARK_REPORT
+                    dump_coremark_report(1'b0);
+                `endif
+                $display("TEST TIMEOUT");
                 test_complete = 1'b1;
-            end else if (`DATA_PATH_HIER.csr_result_wb == `TEST_FAIL) begin
-                $display("TEST FAILED");
-                test_complete = 1'b1;
+            end else if (`DATA_PATH_HIER.csr_we_wb_o && `DATA_PATH_HIER.csr_addr_wb_o == `MTEST_STATUS_ADDR) begin
+                if (`DATA_PATH_HIER.csr_result_wb == `TEST_PASS) begin
+                    `ifdef COREMARK_REPORT
+                        dump_coremark_report(1'b1);
+                    `endif
+                    $display("TEST PASSED");
+                    test_complete = 1'b1;
+                end else if (`DATA_PATH_HIER.csr_result_wb == `TEST_FAIL) begin
+                    `ifdef COREMARK_REPORT
+                        dump_coremark_report(1'b1);
+                    `endif
+                    $display("TEST FAILED");
+                    test_complete = 1'b1;
+                end
             end
         end
     end

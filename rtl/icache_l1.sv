@@ -25,7 +25,7 @@ module icache_l1 #(
 
     // Control inputs
     input  logic        l2_repl_ready_i,
-    input  logic [1:0]  pc_src_reg_i,
+    input  logic        branch_cache_miss_i,
     input  logic [1:0]  branch_op_ex_i,
 
     // Address & data inputs
@@ -108,7 +108,7 @@ module icache_l1 #(
         // Control inputs
         .set_i                          (set),
         .miss_array_i                   (miss_array),
-        .pc_src_reg_i                   (pc_src_reg_i),
+        .branch_cache_miss_i             (branch_cache_miss_i),
         .branch_op_ex_i                  (branch_op_ex_i),
 
         // Control outputs

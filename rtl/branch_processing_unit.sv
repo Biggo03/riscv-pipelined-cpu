@@ -26,7 +26,6 @@ module branch_processing_unit (
 
         // Pipeline control inputs
         input  logic        stall_ex_i,
-        input  logic        flush_ex_i,
 
         // Instruction decode inputs
         input  logic [2:0]  funct3_ex_i,
@@ -44,7 +43,6 @@ module branch_processing_unit (
 
         // Control outputs
         output logic [1:0]  pc_src_o,
-        output logic [1:0]  pc_src_reg_o,
 
         // Branch predictor outputs
         output logic [31:0] pred_pc_target_fi_o,
@@ -106,21 +104,6 @@ module branch_processing_unit (
 
         // Control output
         .pc_src_o                       (pc_src_o)
-    );
-
-    flop #(
-        .WIDTH                          (2)
-    ) u_src_reg (
-        // Clock & reset_i
-        .clk_i                          (clk_i),
-        .en                             (1'b1),
-        .reset                          (reset_i | flush_ex_i),
-
-        // data_i input
-        .D                              (pc_src_o),
-
-        // data_i output
-        .Q                              (pc_src_reg_o)
     );
 
 endmodule

@@ -24,7 +24,7 @@ module instr_cache_ctlr #(
     // Control inputs
     input  logic [$clog2(S)-1:0]  set_i,
     input  logic [S-1:0]          miss_array_i,
-    input  logic [1:0]            pc_src_reg_i,
+    input  logic                  branch_cache_miss_i,
     input  logic [1:0]            branch_op_ex_i,
 
     // Control outputs
@@ -36,7 +36,7 @@ module instr_cache_ctlr #(
     // ----- Delay FSM states -----
     typedef enum logic [0:0] {
         READY_TO_DELAY = 1'b0,
-        DELAY_COMPLETE       = 1'b1
+        DELAY_COMPLETE = 1'b1
     } delay_state_t;
 
     // ----- State registers -----
@@ -47,8 +47,10 @@ module instr_cache_ctlr #(
     assign active_array_o = 1'b1 << set_i;
     assign instr_hit_fi_o = ~miss_array_i[set_i];
 
-    // Determines if signal active
-    assign ic_repl_permit_o = reset_i ? 1'b0 : ((branch_op_ex_i == `NON_BRANCH) | instr_hit_fi_o | present_state) & ~pc_src_reg_i[1];
+    // Recovery blocks replacement even after the branch delay has completed.
+    assign ic_repl_permit_o = reset_i ? 1'b0 : ((branch_op_ex_i == `NON_BRANCH) |
+                                                (present_state == DELAY_COMPLETE))
+                                                & ~branch_cache_miss_i;
 
     // State update logic
     always_ff @(posedge clk_i) begin
@@ -59,9 +61,10 @@ module instr_cache_ctlr #(
     // Next state logic
     always_comb begin
         next_state = present_state;
+
         case (present_state)
-            READY_TO_DELAY: if (~ic_repl_permit_o)                  next_state = DELAY_COMPLETE;
-            DELAY_COMPLETE:       if (instr_hit_fi_o | pc_src_reg_i[1])    next_state = READY_TO_DELAY;
+            READY_TO_DELAY: if (~ic_repl_permit_o & ~instr_hit_fi_o) next_state = DELAY_COMPLETE;
+            DELAY_COMPLETE: if (instr_hit_fi_o | branch_cache_miss_i)      next_state = READY_TO_DELAY;
             default: next_state = READY_TO_DELAY;
         endcase
     end

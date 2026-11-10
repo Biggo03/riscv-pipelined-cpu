@@ -20,7 +20,6 @@ module pipelined_riscv_core ( // Clock & reset_i
     // Instruction fetch inputs
     input  logic [31:0] instr_fi_i,
     input  logic        instr_hit_fi_i,
-    input  logic        ic_repl_permit_i,
 
     // Memory data inputs
     input  logic [31:0] read_data_mem_i,
@@ -35,7 +34,7 @@ module pipelined_riscv_core ( // Clock & reset_i
     // Control outputs
     output logic [2:0]  width_src_mem_o,
     output logic [1:0]  branch_op_ex_o,
-    output logic [1:0]  pc_src_reg_o,
+    output logic        branch_cache_miss_o,
     output logic        mem_write_mem_o
 );
 
@@ -127,6 +126,10 @@ module pipelined_riscv_core ( // Clock & reset_i
 
 
     hazard_unit u_hazard_unit (
+        // Clock & reset_i
+        .clk_i                           (clk_i),
+        .reset_i                         (reset_i),
+
         // Fetch stage inputs
         .instr_hit_fi_i                 (instr_hit_fi_i),
 
@@ -154,9 +157,8 @@ module pipelined_riscv_core ( // Clock & reset_i
         .csr_addr_wb_i                   (csr_addr_wb),
         .csr_we_wb_i                     (csr_we_wb),
 
-        // Branch predictor / cache inputs
-        .pc_src_reg_i                    (pc_src_reg_o),
-        .ic_repl_permit_i                (ic_repl_permit_i),
+        // Branch recovery outputs
+        .branch_cache_miss_o             (branch_cache_miss_o),
 
         // stall outputs
         .stall_fi_o                      (stall_fi),
@@ -188,7 +190,6 @@ module pipelined_riscv_core ( // Clock & reset_i
 
         // Pipeline control inputs
         .stall_ex_i                      (stall_ex),
-        .flush_ex_i                      (flush_ex),
 
         // Instruction decode inputs
         .funct3_ex_i                     (funct3_ex),
@@ -206,7 +207,6 @@ module pipelined_riscv_core ( // Clock & reset_i
 
         // Control outputs
         .pc_src_o                        (pc_src),
-        .pc_src_reg_o                    (pc_src_reg_o),
 
         // Predictor outputs
         .pred_pc_target_fi_o             (pred_pc_target_fi),

@@ -3,6 +3,10 @@
 
     .include "test_macros.s"
 
+    # Keep call placement and label addresses independent of linker relaxation.
+    .option norelax
+    .option norvc
+
 _start:
     ################################################################
     # Fail flag and path selector
@@ -55,18 +59,95 @@ wrong_path:
 from_branch:
     jal  x0,  after_branch
 
-# ----------------------- Success epilogue -----------------------------
+# ----------------------- JAL link-write overlap -----------------------
 after_branch:
     # If any wrong-path op committed (x31 != 0), test fails
     bne  x31, x0, fail
 
-    # Correct rollback → success
-    li   t0, 25
+    # Warm the callee before testing a call with a cold fall-through line.
+    # x31 bits: 0=JAL link, 1=JALR link, 2/3=their wrong-path markers.
+    li   ra, -1
+    la   x20, jal_return
+    li   x29, 0
+    jal  x0, jal_callee
+
+    .balign 64
+jal_call_block:
+    .rept 14
+        nop
+    .endr
+jal_overlap_call:
+    # Offset 0x38: fetch crosses into the cold next line while this resolves.
+    jal  ra, jal_callee
+jal_return:
+    jal  x0, after_jal
+
+    # First instruction of the cold fall-through line; must never commit.
+jal_wrong_path:
+    ori  x31, x31, 4
+    jal  x0, after_jal
+
+# ----------------------- JALR link-write overlap ----------------------
+    .balign 64
+after_jal:
+    li   x5, -1
+    la   x21, jalr_return
+    la   x22, jalr_callee
+    li   x29, 0
+    jal  x0, jalr_callee
+
+    .balign 64
+jalr_call_block:
+    .rept 14
+        nop
+    .endr
+jalr_overlap_call:
+    # Use x5 as the link register to check a non-ra destination as well.
+    jalr x5, 0(x22)
+jalr_return:
+    jal  x0, after_jalr
+
+jalr_wrong_path:
+    ori  x31, x31, 8
+    jal  x0, after_jalr
+
+# ----------------------- Success epilogue -----------------------------
+    .balign 64
+after_jalr:
+    bne  x31, x0, fail
     SIGNAL_TEST_PASS
     j    end_test
 
 fail:
+    csrw 0x7A0, x31              # mdbg: identify the failed link/path checks
     SIGNAL_TEST_FAIL
 
 end_test:
-    nop
+    j    end_test
+
+# Both callees fit in one line. The warm-up pass sets x29 and goes to the
+# corresponding call block; the actual pass checks and returns via the link.
+    .balign 64
+jal_callee:
+    beq  x29, x0, jal_warmed
+    beq  ra, x20, jal_link_ok
+    ori  x31, x31, 1
+    # Continue at the known return label so JALR is tested even if JAL fails.
+    jal  x0, jal_return
+jal_link_ok:
+    jalr x0, 0(ra)
+jal_warmed:
+    li   x29, 1
+    jal  x0, jal_call_block
+
+    .balign 64
+jalr_callee:
+    beq  x29, x0, jalr_warmed
+    beq  x5, x21, jalr_link_ok
+    ori  x31, x31, 2
+    jal  x0, jalr_return
+jalr_link_ok:
+    jalr x0, 0(x5)
+jalr_warmed:
+    li   x29, 1
+    jal  x0, jalr_call_block
